@@ -150,7 +150,7 @@ const Home = () => {
             <img src={logo} alt="MNR Group" className="h-12 w-12 rounded-full" />
             <div>
               <h1 className="text-2xl font-bold">Anish Memorial Badminton Tournament</h1>
-              <p className="text-sm text-muted-foreground">2024-2025 • Organized by MNR Group</p>
+              <p className="text-sm text-muted-foreground">2025-2026 • Organized by MNR Group</p>
             </div>
           </div>
 {/* Admin login removed from public home page */}
