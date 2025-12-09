@@ -17,7 +17,7 @@ export default defineConfig(({ mode }) => ({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'robots.txt'],
       manifest: {
-        name: 'Anish Memorial Badminton Tournament',
+        name: 'AMBT',
         short_name: 'Badminton',
         description: 'Official tournament management system for Anish Memorial Badminton Tournament 2024-2025',
         theme_color: '#0f172a',
