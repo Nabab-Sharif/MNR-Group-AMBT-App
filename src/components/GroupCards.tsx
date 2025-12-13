@@ -54,9 +54,9 @@ export const GroupCards = ({ matches }: GroupCardsProps) => {
       <h2 className="text-3xl font-bold">Tournament Groups</h2>
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {Object.entries(groupedMatches).map(([groupName, groupMatches]: [string, any]) => (
-          <Card 
-            key={groupName} 
-            className="p-6 bg-card hover:shadow-glow-gold transition-all cursor-pointer hover:scale-105 transform" 
+          <Card
+            key={groupName}
+            className="p-6 bg-card hover:shadow-glow-gold transition-all cursor-pointer hover:scale-105 transform"
             onClick={() => navigate(`/group/${groupName}`)}
           >
             <div className="flex items-center justify-between mb-4">
@@ -70,34 +70,37 @@ export const GroupCards = ({ matches }: GroupCardsProps) => {
                 <div key={match.id} className="p-3 bg-muted rounded-lg space-y-2">
                   <div className="flex justify-between items-center text-sm">
                     <span className="font-semibold">{match.team1_name}</span>
-                    <span className="text-xs text-muted-foreground">VS</span>
+                    {/* <span className="text-xs text-muted-foreground">VS</span> */}
+                    <span className="bg-gradient-to-r from-rose-500 to-pink-500 text-white font-bold text-sm sm:text-base md:text-lg px-3 sm:px-4 py-1 sm:py-1.5 rounded-lg shadow-lg">
+                      VS
+                    </span>
                     <span className="font-semibold">{match.team2_name}</span>
                   </div>
                   <div className="flex justify-between items-center text-xs text-muted-foreground mb-2">
                     <span>{match.date}</span>
                     <Badge variant={
-                      match.status === 'live' ? 'destructive' : 
-                      match.status === 'completed' ? 'default' : 
-                      'secondary'
+                      match.status === 'live' ? 'destructive' :
+                        match.status === 'completed' ? 'default' :
+                          'secondary'
                     } className="text-xs">
                       {getDisplayStatus(match)}
                     </Badge>
                   </div>
-                  
+
                   {/* Player chips - clickable for profile */}
                   <div className="flex gap-2 items-center justify-between">
                     <div className="flex items-center gap-1">
-                      <div 
-                        onClick={(e) => { 
-                          e.stopPropagation(); 
-                          handlePlayerClick({ 
-                            name: match.team1_player1_name, 
-                            photo: match.team1_player1_photo, 
-                            team: match.team1_name, 
-                            playerKey: 'team1_player1', 
-                            matchId: match.id 
-                          }); 
-                        }} 
+                      <div
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handlePlayerClick({
+                            name: match.team1_player1_name,
+                            photo: match.team1_player1_photo,
+                            team: match.team1_name,
+                            playerKey: 'team1_player1',
+                            matchId: match.id
+                          });
+                        }}
                         className="w-8 h-8 rounded-full overflow-hidden bg-muted cursor-pointer hover:ring-2 hover:ring-primary transition"
                       >
                         {match.team1_player1_photo ? (
@@ -106,17 +109,17 @@ export const GroupCards = ({ matches }: GroupCardsProps) => {
                           <div className="w-full h-full flex items-center justify-center"><User className="h-4 w-4 text-muted-foreground" /></div>
                         )}
                       </div>
-                      <div 
-                        onClick={(e) => { 
-                          e.stopPropagation(); 
-                          handlePlayerClick({ 
-                            name: match.team1_player2_name, 
-                            photo: match.team1_player2_photo, 
-                            team: match.team1_name, 
-                            playerKey: 'team1_player2', 
-                            matchId: match.id 
-                          }); 
-                        }} 
+                      <div
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handlePlayerClick({
+                            name: match.team1_player2_name,
+                            photo: match.team1_player2_photo,
+                            team: match.team1_name,
+                            playerKey: 'team1_player2',
+                            matchId: match.id
+                          });
+                        }}
                         className="w-8 h-8 rounded-full overflow-hidden bg-muted cursor-pointer hover:ring-2 hover:ring-primary transition"
                       >
                         {match.team1_player2_photo ? (
@@ -127,17 +130,17 @@ export const GroupCards = ({ matches }: GroupCardsProps) => {
                       </div>
                     </div>
                     <div className="flex items-center gap-1">
-                      <div 
-                        onClick={(e) => { 
-                          e.stopPropagation(); 
-                          handlePlayerClick({ 
-                            name: match.team2_player1_name, 
-                            photo: match.team2_player1_photo, 
-                            team: match.team2_name, 
-                            playerKey: 'team2_player1', 
-                            matchId: match.id 
-                          }); 
-                        }} 
+                      <div
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handlePlayerClick({
+                            name: match.team2_player1_name,
+                            photo: match.team2_player1_photo,
+                            team: match.team2_name,
+                            playerKey: 'team2_player1',
+                            matchId: match.id
+                          });
+                        }}
                         className="w-8 h-8 rounded-full overflow-hidden bg-muted cursor-pointer hover:ring-2 hover:ring-primary transition"
                       >
                         {match.team2_player1_photo ? (
@@ -146,17 +149,17 @@ export const GroupCards = ({ matches }: GroupCardsProps) => {
                           <div className="w-full h-full flex items-center justify-center"><User className="h-4 w-4 text-muted-foreground" /></div>
                         )}
                       </div>
-                      <div 
-                        onClick={(e) => { 
-                          e.stopPropagation(); 
-                          handlePlayerClick({ 
-                            name: match.team2_player2_name, 
-                            photo: match.team2_player2_photo, 
-                            team: match.team2_name, 
-                            playerKey: 'team2_player2', 
-                            matchId: match.id 
-                          }); 
-                        }} 
+                      <div
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handlePlayerClick({
+                            name: match.team2_player2_name,
+                            photo: match.team2_player2_photo,
+                            team: match.team2_name,
+                            playerKey: 'team2_player2',
+                            matchId: match.id
+                          });
+                        }}
                         className="w-8 h-8 rounded-full overflow-hidden bg-muted cursor-pointer hover:ring-2 hover:ring-primary transition"
                       >
                         {match.team2_player2_photo ? (
@@ -169,7 +172,7 @@ export const GroupCards = ({ matches }: GroupCardsProps) => {
                   </div>
 
                   {/* Status Filter Buttons */}
-                  <div className="flex gap-1 flex-wrap">
+                  {/* <div className="flex gap-1 flex-wrap">
                     <Button
                       size="sm"
                       variant={getDisplayStatus(match) === 'upcoming' ? 'default' : 'outline'}
@@ -217,7 +220,9 @@ export const GroupCards = ({ matches }: GroupCardsProps) => {
                     >
                       Live
                     </Button>
-                  </div>
+                  </div> */}
+
+
                 </div>
               ))}
               {groupMatches.length > 3 && (
@@ -285,13 +290,13 @@ export const GroupCards = ({ matches }: GroupCardsProps) => {
       </Dialog>
 
       {/* Player Profile Dialog */}
-      <PlayerProfile 
-        player={selectedPlayer} 
-        open={playerProfileOpen} 
+      <PlayerProfile
+        player={selectedPlayer}
+        open={playerProfileOpen}
         onClose={() => {
           setPlayerProfileOpen(false);
           setSelectedPlayer(null);
-        }} 
+        }}
       />
     </div>
   );
