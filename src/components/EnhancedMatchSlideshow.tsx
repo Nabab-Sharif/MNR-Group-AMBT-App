@@ -224,11 +224,11 @@ export const EnhancedMatchSlideshow = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 sm:p-6">
           {/* Left Side - Match Info */}
           <div className="space-y-4">
-            <div className="bg-gradient-to-r from-cyan-600 to-purple-600 rounded-xl px-4 py-2 inline-block">
+            {/* <div className="bg-gradient-to-r from-cyan-600 to-purple-600 rounded-xl px-4 py-2 inline-block">
               <span className="text-white text-xs sm:text-sm font-semibold">
                 ANISH MEMORIAL BADMINTON TOURNAMENT
               </span>
-            </div>
+            </div> */}
 
             {/* Team Names with Score */}
             <div className="space-y-2">

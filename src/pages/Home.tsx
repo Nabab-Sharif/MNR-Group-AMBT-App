@@ -31,14 +31,14 @@ const Home = () => {
         .from("matches")
         .select("*")
         .order("date", { ascending: true });
-      
+
       if (allData) {
         setAllMatches(allData);
-        
+
         // Get all live matches
         const liveMatches = allData.filter(m => m.status === 'live');
         setLiveMatches(liveMatches);
-        
+
         if (liveMatches.length > 0) {
           setLiveMatch(liveMatches[0]);
           setCurrentLiveIndex(0);
@@ -58,10 +58,10 @@ const Home = () => {
           schema: 'public',
           table: 'matches'
         },
-            (payload) => {
-              // Re-fetch matches on any change. Do NOT auto-show win celebration here.
-              fetchMatches();
-            }
+        (payload) => {
+          // Re-fetch matches on any change. Do NOT auto-show win celebration here.
+          fetchMatches();
+        }
       )
       .subscribe();
 
@@ -95,10 +95,10 @@ const Home = () => {
         if (stored) {
           const s = JSON.parse(stored);
           // map which field belongs to this player
-          if (m.team1_player1_name === player.name && s.team1p1) playerTotal = s.team1p1.reduce((a:any,b:any)=>a+b,0);
-          else if (m.team1_player2_name === player.name && s.team1p2) playerTotal = s.team1p2.reduce((a:any,b:any)=>a+b,0);
-          else if (m.team2_player1_name === player.name && s.team2p1) playerTotal = s.team2p1.reduce((a:any,b:any)=>a+b,0);
-          else if (m.team2_player2_name === player.name && s.team2p2) playerTotal = s.team2p2.reduce((a:any,b:any)=>a+b,0);
+          if (m.team1_player1_name === player.name && s.team1p1) playerTotal = s.team1p1.reduce((a: any, b: any) => a + b, 0);
+          else if (m.team1_player2_name === player.name && s.team1p2) playerTotal = s.team1p2.reduce((a: any, b: any) => a + b, 0);
+          else if (m.team2_player1_name === player.name && s.team2p1) playerTotal = s.team2p1.reduce((a: any, b: any) => a + b, 0);
+          else if (m.team2_player2_name === player.name && s.team2p2) playerTotal = s.team2p2.reduce((a: any, b: any) => a + b, 0);
         }
       } catch (err) {
         console.error('Error reading stored scores for match', m.id, err);
@@ -153,12 +153,12 @@ const Home = () => {
               <p className="text-sm text-muted-foreground">2025-2026 • Organized by MNR Group</p>
             </div>
           </div>
-{/* Admin login removed from public home page */}
+          {/* Admin login removed from public home page */}
         </div>
       </header>
 
       {/* Main Content */}
-  <main className="max-w-full mx-auto px-0 py-8 space-y-12">
+      <main className="max-w-full mx-auto px-0 py-8 space-y-12">
         {/* Enhanced Match Slideshow with Player Photos */}
         <EnhancedMatchSlideshow />
 
@@ -176,7 +176,7 @@ const Home = () => {
                 </div>
               </div>
               <div className="flex gap-2">
-                <Button 
+                <Button
                   onClick={() => setFullscreenMatch(liveMatch)}
                   className="bg-red-600 hover:bg-red-700 gap-2"
                 >
