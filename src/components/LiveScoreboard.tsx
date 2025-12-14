@@ -459,7 +459,7 @@ export const LiveScoreboard = ({ match, isAdmin = false, onFullscreen, onWin, on
           
           {/* Name */}
           <div className="text-white font-bold text-sm sm:text-base md:text-lg truncate max-w-full px-1">{name}</div>
-          <div className="text-white/70 text-xs sm:text-sm md:text-base">{label} Performance: {performance}%</div>
+          <div className="text-white text-sm sm:text-base md:text-lg truncate max-w-full px-1">{label} Performance: {performance}%</div>
           
           {/* Score Circles */}
           <div className="mt-2">
@@ -468,7 +468,7 @@ export const LiveScoreboard = ({ match, isAdmin = false, onFullscreen, onWin, on
           
           {/* Score Button */}
           <div className="mt-2">
-            <div className="bg-orange-500 text-white px-3 sm:px-4 py-1 rounded-full text-[10px] sm:text-xs font-bold shadow-lg">
+            <div className="bg-orange-400 text-white px-3 sm:px-4 py-1 rounded-full text-[20px] sm:text-xs font-bold shadow-lg">
               Score: {total}
             </div>
           </div>
@@ -501,11 +501,11 @@ export const LiveScoreboard = ({ match, isAdmin = false, onFullscreen, onWin, on
               {/* Team Header */}
               <div className="bg-indigo-400/30 rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 mb-2 sm:mb-3 text-center border border-indigo-300/40">
                 <h3 className="text-white font-bold text-sm sm:text-base md:text-lg">{match.team1_name}</h3>
-                <p className="text-white/80 text-[10px] sm:text-xs">{match.team1_leader} (Leader)</p>
+                <p className="text-white text-sm sm:text-base md:text-lg">{match.team1_leader} (Leader)</p>
               </div>
               
               {/* Date/Time Bar */}
-              <div className="bg-orange-400 rounded-lg px-2 sm:px-3 py-1 sm:py-1.5 text-white text-[10px] sm:text-xs mb-2 sm:mb-3 text-center flex items-center justify-center gap-1 sm:gap-2 flex-wrap">
+              <div className="bg-indigo-400/30 rounded-lg  px-2 sm:px-3 py-1 sm:py-1.5 text-white text-sm md:text-lg text-[10px] sm:text-xs mb-2 sm:mb-3 text-center flex items-center justify-center gap-1 sm:gap-2 flex-wrap">
                 <span>📅 {match.date}</span>
                 <span className="hidden sm:inline">|</span>
                 <span>⏰ {formatTimeToTwelveHour(match.match_time)}</span>
@@ -544,7 +544,7 @@ export const LiveScoreboard = ({ match, isAdmin = false, onFullscreen, onWin, on
               </div>
               
               {/* Total Bar */}
-              <div className="bg-gradient-to-r from-amber-400 to-orange-500 rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 mt-2 sm:mt-3 text-center shadow-lg">
+              <div className="bg-gradient-to-br from-cyan-500 to-blue-600 text-white font-bold text-2xl sm:text-3xl md:text-4xl lg:text-5xl px-2 sm:px-3 py-1.5 sm:py-2 mt-2 sm:mt-3 text-center shadow-lg">
                 <div className="text-white/90 text-[10px] sm:text-xs font-medium">Total</div>
                 <div className="text-white font-bold text-lg sm:text-xl">{team1Total}</div>
               </div>
@@ -574,11 +574,11 @@ export const LiveScoreboard = ({ match, isAdmin = false, onFullscreen, onWin, on
               {/* Team Header */}
               <div className="bg-purple-400/40 rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 mb-2 sm:mb-3 text-center border border-purple-300/30">
                 <h3 className="text-white font-bold text-sm sm:text-base md:text-lg">{match.team2_name}</h3>
-                <p className="text-white/80 text-[10px] sm:text-xs">{match.team2_leader} (Leader)</p>
+                <p className="text-white text-sm sm:text-base md:text-lg">{match.team2_leader} (Leader)</p>
               </div>
               
               {/* Venue Bar */}
-              <div className="bg-purple-300/30 rounded-lg px-2 sm:px-3 py-1 sm:py-1.5 text-white/90 text-[10px] sm:text-xs mb-2 sm:mb-3 text-center">
+              <div className="bg-purple-300/30 rounded-lg px-2 sm:px-3 py-1 sm:py-1.5 text-white text-sm sm:text-base md:text-lg mb-2 sm:mb-3 text-center">
                 📍 Venue: {match.venue}
               </div>
               
@@ -719,10 +719,10 @@ export const LiveScoreboard = ({ match, isAdmin = false, onFullscreen, onWin, on
                     <div className="flex-1 bg-gradient-to-br from-indigo-500 via-indigo-600 to-blue-600 rounded-2xl p-4 sm:p-6 shadow-xl">
                       <div className="bg-indigo-400/30 rounded-lg px-4 py-2 sm:py-3 mb-4 text-center border border-indigo-300/40">
                         <h3 className="text-white font-bold text-lg sm:text-xl md:text-2xl">{match.team1_name}</h3>
-                        <p className="text-white/80 text-xs sm:text-sm">{match.team1_leader} (Leader)</p>
+                        <p className="text-white text-lg sm:text-xl md:text-2xl">{match.team1_leader} (Leader)</p>
                       </div>
                       
-                      <div className="bg-orange-400 rounded-lg px-4 py-2 text-white text-xs sm:text-sm mb-4 text-center flex items-center justify-center gap-2 sm:gap-4 flex-wrap">
+                      <div className="bg-indigo-400/30 rounded-lg  px-2 sm:px-3 py-1 sm:py-1.5 text-white text-sm md:text-lg text-[10px] sm:text-xs mb-2 sm:mb-3 text-center flex items-center justify-center gap-1 sm:gap-2 flex-wrap">
                         <span>📅 {match.date}</span>
                         <span>⏰ {formatTimeToTwelveHour(match.match_time)}</span>
                         <span>❤️ {match.day}</span>
@@ -740,9 +740,9 @@ export const LiveScoreboard = ({ match, isAdmin = false, onFullscreen, onWin, on
                             )}
                           </div>
                           <div className="text-white font-bold text-sm sm:text-base md:text-lg mt-2 text-center">{match.team1_player1_name}</div>
-                          <div className="text-white/70 text-xs sm:text-sm">1st Men Performance: {Math.round((team1Player1Total / 16) * 100)}%</div>
+                          <div className="text-white text-sm sm:text-base md:text-lg mt-2 text-center">1st Men Performance: {Math.round((team1Player1Total / 16) * 100)}%</div>
                           <div className="mt-3">{renderScoreCircles(team1Player1Scores, 1, 1, 'cyan')}</div>
-                          <div className="mt-3 bg-orange-500 text-white px-4 py-1.5 rounded-full text-xs sm:text-sm font-bold shadow-lg">Score: {team1Player1Total}</div>
+                          <div className="mt-3 bg-indigo-400/30 text-white px-4 py-1.5 rounded-full text-xs sm:text-sm font-bold shadow-lg">Score: {team1Player1Total}</div>
                         </div>
                         
                         {/* Player 2 */}
@@ -755,13 +755,13 @@ export const LiveScoreboard = ({ match, isAdmin = false, onFullscreen, onWin, on
                             )}
                           </div>
                           <div className="text-white font-bold text-sm sm:text-base md:text-lg mt-2 text-center">{match.team1_player2_name}</div>
-                          <div className="text-white/70 text-xs sm:text-sm">2nd Men Performance: {Math.round((team1Player2Total / 16) * 100)}%</div>
+                          <div className="text-white text-sm sm:text-base md:text-lg mt-2 text-center">2nd Men Performance: {Math.round((team1Player2Total / 16) * 100)}%</div>
                           <div className="mt-3">{renderScoreCircles(team1Player2Scores, 1, 2, 'cyan')}</div>
-                          <div className="mt-3 bg-orange-500 text-white px-4 py-1.5 rounded-full text-xs sm:text-sm font-bold shadow-lg">Score: {team1Player2Total}</div>
+                          <div className="mt-3 bg-indigo-400/30 text-white px-4 py-1.5 rounded-full text-xs sm:text-sm font-bold shadow-lg">Score: {team1Player2Total}</div>
                         </div>
                       </div>
                       
-                      <div className="bg-gradient-to-r from-amber-400 to-orange-500 rounded-lg px-4 py-3 mt-4 text-center shadow-lg">
+                      <div className="bg-gradient-to-br from-cyan-500 to-blue-600 text-white font-bold text-2xl sm:text-3xl md:text-4xl lg:text-5xl px-2 sm:px-3 py-1.5 sm:py-2 mt-2 sm:mt-3 text-center shadow-lg">
                         <div className="text-white/90 text-xs sm:text-sm font-medium">Total</div>
                         <div className="text-white font-bold text-2xl sm:text-3xl">{team1Total}</div>
                       </div>
@@ -789,10 +789,10 @@ export const LiveScoreboard = ({ match, isAdmin = false, onFullscreen, onWin, on
                     <div className="flex-1 bg-gradient-to-br from-purple-500 to-violet-600 rounded-2xl p-4 sm:p-6 shadow-xl">
                       <div className="bg-purple-400/40 rounded-lg px-4 py-2 sm:py-3 mb-4 text-center border border-purple-300/30">
                         <h3 className="text-white font-bold text-lg sm:text-xl md:text-2xl">{match.team2_name}</h3>
-                        <p className="text-white/80 text-xs sm:text-sm">{match.team2_leader} (Leader)</p>
+                        <p className="text-white text-lg sm:text-xl md:text-2xl">{match.team2_leader} (Leader)</p>
                       </div>
                       
-                      <div className="bg-purple-300/30 rounded-lg px-4 py-2 text-white/90 text-xs sm:text-sm mb-4 text-center">
+                      <div className="bg-purple-300/30 rounded-lg  px-2 sm:px-3 py-1 sm:py-1.5 text-white text-sm md:text-lg text-[10px] sm:text-xs mb-2 sm:mb-3 text-center flex items-center justify-center gap-1 sm:gap-2 flex-wrap">
                         📍 Venue: {match.venue}
                       </div>
                       
@@ -808,9 +808,9 @@ export const LiveScoreboard = ({ match, isAdmin = false, onFullscreen, onWin, on
                             )}
                           </div>
                           <div className="text-white font-bold text-sm sm:text-base md:text-lg mt-2 text-center">{match.team2_player1_name}</div>
-                          <div className="text-white/70 text-xs sm:text-sm">1st Men Performance: {Math.round((team2Player1Total / 16) * 100)}%</div>
+                          <div className="text-white text-sm sm:text-base md:text-lg mt-2 text-center">1st Men Performance: {Math.round((team2Player1Total / 16) * 100)}%</div>
                           <div className="mt-3">{renderScoreCircles(team2Player1Scores, 2, 1, 'purple')}</div>
-                          <div className="mt-3 bg-orange-500 text-white px-4 py-1.5 rounded-full text-xs sm:text-sm font-bold shadow-lg">Score: {team2Player1Total}</div>
+                          <div className="mt-3 bg-gradient-to-r from-fuchsia-500 to-violet-600 text-white px-4 py-1.5 rounded-full text-xs sm:text-sm font-bold shadow-lg">Score: {team2Player1Total}</div>
                         </div>
                         
                         {/* Player 2 */}
@@ -823,9 +823,9 @@ export const LiveScoreboard = ({ match, isAdmin = false, onFullscreen, onWin, on
                             )}
                           </div>
                           <div className="text-white font-bold text-sm sm:text-base md:text-lg mt-2 text-center">{match.team2_player2_name}</div>
-                          <div className="text-white/70 text-xs sm:text-sm">2nd Men Performance: {Math.round((team2Player2Total / 16) * 100)}%</div>
+                          <div className="text-white text-sm sm:text-base md:text-lg mt-2 text-center">2nd Men Performance: {Math.round((team2Player2Total / 16) * 100)}%</div>
                           <div className="mt-3">{renderScoreCircles(team2Player2Scores, 2, 2, 'purple')}</div>
-                          <div className="mt-3 bg-orange-500 text-white px-4 py-1.5 rounded-full text-xs sm:text-sm font-bold shadow-lg">Score: {team2Player2Total}</div>
+                          <div className="mt-3 bg-gradient-to-r from-fuchsia-500 to-violet-600 text-white px-4 py-1.5 rounded-full text-xs sm:text-sm font-bold shadow-lg">Score: {team2Player2Total}</div>
                         </div>
                       </div>
                       

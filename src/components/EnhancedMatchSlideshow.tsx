@@ -176,12 +176,12 @@ export const EnhancedMatchSlideshow = () => {
     <div className="rounded-2xl aspect-square flex flex-col items-center justify-center shadow-xl hover:scale-105 transition-transform overflow-hidden relative">
       {/* Circular photo fills entire card */}
       <div className="absolute inset-0 flex items-center justify-center">
-        <div className="w-full h-full rounded-full overflow-hidden flex items-center justify-center">
+        <div className="w-3/4 h-3/4 rounded-full overflow-hidden flex items-center justify-center">
           {photo ? (
             <img src={photo} alt={name} className="w-full h-full object-cover rounded-full" />
           ) : (
             <div className="w-full h-full bg-gray-400 flex items-center justify-center rounded-full">
-              <User className="h-12 w-12 sm:h-16 sm:w-16 text-white/70" />
+              <User className="h-8 w-8 sm:h-12 sm:w-12 text-white/70" />
             </div>
           )}
         </div>
@@ -215,21 +215,20 @@ export const EnhancedMatchSlideshow = () => {
           </div>
         </div>
 
-        {/* Counter Badge */}
-        <div className="absolute top-14 sm:top-16 right-3 sm:right-6 bg-cyan-500 text-white font-bold px-3 py-1 rounded-xl text-sm z-10">
-          {currentIndex + 1}/{slides.length}
-        </div>
+        {/* Full View Button
+        <div className="absolute top-3 right-3">
+          <button
+            onClick={() => document.documentElement.requestFullscreen()}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-lg text-sm"
+          >
+            Full View
+          </button>
+        </div> */}
 
         {/* Main Content */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 sm:p-6">
           {/* Left Side - Match Info */}
           <div className="space-y-4">
-            {/* <div className="bg-gradient-to-r from-cyan-600 to-purple-600 rounded-xl px-4 py-2 inline-block">
-              <span className="text-white text-xs sm:text-sm font-semibold">
-                ANISH MEMORIAL BADMINTON TOURNAMENT
-              </span>
-            </div> */}
-
             {/* Team Names with Score */}
             <div className="space-y-2">
               <div className="flex items-center gap-3">
@@ -333,6 +332,21 @@ export const EnhancedMatchSlideshow = () => {
             <ChevronRight className="h-5 w-5" />
           </Button>
         </div>
+      </div>
+
+      {/* Responsive Slideshow Grid - New Addition */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+        {slides.map((slide, index) => (
+          <div
+            key={slide.id}
+            className={`slide ${index === currentIndex ? 'active' : ''} transition-opacity duration-500`}
+            style={{ opacity: index === currentIndex ? 1 : 0 }}
+          >
+            <div className="p-4 rounded-lg shadow-lg">
+              
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

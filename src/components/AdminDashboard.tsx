@@ -236,6 +236,14 @@ export const AdminDashboard = ({ session }: AdminDashboardProps) => {
   const tomorrowCount = matches.filter(m => m.date === new Date(Date.now() + 86400000).toISOString().split('T')[0]).length;
   const completedCount = matches.filter(m => m.status === 'completed').length;
 
+  const handleFullscreenToggle = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+    } else {
+      document.exitFullscreen();
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -245,16 +253,13 @@ export const AdminDashboard = ({ session }: AdminDashboardProps) => {
             <div className="flex items-center gap-4">
               <img src={logo} alt="Logo" className="h-12 w-12 rounded-full" />
               <div>
-                <h1 className="text-2xl font-bold">Anish Memorial Badminton Tournament</h1>
-                <p className="text-sm text-muted-foreground">Admin Control Panel</p>
+                <h1 className="text-3xl font-bold">Anish Memorial Badminton Tournament</h1>
+                <p className="text-lg text-muted-foreground">Admin Control Panel</p>
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <Button onClick={() => navigate("/")} variant="outline">
-                Home
-              </Button>
-              <Button variant="ghost">
-                Welcome, Nabab
+              <Button onClick={handleFullscreenToggle} variant="outline">
+                Fullscreen
               </Button>
               <Button onClick={handleLogout} variant="outline" className="gap-2">
                 <LogOut className="h-4 w-4" />

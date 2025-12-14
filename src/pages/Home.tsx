@@ -175,15 +175,6 @@ const Home = () => {
                   <p className="text-sm text-muted-foreground">All active live scoreboards</p>
                 </div>
               </div>
-              <div className="flex gap-2">
-                <Button
-                  onClick={() => setFullscreenMatch(liveMatch)}
-                  className="bg-red-600 hover:bg-red-700 gap-2"
-                >
-                  <Maximize2 className="h-4 w-4" />
-                  Full View
-                </Button>
-              </div>
             </div>
 
             <div className="grid grid-cols-1 gap-4 w-full">
@@ -191,7 +182,6 @@ const Home = () => {
                 <LiveScoreboard
                   key={m.id}
                   match={m}
-                  onFullscreen={() => setFullscreenMatch(m)}
                   onWin={(match) => setWinningMatch(match)}
                   onShowWelcome={() => {
                     setWelcomeMatch(m);
