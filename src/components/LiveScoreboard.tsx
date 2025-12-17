@@ -709,7 +709,7 @@ export const LiveScoreboard = ({ match, isAdmin = false, onFullscreen, onWin, on
                 
                 {/* Organized By Bar */}
                 <div className="bg-gradient-to-r from-cyan-500 to-sky-500 text-center py-2">
-                  <p className="text-white text-xs sm:text-sm font-medium">✨ Organized by MNR Group ✨</p>
+                  <p className="text-white text-xs md:text-3xl sm:text-sm font-medium">✨ Organized by MNR Group ✨</p>
                 </div>
 
                 {/* Main Content */}
