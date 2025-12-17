@@ -33,9 +33,9 @@ export default function PlayerProfilePage() {
   useEffect(() => {
     const fetchPlayerStats = async () => {
       if (!playerName) return;
-      
+
       const decodedName = decodeURIComponent(playerName);
-      
+
       // Fetch all matches where this player participated
       const { data: matches, error } = await supabase
         .from('matches')
@@ -130,7 +130,7 @@ export default function PlayerProfilePage() {
         matches_lost: matchesLost,
         matchHistory: matchHistory.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
       });
-      
+
       setLoading(false);
     };
 
@@ -156,20 +156,35 @@ export default function PlayerProfilePage() {
     );
   }
 
-  const winRate = player.matches_played > 0 
-    ? Math.round((player.matches_won / player.matches_played) * 100) 
+  const winRate = player.matches_played > 0
+    ? Math.round((player.matches_won / player.matches_played) * 100)
     : 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-400 via-sky-500 to-purple-600 p-4">
-      <div className="max-w-2xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-sky-800 via-sky-800 to-purple-800 p-4">
+
+      {/* Header */}
+      <div className="bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-400 text-center py-3 sm:py-4">
+        <h1 className="text-slate-900 font-bold text-base sm:text-lg md:text-xl lg:text-2xl tracking-wide">
+          🏸 ANISH MEMORIAL BADMINTON TOURNAMENT 2025-2026 🏸
+        </h1>
+      </div>
+
+      {/* Organized By Bar */}
+      <div className="bg-gradient-to-r from-cyan-500 to-sky-500 text-center py-2">
+        <p className="text-white text-xs md:text-3xl sm:text-sm font-medium">✨ Organized by MNR Group ✨</p>
+      </div>
+
+      <div className="mx-auto">
+
         {/* Back Button */}
-        <Button 
-          onClick={() => navigate(-1)} 
-          variant="ghost" 
-          className="text-white mb-4 hover:bg-white/20"
+        <Button
+          onClick={() => navigate(-1)}
+          variant="ghost"
+          className="text-white my-4 hover:bg-white/20"
         >
-          <ArrowLeft className="h-5 w-5 mr-2" /> Back
+          <ArrowLeft className="h-5 w-5 mr-2" /> Back To Home
+
         </Button>
 
         {/* Profile Header */}
@@ -187,7 +202,7 @@ export default function PlayerProfilePage() {
 
               {/* Name & Info */}
               <h1 className="text-3xl font-bold text-white mb-2">{player.name}</h1>
-              
+
               {(player.department || player.unit) && (
                 <div className="flex flex-wrap justify-center gap-3 text-white/80 text-sm">
                   {player.department && (
@@ -250,18 +265,17 @@ export default function PlayerProfilePage() {
               <Calendar className="h-5 w-5" />
               Match History
             </h2>
-            
+
             <div className="space-y-3">
               {player.matchHistory.map((match, index) => (
-                <div 
+                <div
                   key={index}
-                  className={`p-3 rounded-lg ${
-                    match.result === 'won' 
-                      ? 'bg-green-500/30 border border-green-400/50' 
-                      : match.result === 'lost'
+                  className={`p-3 rounded-lg ${match.result === 'won'
+                    ? 'bg-green-500/30 border border-green-400/50'
+                    : match.result === 'lost'
                       ? 'bg-red-500/30 border border-red-400/50'
                       : 'bg-white/10 border border-white/20'
-                  }`}
+                    }`}
                 >
                   <div className="flex justify-between items-center">
                     <div>
@@ -272,10 +286,9 @@ export default function PlayerProfilePage() {
                     </div>
                     <div className="text-right">
                       <div className="text-white font-bold text-lg">Score: {match.score}</div>
-                      <div className={`text-xs font-medium ${
-                        match.result === 'won' ? 'text-green-300' : 
+                      <div className={`text-xs font-medium ${match.result === 'won' ? 'text-green-300' :
                         match.result === 'lost' ? 'text-red-300' : 'text-white/60'
-                      }`}>
+                        }`}>
                         {match.result === 'won' ? '🏆 Won' : match.result === 'lost' ? '❌ Lost' : '⏳ Pending'}
                       </div>
                     </div>
