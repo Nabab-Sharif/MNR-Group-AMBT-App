@@ -777,11 +777,11 @@ export const LiveScoreboard = ({ match, isAdmin = false, onFullscreen, onWin, on
                     {/* Center VS Section */}
                     <div className="flex lg:flex-col items-center justify-center gap-4 py-4 lg:py-0 lg:px-4">
                       <div className="flex items-center gap-4 sm:gap-5">
-                        <div className="bg-gradient-to-br from-cyan-500 to-blue-600 text-white font-bold text-4xl sm:text-5xl md:text-6xl px-6 sm:px-8 py-3 sm:py-4 rounded-lg shadow-lg">{team1Total}</div>
+                        <div className="bg-gradient-to-br from-cyan-500 to-blue-600 text-white font-bold text-4xl sm:text-5xl md:text-8xl px-6 sm:px-8 py-3 sm:py-4 rounded-lg shadow-lg">{team1Total}</div>
                         <div className="bg-gradient-to-r from-rose-500 to-pink-500 text-white font-bold text-lg sm:text-xl md:text-2xl px-4 sm:px-6 py-2 rounded-lg shadow-lg">
                           VS
                         </div>
-                        <div className="bg-gradient-to-br from-purple-500 to-violet-600 text-white font-bold text-4xl sm:text-5xl md:text-6xl px-6 sm:px-8 py-3 sm:py-4 rounded-lg shadow-lg">{team2Total}</div>
+                        <div className="bg-gradient-to-br from-purple-500 to-violet-600 text-white font-bold text-4xl sm:text-5xl md:text-8xl px-6 sm:px-8 py-3 sm:py-4 rounded-lg shadow-lg">{team2Total}</div>
                       </div>
                     </div>
 
