@@ -242,7 +242,7 @@ const GroupStandings = ({ matches }: GroupStandingsProps) => {
                   setSelectedTeam(team);
                   setDetailView("team");
                 }}
-                className="ranking-badge-3d absolute top-0 left-1/2 -translate-x-1/2 w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center text-white font-extrabold text-lg sm:text-2xl md:text-4xl border-2 sm:border-4 border-transparent shadow-none cursor-pointer transition-all duration-300 hover:scale-125 hover:ring-4 hover:ring-yellow-300 hover:shadow-2xl hover:shadow-yellow-500/50 hover:-translate-y-6 active:scale-110 z-10"
+                className="ranking-badge-3d absolute top-0 left-1/2 -translate-x-1/2 w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center text-white font-extrabold text-lg sm:text-3xl md:text-5xl border-2 sm:border-4 border-transparent shadow-none cursor-pointer transition-all duration-300 hover:scale-125 hover:ring-4 hover:ring-yellow-300 hover:shadow-2xl hover:shadow-yellow-500/50 hover:-translate-y-6 active:scale-110 z-10"
                 style={{ transformStyle: "preserve-3d" }}
               >
                 {team.rank === 1 ? "🥇" : team.rank === 2 ? "🥈" : team.rank === 3 ? "🥉" : team.rank}
