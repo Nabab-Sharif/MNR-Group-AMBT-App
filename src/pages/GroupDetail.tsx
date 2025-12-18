@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
+import GroupStandings from "@/components/GroupStandings";
 
 const GroupDetail = () => {
   const { groupName } = useParams();
@@ -132,6 +133,9 @@ const GroupDetail = () => {
           {matches.length} Matches
         </Badge>
       </div>
+
+      {/* Group Standings Section */}
+      <GroupStandings matches={matches} />
 
       {/* Top Teams Leaderboard */}
       <div className="mb-8 grid md:grid-cols-2 gap-6">

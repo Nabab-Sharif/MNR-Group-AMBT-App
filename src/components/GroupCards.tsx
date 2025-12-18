@@ -56,7 +56,7 @@ export const GroupCards = ({ matches }: GroupCardsProps) => {
         {Object.entries(groupedMatches).map(([groupName, groupMatches]: [string, any]) => (
           <Card
             key={groupName}
-            className="p-6 bg-card hover:shadow-glow-gold transition-all cursor-pointer hover:scale-105 transform"
+            className="p-6 bg-card hover:shadow-2xl hover:shadow-gold/50 transition-all duration-300 cursor-pointer hover:scale-105 hover:-translate-y-1 transform"
             onClick={() => navigate(`/group/${groupName}`)}
           >
             <div className="flex items-center justify-between mb-4">
@@ -67,14 +67,14 @@ export const GroupCards = ({ matches }: GroupCardsProps) => {
             </div>
             <div className="space-y-3">
               {groupMatches.slice(0, 3).map((match: any) => (
-                <div key={match.id} className="p-3 bg-muted rounded-lg space-y-2">
+                <div key={match.id} className="p-3 bg-muted rounded-lg space-y-2 hover:bg-muted/80 hover:shadow-md transition-all duration-200 cursor-default">
                   <div className="flex justify-between items-center text-sm">
-                    <span className="font-semibold">{match.team1_name}</span>
+                    <span className="font-semibold hover:text-primary transition-colors">{match.team1_name}</span>
                     {/* <span className="text-xs text-muted-foreground">VS</span> */}
-                    <span className="bg-gradient-to-r from-rose-500 to-pink-500 text-white font-bold text-sm sm:text-base md:text-lg px-3 sm:px-4 py-1 sm:py-1.5 rounded-lg shadow-lg">
+                    <span className="bg-gradient-to-r from-rose-500 to-pink-500 text-white font-bold text-sm sm:text-base md:text-lg px-3 sm:px-4 py-1 sm:py-1.5 rounded-lg shadow-lg hover:shadow-xl hover:from-rose-600 hover:to-pink-600 transition-all">
                       VS
                     </span>
-                    <span className="font-semibold">{match.team2_name}</span>
+                    <span className="font-semibold hover:text-primary transition-colors">{match.team2_name}</span>
                   </div>
                   <div className="flex justify-between items-center text-xs text-muted-foreground mb-2">
                     <span>{match.date}</span>
@@ -101,7 +101,7 @@ export const GroupCards = ({ matches }: GroupCardsProps) => {
                             matchId: match.id
                           });
                         }}
-                        className="w-8 h-8 rounded-full overflow-hidden bg-muted cursor-pointer hover:ring-2 hover:ring-primary transition"
+                        className="w-8 h-8 rounded-full overflow-hidden bg-muted cursor-pointer hover:ring-3 hover:ring-primary transition-all duration-200 hover:scale-125 hover:shadow-lg"
                       >
                         {match.team1_player1_photo ? (
                           <img src={match.team1_player1_photo} alt={match.team1_player1_name} className="w-full h-full object-cover" />
@@ -120,7 +120,7 @@ export const GroupCards = ({ matches }: GroupCardsProps) => {
                             matchId: match.id
                           });
                         }}
-                        className="w-8 h-8 rounded-full overflow-hidden bg-muted cursor-pointer hover:ring-2 hover:ring-primary transition"
+                        className="w-8 h-8 rounded-full overflow-hidden bg-muted cursor-pointer hover:ring-3 hover:ring-primary transition-all duration-200 hover:scale-125 hover:shadow-lg"
                       >
                         {match.team1_player2_photo ? (
                           <img src={match.team1_player2_photo} alt={match.team1_player2_name} className="w-full h-full object-cover" />
@@ -141,7 +141,7 @@ export const GroupCards = ({ matches }: GroupCardsProps) => {
                             matchId: match.id
                           });
                         }}
-                        className="w-8 h-8 rounded-full overflow-hidden bg-muted cursor-pointer hover:ring-2 hover:ring-primary transition"
+                        className="w-8 h-8 rounded-full overflow-hidden bg-muted cursor-pointer hover:ring-3 hover:ring-primary transition-all duration-200 hover:scale-125 hover:shadow-lg"
                       >
                         {match.team2_player1_photo ? (
                           <img src={match.team2_player1_photo} alt={match.team2_player1_name} className="w-full h-full object-cover" />
@@ -160,7 +160,7 @@ export const GroupCards = ({ matches }: GroupCardsProps) => {
                             matchId: match.id
                           });
                         }}
-                        className="w-8 h-8 rounded-full overflow-hidden bg-muted cursor-pointer hover:ring-2 hover:ring-primary transition"
+                        className="w-8 h-8 rounded-full overflow-hidden bg-muted cursor-pointer hover:ring-3 hover:ring-primary transition-all duration-200 hover:scale-125 hover:shadow-lg"
                       >
                         {match.team2_player2_photo ? (
                           <img src={match.team2_player2_photo} alt={match.team2_player2_name} className="w-full h-full object-cover" />

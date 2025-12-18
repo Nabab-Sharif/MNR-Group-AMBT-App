@@ -183,7 +183,7 @@ export default function PlayerProfilePage() {
           variant="ghost"
           className="text-white my-4 hover:bg-white/20"
         >
-          <ArrowLeft className="h-5 w-5 mr-2" /> Back To Home
+          <ArrowLeft className="h-5 w-5 mr-2" /> Back
 
         </Button>
 

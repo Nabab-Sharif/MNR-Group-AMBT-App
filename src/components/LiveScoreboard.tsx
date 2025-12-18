@@ -480,7 +480,7 @@ export const LiveScoreboard = ({ match, isAdmin = false, onFullscreen, onWin, on
   return (
     <div className="w-full">
       {/* Main Scoreboard */}
-      <div ref={scoreboardRef} className="bg-gradient-to-b from-slate-800 via-slate-900 to-slate-950 rounded-2xl overflow-hidden shadow-2xl">
+      <div ref={scoreboardRef} className="bg-gradient-to-b from-slate-800 via-slate-900 to-slate-950 rounded-2xl overflow-hidden shadow-2xl hover:shadow-2xl hover:shadow-amber-400/30 transition-all duration-300">
         {/* Header */}
         <div className="bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-400 text-center py-2 sm:py-3">
           <h1 className="text-slate-900 font-bold text-xs sm:text-sm md:text-base lg:text-lg tracking-wide">

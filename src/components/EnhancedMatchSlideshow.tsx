@@ -200,45 +200,35 @@ export const EnhancedMatchSlideshow = () => {
       {filterButtons}
       
       {/* Dark Theme Slide - Like Reference Image */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 rounded-2xl shadow-2xl">
+      <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 rounded-2xl shadow-2xl w-full">
         {/* Header */}
-        <div className="flex items-center justify-between px-3 sm:px-6 py-3 border-b border-white/10">
+        <div className="flex items-center justify-between px-3 sm:px-4 md:px-8 py-2 sm:py-3 md:py-4 border-b border-white/10">
           <div className="flex items-center gap-2 sm:gap-3">
-            <img src={logo} alt="Logo" className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-white/30" />
-            <span className="text-white font-bold text-sm sm:text-lg">Anish Memorial Badminton Tournament</span>
+            <img src={logo} alt="Logo" className="w-7 h-7 sm:w-9 sm:h-9 md:w-12 md:h-12 rounded-full border-2 border-white/30" />
+            <span className="text-white font-bold text-xs sm:text-sm md:text-lg truncate">Anish Memorial Badminton Tournament</span>
           </div>
           <div className="flex items-center gap-2 text-white/70 text-xs sm:text-sm">
-            <span>Welcome</span>
+            <span className="hidden sm:inline">Welcome</span>
             {currentSlide.status === 'live' && (
               <span className="bg-red-600 text-white px-2 py-0.5 rounded text-xs animate-pulse">LIVE</span>
             )}
           </div>
         </div>
 
-        {/* Full View Button
-        <div className="absolute top-3 right-3">
-          <button
-            onClick={() => document.documentElement.requestFullscreen()}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-lg text-sm"
-          >
-            Full View
-          </button>
-        </div> */}
-
         {/* Main Content */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 sm:p-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 md:gap-6 p-3 sm:p-4 md:p-8 min-h-[400px] sm:min-h-[500px] md:min-h-[600px] lg:min-h-[700px]">
           {/* Left Side - Match Info */}
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4 md:space-y-6 flex flex-col justify-center">
             {/* Team Names with Score */}
-            <div className="space-y-2">
-              <div className="flex items-center gap-3">
-                <span className="text-white text-3xl sm:text-5xl font-black">{currentSlide.team1_name}</span>
-                <span className="text-yellow-400 text-3xl sm:text-5xl font-black">- {currentSlide.team1_score || 0}</span>
+            <div className="space-y-1 sm:space-y-2">
+              <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+                <span className="text-white text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-black truncate">{currentSlide.team1_name}</span>
+                <span className="text-yellow-400 text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-black">- {currentSlide.team1_score || 0}</span>
               </div>
-              <div className="text-white/50 text-xl sm:text-2xl font-bold">VS</div>
-              <div className="flex items-center gap-3">
-                <span className="text-white text-3xl sm:text-5xl font-black">{currentSlide.team2_name}</span>
-                <span className="text-yellow-400 text-3xl sm:text-5xl font-black">- {currentSlide.team2_score || 0}</span>
+              <div className="text-white/50 text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold">VS</div>
+              <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+                <span className="text-white text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-black truncate">{currentSlide.team2_name}</span>
+                <span className="text-yellow-400 text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-black">- {currentSlide.team2_score || 0}</span>
               </div>
             </div>
 
@@ -253,28 +243,28 @@ export const EnhancedMatchSlideshow = () => {
             )}
 
             {/* Match Details */}
-            <div className="grid grid-cols-2 gap-3 mt-4">
-              <div className="bg-white/5 rounded-xl p-3 border border-white/10">
-                <div className="text-white/50 text-[10px] sm:text-xs">📅 DATE</div>
-                <div className="text-white font-bold text-sm sm:text-base">{currentSlide.date}</div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 mt-3 sm:mt-4 md:mt-6">
+              <div className="bg-white/5 rounded-lg sm:rounded-xl p-2 sm:p-3 border border-white/10">
+                <div className="text-white/50 text-xs">📅 DATE</div>
+                <div className="text-white font-bold text-xs sm:text-sm">{currentSlide.date}</div>
               </div>
-              <div className="bg-white/5 rounded-xl p-3 border border-white/10">
-                <div className="text-white/50 text-[10px] sm:text-xs">⏰ TIME</div>
-                <div className="text-white font-bold text-sm sm:text-base">{formatTimeToTwelveHour(currentSlide.match_time)}</div>
+              <div className="bg-white/5 rounded-lg sm:rounded-xl p-2 sm:p-3 border border-white/10">
+                <div className="text-white/50 text-xs">⏰ TIME</div>
+                <div className="text-white font-bold text-xs sm:text-sm">{formatTimeToTwelveHour(currentSlide.match_time)}</div>
               </div>
-              <div className="bg-white/5 rounded-xl p-3 border border-white/10">
-                <div className="text-white/50 text-[10px] sm:text-xs">📍 VENUE</div>
-                <div className="text-white font-bold text-sm sm:text-base">{currentSlide.venue}</div>
+              <div className="bg-white/5 rounded-lg sm:rounded-xl p-2 sm:p-3 border border-white/10">
+                <div className="text-white/50 text-xs">📍 VENUE</div>
+                <div className="text-white font-bold text-xs sm:text-sm">{currentSlide.venue}</div>
               </div>
-              <div className="bg-white/5 rounded-xl p-3 border border-white/10">
-                <div className="text-white/50 text-[10px] sm:text-xs">🏆 GROUP</div>
-                <div className="text-white font-bold text-sm sm:text-base">{currentSlide.group_name}</div>
+              <div className="bg-white/5 rounded-lg sm:rounded-xl p-2 sm:p-3 border border-white/10">
+                <div className="text-white/50 text-xs">🏆 GROUP</div>
+                <div className="text-white font-bold text-xs sm:text-sm">{currentSlide.group_name}</div>
               </div>
             </div>
           </div>
 
           {/* Right Side - 4 Player Photos Grid */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-2 gap-2 sm:gap-3 md:gap-4 h-full">
             <PlayerCard
               photo={currentSlide.team1_player1_photo}
               name={currentSlide.team1_player1_name}
@@ -299,25 +289,25 @@ export const EnhancedMatchSlideshow = () => {
         </div>
 
         {/* Navigation & Indicators */}
-        <div className="flex items-center justify-center gap-4 py-4 border-t border-white/10">
+        <div className="flex items-center justify-center gap-3 sm:gap-4 md:gap-6 py-3 sm:py-4 md:py-6 border-t border-white/10 flex-wrap">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setCurrentIndex((prev) => (prev - 1 + slides.length) % slides.length)}
-            className="text-white hover:bg-white/10 h-8 w-8"
+            className="text-white hover:bg-white/10 h-8 w-8 sm:h-10 sm:w-10"
           >
-            <ChevronLeft className="h-5 w-5" />
+            <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
           </Button>
           
-          <div className="flex gap-2">
+          <div className="flex gap-1 sm:gap-2 flex-wrap justify-center">
             {slides.map((_, idx) => (
               <button
                 key={idx}
                 onClick={() => setCurrentIndex(idx)}
-                className={`h-2 rounded-full transition-all ${
+                className={`rounded-full transition-all ${
                   idx === currentIndex 
-                    ? 'w-8 bg-cyan-500' 
-                    : 'w-2 bg-white/30 hover:bg-white/50'
+                    ? 'w-6 sm:w-8 h-2 sm:h-2.5 bg-cyan-500' 
+                    : 'w-2 h-2 sm:h-2.5 bg-white/30 hover:bg-white/50'
                 }`}
               />
             ))}
@@ -327,26 +317,11 @@ export const EnhancedMatchSlideshow = () => {
             variant="ghost"
             size="icon"
             onClick={() => setCurrentIndex((prev) => (prev + 1) % slides.length)}
-            className="text-white hover:bg-white/10 h-8 w-8"
+            className="text-white hover:bg-white/10 h-8 w-8 sm:h-10 sm:w-10"
           >
-            <ChevronRight className="h-5 w-5" />
+            <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
           </Button>
         </div>
-      </div>
-
-      {/* Responsive Slideshow Grid - New Addition */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
-        {slides.map((slide, index) => (
-          <div
-            key={slide.id}
-            className={`slide ${index === currentIndex ? 'active' : ''} transition-opacity duration-500`}
-            style={{ opacity: index === currentIndex ? 1 : 0 }}
-          >
-            <div className="p-4 rounded-lg shadow-lg">
-              
-            </div>
-          </div>
-        ))}
       </div>
     </div>
   );
