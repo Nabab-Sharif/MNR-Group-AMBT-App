@@ -142,20 +142,40 @@ const GroupDetail = () => {
         <Card className="p-6 bg-gradient-to-br from-white/10 to-white/5 border-white/20 backdrop-blur">
           <h2 className="text-2xl font-bold text-white mb-4">🏆 Leaderboard</h2>
           <div className="space-y-3">
-            {sortedTeams.map(([team, score], idx) => (
-              <div
-                key={team}
-                className="flex items-center justify-between p-3 bg-white/10 rounded-lg border border-white/20"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="text-2xl font-bold text-yellow-400 w-8 text-center">
-                    {idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : `#${idx + 1}`}
+            {sortedTeams.map(([team, score], idx) => {
+              // Calculate wins and losses for this team
+              const teamMatches = matches.filter((m) => m.status === "completed" && (m.team1_name === team || m.team2_name === team));
+              const wins = teamMatches.filter((m) => m.winner === team).length;
+              const losses = teamMatches.length - wins;
+
+              return (
+                <div
+                  key={team}
+                  className="flex items-center justify-between p-3 bg-white/10 rounded-lg border border-white/20"
+                >
+                  <div className="flex items-center gap-3 flex-1">
+                    <div className="text-4xl font-bold text-yellow-400 w-16 text-center">
+                      {idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : idx === 3 ? "4️⃣" : idx === 4 ? "5️⃣" : idx === 5 ? "6️⃣" : idx === 6 ? "7️⃣" : idx === 7 ? "8️⃣" : idx === 8 ? "9️⃣" : "🔟"}
+                    </div>
+                    <span className="text-white font-semibold">{team}</span>
                   </div>
-                  <span className="text-white font-semibold">{team}</span>
+                  <div className="flex items-center gap-4">
+                    <div className="text-right">
+                      <div className="text-xs text-white/60">Wins</div>
+                      <div className="text-lg font-bold text-green-400">{wins}</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-xs text-white/60">Loss</div>
+                      <div className="text-lg font-bold text-red-400">{losses}</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-xs text-white/60">Score</div>
+                      <div className="text-xl font-extrabold text-yellow-300">{score}</div>
+                    </div>
+                  </div>
                 </div>
-                <span className="text-yellow-300 font-extrabold text-xl">{score}</span>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </Card>
 
