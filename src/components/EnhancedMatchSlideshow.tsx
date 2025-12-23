@@ -34,7 +34,7 @@ interface Match {
 export const EnhancedMatchSlideshow = () => {
   const [slides, setSlides] = useState<Match[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [slideFilter, setSlideFilter] = useState<'upcoming' | 'today' | 'tomorrow' | 'live' | 'winners'>('upcoming');
+  const [slideFilter, setSlideFilter] = useState<'upcoming' | 'today' | 'tomorrow' | 'live' | 'winners'>('today');
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -115,20 +115,20 @@ export const EnhancedMatchSlideshow = () => {
   const filterButtons = (
     <div className="flex gap-2 justify-center mb-4 flex-wrap">
       <Button
-        variant={slideFilter === 'upcoming' ? 'default' : 'outline'}
-        onClick={() => setSlideFilter('upcoming')}
-        size="sm"
-        className={slideFilter === 'upcoming' ? 'bg-purple-600 hover:bg-purple-700' : ''}
-      >
-        Upcoming
-      </Button>
-      <Button
         variant={slideFilter === 'today' ? 'default' : 'outline'}
         onClick={() => setSlideFilter('today')}
         size="sm"
         className={slideFilter === 'today' ? 'bg-green-600 hover:bg-green-700' : ''}
       >
         Today
+      </Button>
+      <Button
+        variant={slideFilter === 'upcoming' ? 'default' : 'outline'}
+        onClick={() => setSlideFilter('upcoming')}
+        size="sm"
+        className={slideFilter === 'upcoming' ? 'bg-purple-600 hover:bg-purple-700' : ''}
+      >
+        Upcoming
       </Button>
       <Button
         variant={slideFilter === 'tomorrow' ? 'default' : 'outline'}
@@ -232,8 +232,8 @@ export const EnhancedMatchSlideshow = () => {
               </div>
             </div>
 
-            {/* Winner Banner */}
-            {currentSlide.winner && (
+            {/* Winner Banner - Only show on winners slide */}
+            {currentSlide.winner && slideFilter === 'winners' && (
               <div className="bg-gradient-to-r from-yellow-500 to-orange-500 rounded-xl px-4 py-2 flex items-center gap-2">
                 <Trophy className="h-5 w-5 text-white" />
                 <span className="text-white font-bold text-sm sm:text-base">
