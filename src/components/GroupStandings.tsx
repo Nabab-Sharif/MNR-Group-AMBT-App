@@ -275,10 +275,10 @@ const GroupStandings = ({ matches }: GroupStandingsProps) => {
                   setSelectedTeam(team);
                   setDetailView("team");
                 }}
-                className="ranking-badge-3d absolute top-0 left-1/2 -translate-x-1/2 w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center text-white font-extrabold text-lg sm:text-3xl md:text-5xl border-2 sm:border-4 border-transparent shadow-none cursor-pointer transition-all duration-300 hover:scale-125 hover:ring-4 hover:ring-yellow-300 hover:shadow-2xl hover:shadow-yellow-500/50 hover:-translate-y-6 active:scale-110 z-10"
+                className="ranking-badge-3d absolute top-0 left-1/2 -translate-x-1/2 w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full flex items-center justify-center text-white font-extrabold text-2xl sm:text-4xl md:text-6xl border-2 sm:border-4 border-transparent shadow-none cursor-pointer transition-all duration-300 hover:scale-125 hover:ring-4 hover:ring-yellow-300 hover:shadow-2xl hover:shadow-yellow-500/50 hover:-translate-y-6 active:scale-110 z-10"
                 style={{ transformStyle: "preserve-3d" }}
               >
-                {team.rank === 1 ? "🥇" : team.rank === 2 ? "🥈" : team.rank === 3 ? "🥉" : team.rank}
+                {team.rank === 1 ? "🥇" : team.rank === 2 ? "🥈" : team.rank === 3 ? "🥉" : team.rank === 4 ? "4️⃣" : team.rank === 5 ? "5️⃣" : team.rank === 6 ? "6️⃣" : team.rank === 7 ? "7️⃣" : team.rank === 8 ? "8️⃣" : team.rank === 9 ? "9️⃣" : "🔟"}
               </div>
 
               {/* Team Header - RESPONSIVE */}
@@ -396,8 +396,8 @@ const GroupStandings = ({ matches }: GroupStandingsProps) => {
             {/* Header with Close Button - RESPONSIVE */}
             <div className="flex items-center justify-between mb-4 sm:mb-6">
               <div className="flex items-center gap-2 sm:gap-4 min-w-0">
-                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center text-white font-extrabold text-xl sm:text-3xl border-4 border-slate-700 flex-shrink-0">
-                  {selectedTeam.rank === 1 ? "🥇" : selectedTeam.rank === 2 ? "🥈" : selectedTeam.rank === 3 ? "🥉" : selectedTeam.rank}
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center text-white font-extrabold text-2xl sm:text-4xl border-4 border-slate-700 flex-shrink-0">
+                  {selectedTeam.rank === 1 ? "🥇" : selectedTeam.rank === 2 ? "🥈" : selectedTeam.rank === 3 ? "🥉" : selectedTeam.rank === 4 ? "4️⃣" : selectedTeam.rank === 5 ? "5️⃣" : selectedTeam.rank === 6 ? "6️⃣" : selectedTeam.rank === 7 ? "7️⃣" : selectedTeam.rank === 8 ? "8️⃣" : selectedTeam.rank === 9 ? "9️⃣" : "🔟"}
                 </div>
                 <div className="min-w-0">
                   <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white truncate">{selectedTeam.teamName}</h2>
