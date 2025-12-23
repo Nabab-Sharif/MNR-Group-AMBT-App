@@ -28,6 +28,7 @@ export const LiveScoreboard = ({ match, isAdmin = false, onFullscreen, onWin, on
   const [team2Player2Scores, setTeam2Player2Scores] = useState<number[]>(Array(16).fill(0));
   const [winner, setWinner] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [downloadedAt15, setDownloadedAt15] = useState(false);
   const scoreboardRef = useRef<HTMLDivElement>(null);
   
   const team1Player1Total = team1Player1Scores.reduce((a, b) => a + b, 0);
@@ -110,6 +111,16 @@ export const LiveScoreboard = ({ match, isAdmin = false, onFullscreen, onWin, on
       subscription.unsubscribe();
     };
   }, [match.id]);
+
+  // Auto-download when any team reaches 15 points
+  useEffect(() => {
+    if (!downloadedAt15 && (team1Total >= 15 || team2Total >= 15)) {
+      setDownloadedAt15(true);
+      setTimeout(() => {
+        handleDownload();
+      }, 500);
+    }
+  }, [team1Total, team2Total, downloadedAt15]);
 
   const toggleScore = async (team: 1 | 2, player: 1 | 2, index: number) => {
     if (!isAdmin) return;
@@ -550,7 +561,7 @@ export const LiveScoreboard = ({ match, isAdmin = false, onFullscreen, onWin, on
               </div>
               
               {/* Result Bar */}
-              <div className="bg-orange-400/80 rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 mt-2 text-center">
+              <div className="bg-indigo-400/30 rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 mt-2 text-center">
                 <div className="text-white/90 text-[10px] sm:text-xs font-medium">Result</div>
                 <div className="text-white font-bold text-xs sm:text-sm">
                   {team1Total >= 15 ? '🏆 Win' : team2Total >= 15 ? '❌ Lost' : ''}

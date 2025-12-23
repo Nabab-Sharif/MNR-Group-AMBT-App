@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { X, Trophy, TrendingUp, Zap } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { X, Trophy, TrendingUp, Zap, Search } from "lucide-react";
 
 interface TeamPlayer {
   name: string;
@@ -43,6 +44,7 @@ const GroupStandings = ({ matches }: GroupStandingsProps) => {
   const [winMatches, setWinMatches] = useState<MatchDetail[]>([]);
   const [lossMatches, setLossMatches] = useState<MatchDetail[]>([]);
   const [allMatches, setAllMatches] = useState<MatchDetail[]>([]);
+  const [standingsSearch, setStandingsSearch] = useState("");
   // Function to get match details for wins
   const handleWinsClick = (team: TeamStanding) => {
     const winsList = matches.filter((m) => {
@@ -219,14 +221,45 @@ const GroupStandings = ({ matches }: GroupStandingsProps) => {
       rank: idx + 1,
     }));
 
+  // Filter standings based on search
+  const filteredStandings = useMemo(() => {
+    return standings.filter((team) =>
+      team.teamName.toLowerCase().includes(standingsSearch.toLowerCase())
+    );
+  }, [standings, standingsSearch]);
+
   return (
     <div className="mb-8">
-      <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6 flex items-center gap-2">
-        <span className="text-2xl sm:text-3xl">🏆</span> Group Standings
-      </h2>
+      <div className="flex items-center justify-between mb-4 sm:mb-6">
+        <h2 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-2">
+          <span className="text-2xl sm:text-3xl">🏆</span> Group Standings
+        </h2>
+        {standingsSearch && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setStandingsSearch("")}
+            className="text-white/70 hover:text-white"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
+
+      {/* Search Input */}
+      <div className="relative mb-4 max-w-xs">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/50" />
+        <Input
+          type="text"
+          placeholder="Search team..."
+          value={standingsSearch}
+          onChange={(e) => setStandingsSearch(e.target.value)}
+          className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/50"
+        />
+      </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-6">
-        {standings.map((team) => (
+        {filteredStandings.map((team) => (
           <div 
             key={team.teamName}
             onClick={() => setSelectedTeam(team)}

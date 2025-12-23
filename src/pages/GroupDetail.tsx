@@ -1,17 +1,83 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { ArrowLeft, Search, X } from "lucide-react";
 import GroupStandings from "@/components/GroupStandings";
+
+interface TeamStats {
+  name: string;
+  totalScore: number;
+  wins: number;
+  losses: number;
+  winRate: string;
+}
 
 const GroupDetail = () => {
   const { groupName } = useParams();
   const navigate = useNavigate();
   const [matches, setMatches] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [leaderboardSearch, setLeaderboardSearch] = useState("");
+  const [matchesSearch, setMatchesSearch] = useState("");
+
+  // Calculate team stats (wins, losses, win rate)
+  const teamStats: Record<string, TeamStats> = {};
+  
+  matches.forEach((m) => {
+    if (!teamStats[m.team1_name]) {
+      teamStats[m.team1_name] = { name: m.team1_name, totalScore: 0, wins: 0, losses: 0, winRate: "0%" };
+    }
+    if (!teamStats[m.team2_name]) {
+      teamStats[m.team2_name] = { name: m.team2_name, totalScore: 0, wins: 0, losses: 0, winRate: "0%" };
+    }
+
+    // Add scores
+    teamStats[m.team1_name].totalScore += m.team1_score || 0;
+    teamStats[m.team2_name].totalScore += m.team2_score || 0;
+
+    // Track wins/losses
+    if (m.status === "completed") {
+      if (m.winner === m.team1_name) {
+        teamStats[m.team1_name].wins += 1;
+        teamStats[m.team2_name].losses += 1;
+      } else if (m.winner === m.team2_name) {
+        teamStats[m.team2_name].wins += 1;
+        teamStats[m.team1_name].losses += 1;
+      }
+    }
+  });
+
+  // Calculate win rates
+  Object.values(teamStats).forEach((team) => {
+    const total = team.wins + team.losses;
+    const rate = total > 0 ? ((team.wins / total) * 100).toFixed(1) : "0.0";
+    team.winRate = `${rate}%`;
+  });
+
+  const sortedTeams = Object.values(teamStats).sort((a, b) => b.totalScore - a.totalScore);
+  
+  // Filter leaderboard based on search - HOOK CALL
+  const filteredLeaderboard = useMemo(() => {
+    return sortedTeams.filter((team) =>
+      team.name.toLowerCase().includes(leaderboardSearch.toLowerCase())
+    );
+  }, [sortedTeams, leaderboardSearch]);
+
+  // Filter matches based on search - HOOK CALL
+  const filteredMatches = useMemo(() => {
+    return matches.filter((match) => {
+      const searchLower = matchesSearch.toLowerCase();
+      return (
+        match.team1_name.toLowerCase().includes(searchLower) ||
+        match.team2_name.toLowerCase().includes(searchLower) ||
+        (match.venue && match.venue.toLowerCase().includes(searchLower))
+      );
+    });
+  }, [matches, matchesSearch]);
 
   useEffect(() => {
     const fetchGroupMatches = async () => {
@@ -43,17 +109,6 @@ const GroupDetail = () => {
       </div>
     );
   }
-
-  // Calculate team totals
-  const teamTotals: Record<string, number> = {};
-  matches.forEach((m) => {
-    teamTotals[m.team1_name] = (teamTotals[m.team1_name] || 0) + (m.team1_score || 0);
-    teamTotals[m.team2_name] = (teamTotals[m.team2_name] || 0) + (m.team2_score || 0);
-  });
-
-  const sortedTeams = Object.entries(teamTotals)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 5);
 
   // Calculate per-player aggregated stats within this group
   interface PlayerStat {
@@ -140,22 +195,59 @@ const GroupDetail = () => {
       {/* Top Teams Leaderboard */}
       <div className="mb-8 grid md:grid-cols-2 gap-6">
         <Card className="p-6 bg-gradient-to-br from-white/10 to-white/5 border-white/20 backdrop-blur">
-          <h2 className="text-2xl font-bold text-white mb-4">🏆 Leaderboard</h2>
-          <div className="space-y-3">
-            {sortedTeams.map(([team, score], idx) => (
-              <div
-                key={team}
-                className="flex items-center justify-between p-3 bg-white/10 rounded-lg border border-white/20"
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold text-white">🏆 Leaderboard</h2>
+            {leaderboardSearch && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setLeaderboardSearch("")}
+                className="text-white/70 hover:text-white"
               >
-                <div className="flex items-center gap-3">
-                  <div className="text-2xl font-bold text-yellow-400 w-8 text-center">
-                    {idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : `#${idx + 1}`}
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+          
+          {/* Search Input */}
+          <div className="relative mb-4">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/50" />
+            <Input
+              type="text"
+              placeholder="Search team..."
+              value={leaderboardSearch}
+              onChange={(e) => setLeaderboardSearch(e.target.value)}
+              className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/50"
+            />
+          </div>
+
+          <div className="space-y-3">
+            {filteredLeaderboard.slice(0, 10).map((team, idx) => (
+              <div
+                key={team.name}
+                className="p-4 bg-white/10 rounded-lg border border-white/20 hover:bg-white/15 transition"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-3">
+                    <div className="text-2xl font-bold text-yellow-400 w-8 text-center">
+                      {idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : `#${idx + 1}`}
+                    </div>
+                    <span className="text-white font-semibold">{team.name}</span>
                   </div>
-                  <span className="text-white font-semibold">{team}</span>
+                  <span className="text-yellow-300 font-extrabold text-xl">{team.totalScore}</span>
                 </div>
-                <span className="text-yellow-300 font-extrabold text-xl">{score}</span>
+                <div className="flex gap-4 text-xs text-white/70">
+                  <span>🎯 Win: <span className="text-green-400 font-bold">{team.wins}</span></span>
+                  <span>❌ Loss: <span className="text-red-400 font-bold">{team.losses}</span></span>
+                  <span>📊 Rate: <span className="text-blue-400 font-bold">{team.winRate}</span></span>
+                </div>
               </div>
             ))}
+            {filteredLeaderboard.length === 0 && (
+              <div className="text-center py-8 text-white/50">
+                No teams found matching "{leaderboardSearch}"
+              </div>
+            )}
           </div>
         </Card>
 
@@ -185,9 +277,34 @@ const GroupDetail = () => {
 
       {/* Matches List */}
       <Card className="p-6 bg-gradient-to-br from-white/10 to-white/5 border-white/20 backdrop-blur">
-        <h2 className="text-2xl font-bold text-white mb-6">📋 All Matches</h2>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-white">📋 All Matches</h2>
+          {matchesSearch && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setMatchesSearch("")}
+              className="text-white/70 hover:text-white"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
+
+        {/* Search Input */}
+        <div className="relative mb-4">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/50" />
+          <Input
+            type="text"
+            placeholder="Search by team or venue..."
+            value={matchesSearch}
+            onChange={(e) => setMatchesSearch(e.target.value)}
+            className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/50"
+          />
+        </div>
+
         <div className="grid gap-4">
-          {matches.map((match) => (
+          {filteredMatches.map((match) => (
             <div
               key={match.id}
               className="p-4 bg-white/10 rounded-lg border border-white/20 hover:bg-white/15 transition"
