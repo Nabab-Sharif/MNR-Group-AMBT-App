@@ -22,6 +22,10 @@ interface Match {
   team2_player2_photo: string | null;
   team1_score: number;
   team2_score: number;
+  team1_player1_scores?: number[];
+  team1_player2_scores?: number[];
+  team2_player1_scores?: number[];
+  team2_player2_scores?: number[];
   winner: string | null;
   group_name: string;
   date: string;
@@ -56,6 +60,7 @@ export const EnhancedMatchSlideshow = () => {
     const fetchSlides = async () => {
       const today = new Date().toISOString().split('T')[0];
       const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+      const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
 
       let query = supabase
         .from("matches")
@@ -69,7 +74,8 @@ export const EnhancedMatchSlideshow = () => {
       } else if (slideFilter === 'tomorrow') {
         query = query.eq("status", "upcoming").eq("date", tomorrow);
       } else if (slideFilter === 'winners') {
-        query = query.eq("status", "completed").not("winner", "is", null);
+        // Show winners from last 2 days (today and yesterday)
+        query = query.eq("status", "completed").not("winner", "is", null).or(`date.eq.${today},date.eq.${yesterday}`);
       } else {
         query = query.eq("status", "upcoming").neq("date", today).neq("date", tomorrow);
       }
@@ -195,6 +201,73 @@ export const EnhancedMatchSlideshow = () => {
     </div>
   );
 
+  const renderPlayerScore = (playerScores: number[] | undefined, playerName: string, playerPhoto: string | null, total: number) => {
+    if (!playerScores || playerScores.length === 0) {
+      return (
+        <div className="text-center space-y-2">
+          <div className="flex justify-center">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full overflow-hidden border-2 border-white/50 flex items-center justify-center bg-gray-400">
+              {playerPhoto ? (
+                <img src={playerPhoto} alt={playerName} className="w-full h-full object-cover" />
+              ) : (
+                <User className="h-6 w-6 sm:h-8 sm:w-8 text-white/70" />
+              )}
+            </div>
+          </div>
+          <div className="text-white text-xs sm:text-sm font-bold">{playerName}</div>
+          <div className="text-yellow-400 text-2xl sm:text-3xl font-bold">{total}</div>
+        </div>
+      );
+    }
+
+    const row1 = playerScores.slice(0, 8);
+    const row2 = playerScores.slice(8, 16);
+
+    return (
+      <div className="text-center space-y-2">
+        <div className="flex justify-center">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full overflow-hidden border-2 border-yellow-400/50 flex items-center justify-center bg-gray-400 shadow-lg shadow-yellow-400/30">
+            {playerPhoto ? (
+              <img src={playerPhoto} alt={playerName} className="w-full h-full object-cover" />
+            ) : (
+              <User className="h-6 w-6 sm:h-8 sm:w-8 text-white/70" />
+            )}
+          </div>
+        </div>
+        <div className="text-white text-xs sm:text-sm font-bold">{playerName}</div>
+        <div className="flex gap-0.5 justify-center flex-wrap">
+          {row1.map((score, index) => (
+            <div
+              key={index}
+              className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full text-[8px] sm:text-xs font-bold flex items-center justify-center border ${
+                score === 1
+                  ? 'bg-gradient-to-br from-emerald-400 to-teal-500 border-emerald-500 text-white'
+                  : 'bg-white/20 border-white/30 text-white/50'
+              }`}
+            >
+              {score}
+            </div>
+          ))}
+        </div>
+        <div className="flex gap-0.5 justify-center flex-wrap">
+          {row2.map((score, index) => (
+            <div
+              key={index + 8}
+              className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full text-[8px] sm:text-xs font-bold flex items-center justify-center border ${
+                score === 1
+                  ? 'bg-gradient-to-br from-emerald-400 to-teal-500 border-emerald-500 text-white'
+                  : 'bg-white/20 border-white/30 text-white/50'
+              }`}
+            >
+              {score}
+            </div>
+          ))}
+        </div>
+        <div className="text-yellow-400 text-lg sm:text-2xl font-bold mt-1">{total}</div>
+      </div>
+    );
+  };
+
   return (
     <div id="enhanced-slideshow" className="w-full">
       {filterButtons}
@@ -217,33 +290,95 @@ export const EnhancedMatchSlideshow = () => {
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 md:gap-6 p-3 sm:p-4 md:p-8 min-h-[400px] sm:min-h-[500px] md:min-h-[600px] lg:min-h-[700px]">
-          {/* Left Side - Match Info */}
+          {/* Left Side - Match Info & Scoreboard */}
           <div className="space-y-3 sm:space-y-4 md:space-y-6 flex flex-col justify-center">
-            {/* Team Names with Score */}
-            <div className="space-y-1 sm:space-y-2">
-              <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-                <span className="text-white text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-black truncate">{currentSlide.team1_name}</span>
-                <span className="text-yellow-400 text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-black">- {currentSlide.team1_score || 0}</span>
+            {/* Team Names with Score - Scoreboard Style */}
+            <div className="space-y-2 sm:space-y-3 bg-gradient-to-b from-white/10 to-white/5 rounded-xl p-4 sm:p-6 border border-white/20">
+              <div className="flex items-center justify-between gap-2 sm:gap-3">
+                <div className="flex-1">
+                  <div className="text-white text-lg sm:text-2xl md:text-3xl font-black truncate">{currentSlide.team1_name}</div>
+                  <div className="text-white/50 text-xs sm:text-sm mt-1">Team 1</div>
+                </div>
+                <div className="text-yellow-400 text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black px-2 sm:px-4 py-1 sm:py-2 bg-black/50 rounded-lg">
+                  {currentSlide.team1_score || 0}
+                </div>
               </div>
-              <div className="text-white/50 text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold">VS</div>
-              <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-                <span className="text-white text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-black truncate">{currentSlide.team2_name}</span>
-                <span className="text-yellow-400 text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-black">- {currentSlide.team2_score || 0}</span>
+
+              {/* Team 1 Performance Bar */}
+              {slideFilter === 'winners' && (
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-white/50">Performance</span>
+                    <span className="text-cyan-400 font-bold">{Math.round(((currentSlide.team1_score || 0) / 30) * 100)}%</span>
+                  </div>
+                  <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden border border-white/20">
+                    <div 
+                      className="h-full bg-gradient-to-r from-cyan-500 to-blue-600 transition-all duration-500"
+                      style={{ width: `${Math.min(((currentSlide.team1_score || 0) / 30) * 100, 100)}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div className="text-center py-2 sm:py-3">
+                <span className="text-white/60 text-sm sm:text-base font-bold px-3 py-1 bg-white/10 rounded-full">VS</span>
               </div>
+
+              <div className="flex items-center justify-between gap-2 sm:gap-3">
+                <div className="flex-1">
+                  <div className="text-white text-lg sm:text-2xl md:text-3xl font-black truncate">{currentSlide.team2_name}</div>
+                  <div className="text-white/50 text-xs sm:text-sm mt-1">Team 2</div>
+                </div>
+                <div className="text-yellow-400 text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black px-2 sm:px-4 py-1 sm:py-2 bg-black/50 rounded-lg">
+                  {currentSlide.team2_score || 0}
+                </div>
+              </div>
+
+              {/* Team 2 Performance Bar */}
+              {slideFilter === 'winners' && (
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-white/50">Performance</span>
+                    <span className="text-rose-400 font-bold">{Math.round(((currentSlide.team2_score || 0) / 30) * 100)}%</span>
+                  </div>
+                  <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden border border-white/20">
+                    <div 
+                      className="h-full bg-gradient-to-r from-rose-500 to-pink-600 transition-all duration-500"
+                      style={{ width: `${Math.min(((currentSlide.team2_score || 0) / 30) * 100, 100)}%` }}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Winner Banner - Only show on winners slide */}
             {currentSlide.winner && slideFilter === 'winners' && (
-              <div className="bg-gradient-to-r from-yellow-500 to-orange-500 rounded-xl px-4 py-2 flex items-center gap-2">
-                <Trophy className="h-5 w-5 text-white" />
-                <span className="text-white font-bold text-sm sm:text-base">
-                  {currentSlide.winner} WINS!
+              <div className="bg-gradient-to-r from-yellow-500 via-orange-500 to-yellow-600 rounded-xl px-4 py-3 flex items-center gap-3 shadow-lg animate-pulse">
+                <Trophy className="h-6 w-6 text-white" />
+                <span className="text-white font-bold text-base sm:text-lg flex-1 text-center">
+                  🎉 {currentSlide.winner} WINS! 🎉
                 </span>
               </div>
             )}
 
+            {/* Team Total Summary - Only on winners slide */}
+            {slideFilter === 'winners' && (
+              <div className="grid grid-cols-2 gap-3 bg-gradient-to-r from-cyan-600/20 to-rose-600/20 rounded-xl p-4 border border-white/20">
+                <div className="text-center">
+                  <div className="text-white/70 text-xs font-semibold mb-2">Team Total</div>
+                  <div className="text-2xl sm:text-3xl font-black text-cyan-400">{currentSlide.team1_score || 0}</div>
+                  <div className="text-white/50 text-xs mt-1">{currentSlide.team1_name}</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-white/70 text-xs font-semibold mb-2">Team Total</div>
+                  <div className="text-2xl sm:text-3xl font-black text-rose-400">{currentSlide.team2_score || 0}</div>
+                  <div className="text-white/50 text-xs mt-1">{currentSlide.team2_name}</div>
+                </div>
+              </div>
+            )}
+
             {/* Match Details */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 mt-3 sm:mt-4 md:mt-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
               <div className="bg-white/5 rounded-lg sm:rounded-xl p-2 sm:p-3 border border-white/10">
                 <div className="text-white/50 text-xs">📅 DATE</div>
                 <div className="text-white font-bold text-xs sm:text-sm">{currentSlide.date}</div>
@@ -264,28 +399,57 @@ export const EnhancedMatchSlideshow = () => {
           </div>
 
           {/* Right Side - 4 Player Photos Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-2 gap-2 sm:gap-3 md:gap-4 h-full">
-            <PlayerCard
-              photo={currentSlide.team1_player1_photo}
-              name={currentSlide.team1_player1_name}
-              gradient="bg-gradient-to-br from-purple-600 to-pink-600"
-            />
-            <PlayerCard
-              photo={currentSlide.team1_player2_photo}
-              name={currentSlide.team1_player2_name}
-              gradient="bg-gradient-to-br from-pink-500 to-orange-500"
-            />
-            <PlayerCard
-              photo={currentSlide.team2_player1_photo}
-              name={currentSlide.team2_player1_name}
-              gradient="bg-gradient-to-br from-cyan-500 to-blue-600"
-            />
-            <PlayerCard
-              photo={currentSlide.team2_player2_photo}
-              name={currentSlide.team2_player2_name}
-              gradient="bg-gradient-to-br from-orange-500 to-red-600"
-            />
-          </div>
+          {slideFilter === 'winners' ? (
+            <div className="grid grid-cols-2 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6 bg-gradient-to-br from-white/5 to-white/10 rounded-xl p-4 sm:p-6 border border-white/20">
+              {renderPlayerScore(
+                currentSlide.team1_player1_scores,
+                currentSlide.team1_player1_name,
+                currentSlide.team1_player1_photo,
+                currentSlide.team1_player1_scores?.reduce((a, b) => a + b, 0) || 0
+              )}
+              {renderPlayerScore(
+                currentSlide.team1_player2_scores,
+                currentSlide.team1_player2_name,
+                currentSlide.team1_player2_photo,
+                currentSlide.team1_player2_scores?.reduce((a, b) => a + b, 0) || 0
+              )}
+              {renderPlayerScore(
+                currentSlide.team2_player1_scores,
+                currentSlide.team2_player1_name,
+                currentSlide.team2_player1_photo,
+                currentSlide.team2_player1_scores?.reduce((a, b) => a + b, 0) || 0
+              )}
+              {renderPlayerScore(
+                currentSlide.team2_player2_scores,
+                currentSlide.team2_player2_name,
+                currentSlide.team2_player2_photo,
+                currentSlide.team2_player2_scores?.reduce((a, b) => a + b, 0) || 0
+              )}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-2 gap-2 sm:gap-3 md:gap-4 h-full">
+              <PlayerCard
+                photo={currentSlide.team1_player1_photo}
+                name={currentSlide.team1_player1_name}
+                gradient="bg-gradient-to-br from-purple-600 to-pink-600"
+              />
+              <PlayerCard
+                photo={currentSlide.team1_player2_photo}
+                name={currentSlide.team1_player2_name}
+                gradient="bg-gradient-to-br from-pink-500 to-orange-500"
+              />
+              <PlayerCard
+                photo={currentSlide.team2_player1_photo}
+                name={currentSlide.team2_player1_name}
+                gradient="bg-gradient-to-br from-cyan-500 to-blue-600"
+              />
+              <PlayerCard
+                photo={currentSlide.team2_player2_photo}
+                name={currentSlide.team2_player2_name}
+                gradient="bg-gradient-to-br from-orange-500 to-red-600"
+              />
+            </div>
+          )}
         </div>
 
         {/* Navigation & Indicators */}
