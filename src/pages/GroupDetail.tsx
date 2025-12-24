@@ -190,13 +190,13 @@ const GroupDetail = () => {
       </div>
 
       {/* Group Standings Section */}
-      <GroupStandings matches={matches} />
+      <GroupStandings matches={matches} groupName={groupName} />
 
       {/* Top Teams Leaderboard */}
       <div className="mb-8 grid md:grid-cols-2 gap-6">
         <Card className="p-6 bg-gradient-to-br from-white/10 to-white/5 border-white/20 backdrop-blur">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold text-white">🏆 Leaderboard</h2>
+            <h2 className="text-2xl font-bold text-white">🏆 Scoreboard Table</h2>
             {leaderboardSearch && (
               <Button
                 variant="ghost"
@@ -234,10 +234,11 @@ const GroupDetail = () => {
                     </div>
                     <span className="text-white font-semibold">{team.name}</span>
                   </div>
-                  <span className="text-yellow-300 font-extrabold text-xl">{team.totalScore}</span>
+                <span className="text-yellow-300 font-extrabold text-xl"><span className="text-yellow-700">Total Score: </span>{team.totalScore}</span>
                 </div>
                 <div className="flex gap-4 text-xs text-white/70">
-                  <span>🎯 Win: <span className="text-green-400 font-bold">{team.wins}</span></span>
+                  <span>🎯 Total Wins Points: <span className="text-green-400 font-bold">{team.wins}</span></span>
+                  <span>🏅 Total Wins: <span className="text-amber-400 font-bold">{team.wins}</span></span>
                   <span>❌ Loss: <span className="text-red-400 font-bold">{team.losses}</span></span>
                   <span>📊 Rate: <span className="text-blue-400 font-bold">{team.winRate}</span></span>
                 </div>
