@@ -165,7 +165,7 @@ export const WinCelebration = ({ match, onClose }: WinCelebrationProps) => {
         {/* Congratulations Text with gradient */}
         <div className="relative">
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black bg-gradient-to-r from-yellow-300 via-amber-400 to-yellow-300 bg-clip-text text-transparent animate-shimmer drop-shadow-lg">
-            ✨ CHAMPIONS! ✨
+            ✨ MATCH WINNER! ✨
           </h1>
           <p className="text-white/80 text-lg sm:text-xl mt-2 animate-fade-in-delayed">
             Congratulations on an amazing victory!
