@@ -29,6 +29,7 @@ export const AdminDashboard = ({ session }: AdminDashboardProps) => {
   const [fullscreenMatch, setFullscreenMatch] = useState<any>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [filter, setFilter] = useState<"live" | "upcoming" | "today" | "tomorrow" | "completed">("live");
+  const [groupFilter, setGroupFilter] = useState<"all" | "A" | "B">("all");
   const [activeTab, setActiveTab] = useState<'matches' | 'slides' | 'data'>('matches');
   const [stats, setStats] = useState({ teams: 0, matches: 0, live: 0 });
   const [isAdmin, setIsAdmin] = useState(false);
@@ -86,6 +87,11 @@ export const AdminDashboard = ({ session }: AdminDashboardProps) => {
       query = query.eq("status", "completed");
     }
 
+    // Apply group filter
+    if (groupFilter !== "all") {
+      query = query.eq("group_name", groupFilter);
+    }
+
     const { data } = await query.order("created_at", { ascending: false });
     if (data) setMatches(data);
 
@@ -140,7 +146,7 @@ export const AdminDashboard = ({ session }: AdminDashboardProps) => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [filter]);
+  }, [filter, groupFilter]);
 
   // Compute player details when a player avatar is clicked (from LiveScoreboard or GroupCards)
   const handlePlayerClick = (player: any) => {
@@ -415,6 +421,30 @@ export const AdminDashboard = ({ session }: AdminDashboardProps) => {
                   onClick={() => setFilter("completed")}
                 >
                   {completedCount} Completed
+                </Button>
+              </div>
+              <div className="flex gap-2 items-center">
+                <span className="text-sm text-muted-foreground">Filter by Group:</span>
+                <Button
+                  variant={groupFilter === "all" ? "default" : "outline"}
+                  onClick={() => setGroupFilter("all")}
+                  className="text-xs"
+                >
+                  All
+                </Button>
+                <Button
+                  variant={groupFilter === "A" ? "default" : "outline"}
+                  onClick={() => setGroupFilter("A")}
+                  className="text-xs"
+                >
+                  Group A
+                </Button>
+                <Button
+                  variant={groupFilter === "B" ? "default" : "outline"}
+                  onClick={() => setGroupFilter("B")}
+                  className="text-xs"
+                >
+                  Group B
                 </Button>
               </div>
               <MatchList 

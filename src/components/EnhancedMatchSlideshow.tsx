@@ -38,14 +38,15 @@ interface Match {
 export const EnhancedMatchSlideshow = () => {
   const [slides, setSlides] = useState<Match[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [slideFilter, setSlideFilter] = useState<'upcoming' | 'today' | 'tomorrow' | 'live' | 'winners'>('today');
+  const [slideFilter, setSlideFilter] = useState<'upcoming' | 'today' | 'tomorrow' | 'live' | 'winners' | 'today-winners-a' | 'today-winners-b'>('today');
+  const [winnerDate, setWinnerDate] = useState<string | null>(null);
 
   useEffect(() => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail as { filter?: string; group?: string } | undefined;
       if (!detail) return;
-      if (detail.filter === 'today' || detail.filter === 'tomorrow' || detail.filter === 'upcoming' || detail.filter === 'live' || detail.filter === 'winners') {
-        setSlideFilter(detail.filter as 'upcoming' | 'today' | 'tomorrow' | 'live' | 'winners');
+      if (detail.filter === 'today' || detail.filter === 'tomorrow' || detail.filter === 'upcoming' || detail.filter === 'live' || detail.filter === 'winners' || detail.filter === 'today-winners-a' || detail.filter === 'today-winners-b') {
+        setSlideFilter(detail.filter as 'upcoming' | 'today' | 'tomorrow' | 'live' | 'winners' | 'today-winners-a' | 'today-winners-b');
         setCurrentIndex(0);
         const el = document.getElementById('enhanced-slideshow');
         if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -73,6 +74,46 @@ export const EnhancedMatchSlideshow = () => {
         query = query.eq("status", "upcoming").eq("date", today);
       } else if (slideFilter === 'tomorrow') {
         query = query.eq("status", "upcoming").eq("date", tomorrow);
+      } else if (slideFilter === 'today-winners-a') {
+        // Show A Group winners from the winner date only
+        if (winnerDate) {
+          query = query.eq("status", "completed").eq("group_name", "A").eq("date", winnerDate).not("winner", "is", null);
+        } else {
+          // If no date is set, fetch the latest A group winner date first
+          const { data: latestData } = await supabase
+            .from("matches")
+            .select("date")
+            .eq("status", "completed")
+            .eq("group_name", "A")
+            .not("winner", "is", null)
+            .order("date", { ascending: false })
+            .limit(1);
+          
+          if (latestData && latestData.length > 0) {
+            setWinnerDate(latestData[0].date);
+            query = query.eq("status", "completed").eq("group_name", "A").eq("date", latestData[0].date).not("winner", "is", null);
+          }
+        }
+      } else if (slideFilter === 'today-winners-b') {
+        // Show B Group winners from the winner date only
+        if (winnerDate) {
+          query = query.eq("status", "completed").eq("group_name", "B").eq("date", winnerDate).not("winner", "is", null);
+        } else {
+          // If no date is set, fetch the latest B group winner date first
+          const { data: latestData } = await supabase
+            .from("matches")
+            .select("date")
+            .eq("status", "completed")
+            .eq("group_name", "B")
+            .not("winner", "is", null)
+            .order("date", { ascending: false })
+            .limit(1);
+          
+          if (latestData && latestData.length > 0) {
+            setWinnerDate(latestData[0].date);
+            query = query.eq("status", "completed").eq("group_name", "B").eq("date", latestData[0].date).not("winner", "is", null);
+          }
+        }
       } else if (slideFilter === 'winners') {
         // Show winners from last 2 days (today and yesterday)
         query = query.eq("status", "completed").not("winner", "is", null).or(`date.eq.${today},date.eq.${yesterday}`);
@@ -106,17 +147,7 @@ export const EnhancedMatchSlideshow = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [slideFilter]);
-
-  useEffect(() => {
-    if (slides.length === 0) return;
-
-    const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % slides.length);
-    }, 6000);
-
-    return () => clearInterval(interval);
-  }, [slides.length]);
+  }, [slideFilter, winnerDate]);
 
   const filterButtons = (
     <div className="flex gap-2 justify-center mb-4 flex-wrap">
@@ -153,24 +184,48 @@ export const EnhancedMatchSlideshow = () => {
         🔴 Live
       </Button>
       <Button
+        variant={slideFilter === 'today-winners-a' ? 'default' : 'outline'}
+        onClick={() => setSlideFilter('today-winners-a')}
+        size="sm"
+        className={slideFilter === 'today-winners-a' ? 'bg-blue-600 hover:bg-blue-700' : ''}
+      >
+        🏆 A Group {winnerDate || 'Winner'}
+      </Button>
+      <Button
+        variant={slideFilter === 'today-winners-b' ? 'default' : 'outline'}
+        onClick={() => setSlideFilter('today-winners-b')}
+        size="sm"
+        className={slideFilter === 'today-winners-b' ? 'bg-orange-600 hover:bg-orange-700' : ''}
+      >
+        🏆 B Group {winnerDate || 'Winner'}
+      </Button>
+      <Button
         variant={slideFilter === 'winners' ? 'default' : 'outline'}
         onClick={() => setSlideFilter('winners')}
         size="sm"
         className={slideFilter === 'winners' ? 'bg-yellow-600 hover:bg-yellow-700' : ''}
       >
-        🏆 Winners
+        🏆 All Winners
       </Button>
     </div>
   );
 
   if (slides.length === 0) {
+    const getFilterLabel = () => {
+      if (slideFilter === 'live') return 'live';
+      if (slideFilter === 'winners') return 'winner';
+      if (slideFilter === 'today-winners-a') return 'A Group winner';
+      if (slideFilter === 'today-winners-b') return 'B Group winner';
+      return slideFilter;
+    };
+
     return (
       <div className="text-center py-10 space-y-4">
         {filterButtons}
         <h2 className="text-2xl font-bold mb-4">Welcome to Anish Memorial Tournament</h2>
         <p className="text-muted-foreground">Organized by MNR Group</p>
         <p className="text-sm text-muted-foreground mt-4">
-          No {slideFilter === 'live' ? 'live' : slideFilter === 'winners' ? 'winner' : slideFilter} matches found
+          No {getFilterLabel()} matches found
         </p>
       </div>
     );
@@ -305,7 +360,7 @@ export const EnhancedMatchSlideshow = () => {
               </div>
 
               {/* Team 1 Performance Bar */}
-              {slideFilter === 'winners' && (
+              {(slideFilter === 'winners' || slideFilter === 'today-winners-a' || slideFilter === 'today-winners-b') && (
                 <div className="space-y-1">
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-white/50">Performance</span>
@@ -335,7 +390,7 @@ export const EnhancedMatchSlideshow = () => {
               </div>
 
               {/* Team 2 Performance Bar */}
-              {slideFilter === 'winners' && (
+              {(slideFilter === 'winners' || slideFilter === 'today-winners-a' || slideFilter === 'today-winners-b') && (
                 <div className="space-y-1">
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-white/50">Performance</span>
@@ -352,30 +407,33 @@ export const EnhancedMatchSlideshow = () => {
             </div>
 
             {/* Winner Banner - Only show on winners slide */}
-            {currentSlide.winner && slideFilter === 'winners' && (
-              <div className="bg-gradient-to-r from-yellow-500 via-orange-500 to-yellow-600 rounded-xl px-4 py-3 flex items-center gap-3 shadow-lg animate-pulse">
-                <Trophy className="h-6 w-6 text-white" />
-                <span className="text-white font-bold text-base sm:text-lg flex-1 text-center">
-                  🎉 {currentSlide.winner} WINS! 🎉
-                </span>
+            {currentSlide.winner && (slideFilter === 'winners' || slideFilter === 'today-winners-a' || slideFilter === 'today-winners-b') && (
+              <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-400 p-0.5 shadow-2xl">
+                <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 rounded-lg px-4 sm:px-6 py-4 sm:py-5 text-center relative">
+                  {/* Animated background particles */}
+                  <div className="absolute inset-0 overflow-hidden rounded-lg">
+                    <div className="absolute -top-1/2 -right-1/2 w-96 h-96 bg-yellow-400/10 rounded-full blur-3xl animate-pulse"></div>
+                    <div className="absolute -bottom-1/2 -left-1/2 w-96 h-96 bg-orange-400/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+                  </div>
+                  
+                  <div className="relative z-10 space-y-2">
+                    <div className="flex justify-center gap-1 mb-2">
+                      <span className="text-2xl animate-bounce">🏆</span>
+                      <span className="text-2xl animate-bounce" style={{ animationDelay: '0.1s' }}>✨</span>
+                      <span className="text-2xl animate-bounce" style={{ animationDelay: '0.2s' }}>🎉</span>
+                    </div>
+                    <div className="text-white font-black text-2xl sm:text-4xl bg-gradient-to-r from-yellow-300 via-orange-300 to-amber-300 bg-clip-text text-transparent">
+                      {currentSlide.winner}
+                    </div>
+                    <div className="text-amber-300 font-bold text-xs sm:text-sm tracking-widest uppercase">
+                      ⚡ Win • {currentSlide.date} ⚡
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
 
-            {/* Team Total Summary - Only on winners slide */}
-            {slideFilter === 'winners' && (
-              <div className="grid grid-cols-2 gap-3 bg-gradient-to-r from-cyan-600/20 to-rose-600/20 rounded-xl p-4 border border-white/20">
-                <div className="text-center">
-                  <div className="text-white/70 text-xs font-semibold mb-2">Team Total</div>
-                  <div className="text-2xl sm:text-3xl font-black text-cyan-400">{currentSlide.team1_score || 0}</div>
-                  <div className="text-white/50 text-xs mt-1">{currentSlide.team1_name}</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-white/70 text-xs font-semibold mb-2">Team Total</div>
-                  <div className="text-2xl sm:text-3xl font-black text-rose-400">{currentSlide.team2_score || 0}</div>
-                  <div className="text-white/50 text-xs mt-1">{currentSlide.team2_name}</div>
-                </div>
-              </div>
-            )}
+            {/* Team Total Summary - Removed, already shown at top */}
 
             {/* Match Details */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
@@ -399,32 +457,55 @@ export const EnhancedMatchSlideshow = () => {
           </div>
 
           {/* Right Side - 4 Player Photos Grid */}
-          {slideFilter === 'winners' ? (
-            <div className="grid grid-cols-2 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6 bg-gradient-to-br from-white/5 to-white/10 rounded-xl p-4 sm:p-6 border border-white/20">
-              {renderPlayerScore(
-                currentSlide.team1_player1_scores,
-                currentSlide.team1_player1_name,
-                currentSlide.team1_player1_photo,
-                currentSlide.team1_player1_scores?.reduce((a, b) => a + b, 0) || 0
-              )}
-              {renderPlayerScore(
-                currentSlide.team1_player2_scores,
-                currentSlide.team1_player2_name,
-                currentSlide.team1_player2_photo,
-                currentSlide.team1_player2_scores?.reduce((a, b) => a + b, 0) || 0
-              )}
-              {renderPlayerScore(
-                currentSlide.team2_player1_scores,
-                currentSlide.team2_player1_name,
-                currentSlide.team2_player1_photo,
-                currentSlide.team2_player1_scores?.reduce((a, b) => a + b, 0) || 0
-              )}
-              {renderPlayerScore(
-                currentSlide.team2_player2_scores,
-                currentSlide.team2_player2_name,
-                currentSlide.team2_player2_photo,
-                currentSlide.team2_player2_scores?.reduce((a, b) => a + b, 0) || 0
-              )}
+          {(slideFilter === 'winners' || slideFilter === 'today-winners-a' || slideFilter === 'today-winners-b') ? (
+            <div className="relative rounded-xl p-4 sm:p-6 border border-white/20 bg-gradient-to-br from-white/10 to-white/5 overflow-hidden">
+              {/* Decorative gradient background */}
+              <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 via-transparent to-orange-500/5 rounded-xl pointer-events-none"></div>
+              
+              <div className="relative z-10 grid grid-cols-2 gap-4 sm:gap-5 md:gap-6 h-full place-content-center">
+                {/* Team 1 Players */}
+                <div className="col-span-2 text-center mb-2">
+                  <div className="text-sm font-bold text-cyan-400 bg-cyan-600/20 rounded-full px-3 py-1 inline-block border border-cyan-400/30">
+                    {currentSlide.team1_name}
+                  </div>
+                </div>
+                
+                {renderPlayerScore(
+                  currentSlide.team1_player1_scores,
+                  currentSlide.team1_player1_name,
+                  currentSlide.team1_player1_photo,
+                  currentSlide.team1_player1_scores?.reduce((a, b) => a + b, 0) || 0
+                )}
+                {renderPlayerScore(
+                  currentSlide.team1_player2_scores,
+                  currentSlide.team1_player2_name,
+                  currentSlide.team1_player2_photo,
+                  currentSlide.team1_player2_scores?.reduce((a, b) => a + b, 0) || 0
+                )}
+                
+                {/* Divider */}
+                <div className="col-span-2 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent my-2"></div>
+                
+                {/* Team 2 Players */}
+                <div className="col-span-2 text-center mb-2">
+                  <div className="text-sm font-bold text-rose-400 bg-rose-600/20 rounded-full px-3 py-1 inline-block border border-rose-400/30">
+                    {currentSlide.team2_name}
+                  </div>
+                </div>
+                
+                {renderPlayerScore(
+                  currentSlide.team2_player1_scores,
+                  currentSlide.team2_player1_name,
+                  currentSlide.team2_player1_photo,
+                  currentSlide.team2_player1_scores?.reduce((a, b) => a + b, 0) || 0
+                )}
+                {renderPlayerScore(
+                  currentSlide.team2_player2_scores,
+                  currentSlide.team2_player2_name,
+                  currentSlide.team2_player2_photo,
+                  currentSlide.team2_player2_scores?.reduce((a, b) => a + b, 0) || 0
+                )}
+              </div>
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-2 gap-2 sm:gap-3 md:gap-4 h-full">

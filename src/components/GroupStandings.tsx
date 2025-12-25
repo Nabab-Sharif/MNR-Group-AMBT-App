@@ -123,7 +123,7 @@ const GroupStandings = ({ matches, groupName }: GroupStandingsProps) => {
 
   // Convert to array and sort by wins, win points, lose score, and total score
   const standings: TeamStanding[] = Object.entries(teamStats)
-    .map(([teamName, stats], index) => {
+    .map(([teamName, stats]) => {
       const players = Array.from(stats.players.values());
       const winPoints = stats.wins; // Win Points = Total number of wins
       const loseScore = stats.loseScores.reduce((a, b) => a + b, 0);
@@ -140,24 +140,24 @@ const GroupStandings = ({ matches, groupName }: GroupStandingsProps) => {
         averageWinScore,
         players,
         leaderPlayer: players.length > 0 ? players[0] : undefined,
-        rank: index + 1,
+        rank: 0, // Will be updated after sorting
       };
     })
     .sort((a, b) => {
-      // Primary sort by wins (descending) - same as winPoints since winPoints = wins count
+      // Primary sort by wins (descending)
       if (b.wins !== a.wins) {
         return b.wins - a.wins;
       }
-      // Secondary sort by lose score (descending)
-      if (b.loseScore !== a.loseScore) {
-        return b.loseScore - a.loseScore;
-      }
-      // Tertiary sort by total score (descending)
+      // Secondary sort by total score (descending)
       if (b.scoreTotal !== a.scoreTotal) {
         return b.scoreTotal - a.scoreTotal;
       }
-      // Final sort by ranking sequence (original order for stability)
-      return 0;
+      // Tertiary sort by lose score (descending)
+      if (b.loseScore !== a.loseScore) {
+        return b.loseScore - a.loseScore;
+      }
+      // Final sort by team name for stability
+      return a.teamName.localeCompare(b.teamName);
     })
     .map((standing, idx) => ({
       ...standing,
@@ -173,9 +173,9 @@ const GroupStandings = ({ matches, groupName }: GroupStandingsProps) => {
 
   return (
     <div className="mb-8">
-      <div className="flex items-center justify-between mb-4 sm:mb-6">
-        <h2 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-2">
-          <span className="text-2xl sm:text-3xl">🏆</span> Group Standings
+      <div className="flex items-center justify-between mb-4 sm:mb-6 flex-wrap gap-2">
+        <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white flex items-center gap-2">
+          <span className="text-2xl sm:text-3xl">🏆</span> <span className="hidden sm:inline">Group Standings</span><span className="sm:hidden">Standings</span>
         </h2>
         {standingsSearch && (
           <Button
@@ -197,11 +197,11 @@ const GroupStandings = ({ matches, groupName }: GroupStandingsProps) => {
           placeholder="Search team..."
           value={standingsSearch}
           onChange={(e) => setStandingsSearch(e.target.value)}
-          className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/50"
+          className="pl-10 text-sm sm:text-base bg-white/10 border-white/20 text-white placeholder:text-white/50"
         />
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-2 sm:gap-3 lg:gap-4 xl:gap-6">
         {filteredStandings.map((team) => (
           <div 
             key={team.teamName}
@@ -209,10 +209,10 @@ const GroupStandings = ({ matches, groupName }: GroupStandingsProps) => {
             className="cursor-pointer group flex flex-col active:scale-95 transition-transform duration-150"
           >
             {/* Card with Hover Effects - RESPONSIVE */}
-            <div className="relative p-4 sm:p-6 bg-gradient-to-br from-blue-600/20 to-purple-600/20 border border-blue-500/30 rounded-lg sm:rounded-xl backdrop-blur transition-all duration-300 hover:border-blue-400/80 hover:bg-gradient-to-br hover:from-blue-600/40 hover:to-purple-600/40 hover:shadow-2xl hover:shadow-blue-500/30 group-hover:scale-105 group-hover:-translate-y-2 group-active:scale-100 group-active:shadow-xl group-active:shadow-blue-500/50 min-h-auto flex flex-col">
+            <div className="relative p-3 sm:p-4 lg:p-6 bg-gradient-to-br from-blue-600/20 to-purple-600/20 border border-blue-500/30 rounded-lg sm:rounded-xl backdrop-blur transition-all duration-300 hover:border-blue-400/80 hover:bg-gradient-to-br hover:from-blue-600/40 hover:to-purple-600/40 hover:shadow-2xl hover:shadow-blue-500/30 group-hover:scale-105 group-hover:-translate-y-2 group-active:scale-100 group-active:shadow-xl group-active:shadow-blue-500/50 min-h-auto flex flex-col">
               
               {/* Team Leader Picture - Top Left - ENHANCED */}
-              <div className="absolute top-2 left-2 z-20">
+              <div className="absolute top-1 sm:top-2 left-1 sm:left-2 z-20">
                 <div
                   onClick={(e) => {
                     e.stopPropagation();
@@ -223,9 +223,9 @@ const GroupStandings = ({ matches, groupName }: GroupStandingsProps) => {
                   className="cursor-pointer hover:scale-110 transition-transform"
                   title={team.leaderPlayer?.name || 'Team Leader'}
                 >
-                  <Avatar className="w-14 h-14 sm:w-16 sm:h-16 border-4 border-blue-400/60 shadow-lg shadow-blue-500/30 hover:ring-4 hover:ring-yellow-300 transition-all">
+                  <Avatar className="w-10 h-10 sm:w-14 sm:h-14 lg:w-16 lg:h-16 border-2 sm:border-4 border-blue-400/60 shadow-lg shadow-blue-500/30 hover:ring-4 hover:ring-yellow-300 transition-all">
                     <AvatarImage src={team.leaderPlayer?.photo || ""} alt={team.leaderPlayer?.name || "Leader"} />
-                    <AvatarFallback className="bg-gradient-to-br from-blue-600 to-purple-600 text-white font-bold text-sm">
+                    <AvatarFallback className="bg-gradient-to-br from-blue-600 to-purple-600 text-white font-bold text-xs sm:text-sm">
                       {team.leaderPlayer?.name?.charAt(0) || "T"}
                     </AvatarFallback>
                   </Avatar>
@@ -234,42 +234,43 @@ const GroupStandings = ({ matches, groupName }: GroupStandingsProps) => {
 
               {/* Rank Number Badge - Right Side - ENHANCED */}
               <div 
-                className="ranking-badge-3d absolute top-2 right-2 w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center text-white font-extrabold text-xl sm:text-2xl border-2 sm:border-3 border-yellow-300/50 shadow-lg shadow-yellow-500/30 cursor-pointer transition-all duration-300 hover:scale-125 hover:ring-4 hover:ring-yellow-300 hover:shadow-2xl hover:shadow-yellow-500/50 active:scale-110 z-10 bg-gradient-to-br from-yellow-500/40 to-orange-500/40"
+                className="ranking-badge-3d absolute top-1 sm:top-2 right-1 sm:right-2 w-10 h-10 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-full flex items-center justify-center text-white font-extrabold text-lg sm:text-xl lg:text-2xl border-2 sm:border-3 border-yellow-300/50 shadow-lg shadow-yellow-500/30 cursor-pointer transition-all duration-300 hover:scale-125 hover:ring-4 hover:ring-yellow-300 hover:shadow-2xl hover:shadow-yellow-500/50 active:scale-110 z-10 bg-gradient-to-br from-yellow-500/40 to-orange-500/40"
                 style={{ transformStyle: "preserve-3d" }}
+                title={`Rank ${team.rank}`}
               >
-                {team.rank === 1 ? "🥇" : team.rank === 2 ? "🥈" : team.rank === 3 ? "🥉" : team.rank === 4 ? "4️⃣" : team.rank === 5 ? "5️⃣" : team.rank === 6 ? "6️⃣" : team.rank === 7 ? "7️⃣" : team.rank === 8 ? "8️⃣" : team.rank === 9 ? "9️⃣" : "🔟"}
+                {team.rank === 1 ? "🥇" : team.rank === 2 ? "🥈" : team.rank === 3 ? "🥉" : team.rank}
               </div>
 
               {/* Team Header - Adjusted for Side Badges - RESPONSIVE */}
-              <div className="flex items-center justify-between mb-3 sm:mb-4 pt-2 relative z-0 px-2">
-                <div className="flex-1 min-w-0 ml-12 sm:ml-16">
-                  <h3 className="text-base sm:text-lg md:text-xl font-bold text-white group-hover:text-yellow-300 transition-colors truncate">{team.teamName}</h3>
+              <div className="flex items-center justify-between mb-2 sm:mb-3 lg:mb-4 pt-1 sm:pt-2 relative z-0 px-1 sm:px-2">
+                <div className="flex-1 min-w-0 ml-10 sm:ml-14 lg:ml-16">
+                  <h3 className="text-sm sm:text-base lg:text-lg xl:text-xl font-bold text-white group-hover:text-yellow-300 transition-colors truncate">{team.teamName}</h3>
                   <p className="text-white/60 text-xs sm:text-sm">{team.wins + team.losses} matches</p>
                 </div>
               </div>
 
               {/* Win Points Display - NEW */}
               <div className="px-2 sm:px-3 py-1 sm:py-2 mb-2 bg-amber-500/20 rounded-lg border border-amber-500/30 group-hover:bg-amber-500/30 transition-all">
-                <div className="flex items-center justify-between">
-                  <span className="text-white/70 text-xs font-semibold">🎯 Total Wins Points</span>
-                  <span className="text-lg sm:text-xl font-extrabold text-amber-300">{team.winPoints}</span>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-white/70 text-xs sm:text-sm font-semibold">🎯 Total Wins Points</span>
+                  <span className="text-base sm:text-lg lg:text-xl font-extrabold text-amber-300">{team.winPoints}</span>
                 </div>
               </div>
 
               {/* Stats Grid - All Clickable - RESPONSIVE */}
-              <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-2 sm:mb-3 flex-grow">
+              <div className="grid grid-cols-2 gap-1 sm:gap-2 lg:gap-3 mb-2 sm:mb-3 lg:mb-4 flex-grow">
                 {/* Wins */}
                 <div 
                   className="p-2 sm:p-3 bg-green-500/20 rounded-lg border border-green-500/30 group-hover:bg-green-500/30 transition-all">
-                  <div className="text-white/70 text-xs font-semibold">WINS</div>
-                  <div className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-green-400">{team.wins}</div>
+                  <div className="text-white/70 text-xs sm:text-sm font-semibold">Wins</div>
+                  <div className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-extrabold text-green-400">{team.wins}</div>
                 </div>
 
                 {/* Losses */}
                 <div 
                   className="p-2 sm:p-3 bg-red-500/20 rounded-lg border border-red-500/30 group-hover:bg-red-500/30 transition-all">
-                  <div className="text-white/70 text-xs font-semibold">LOSSES</div>
-                  <div className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-red-400">{team.losses}</div>
+                  <div className="text-white/70 text-xs sm:text-sm font-semibold">Losses</div>
+                  <div className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-extrabold text-red-400">{team.losses}</div>
                 </div>
 
                 {/* Score Total - Clickable */}
@@ -279,8 +280,8 @@ const GroupStandings = ({ matches, groupName }: GroupStandingsProps) => {
                     setExpandedScore(expandedScore === team.teamName ? null : team.teamName);
                   }}
                   className="col-span-2 p-2 sm:p-3 bg-blue-500/20 rounded-lg border border-blue-500/30 group-hover:bg-blue-500/40 cursor-pointer transition-all hover:shadow-lg hover:shadow-blue-500/20">
-                  <div className="text-white/70 text-xs font-semibold">📊 TOTAL SCORE</div>
-                  <div className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-blue-400">{team.scoreTotal}</div>
+                  <div className="text-white/70 text-xs sm:text-sm font-semibold">📊 Total Score</div>
+                  <div className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-extrabold text-blue-400">{team.scoreTotal}</div>
                   {expandedScore === team.teamName && (
                     <div className="mt-2 pt-2 border-t border-blue-500/50 space-y-1">
                       <div className="flex justify-between items-center text-xs">
@@ -301,22 +302,22 @@ const GroupStandings = ({ matches, groupName }: GroupStandingsProps) => {
               </div>
 
               {/* Divider */}
-              <div className="my-2 sm:my-3 border-t border-white/10"></div>
+              <div className="my-1 sm:my-2 lg:my-3 border-t border-white/10"></div>
 
               {/* Footer Section - Win Rate + Players + CTA */}
               <div className="space-y-2 sm:space-y-3">
                 {/* Win Rate */}
                 <div className="p-2 sm:p-3 bg-gradient-to-r from-purple-600/20 to-purple-500/20 rounded-lg border border-purple-500/30 group-hover:from-purple-600/30 group-hover:to-purple-500/30 transition-all">
-                  <div className="flex items-center justify-between">
-                    <p className="text-white/60 text-xs font-semibold">WIN RATE</p>
-                    <p className="text-lg sm:text-xl md:text-2xl font-extrabold text-purple-300">{team.winRate}%</p>
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-white/60 text-xs sm:text-sm font-semibold">Win Rate</p>
+                    <p className="text-base sm:text-lg lg:text-xl xl:text-2xl font-extrabold text-purple-300">{team.winRate}%</p>
                   </div>
                 </div>
 
                 {/* Players - Enhanced Display */}
                 <div className="flex flex-col gap-2">
-                  <p className="text-white/70 text-xs font-semibold">👥 Players</p>
-                  <div className="flex flex-wrap gap-1.5">
+                  <p className="text-white/70 text-xs sm:text-sm font-semibold">👥 Players</p>
+                  <div className="flex flex-wrap gap-1">
                     {team.players.map((player) => (
                       <div
                         key={player.name}
@@ -327,7 +328,7 @@ const GroupStandings = ({ matches, groupName }: GroupStandingsProps) => {
                         className="cursor-pointer group/player relative hover:z-10"
                         title={player.name}
                       >
-                        <Avatar className="w-8 h-8 sm:w-9 sm:h-9 border-2 border-purple-400/60 shadow-md hover:ring-3 hover:ring-yellow-300 transition-all hover:scale-125 group-hover/player:scale-125">
+                        <Avatar className="w-7 h-7 sm:w-8 sm:h-8 lg:w-9 lg:h-9 border-2 border-purple-400/60 shadow-md hover:ring-3 hover:ring-yellow-300 transition-all hover:scale-125 group-hover/player:scale-125">
                           <AvatarImage src={player.photo || ""} alt={player.name} />
                           <AvatarFallback className="text-xs bg-gradient-to-br from-purple-600 to-blue-600 text-white font-bold">
                             {player.name.charAt(0)}

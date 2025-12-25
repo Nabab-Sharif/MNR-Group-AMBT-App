@@ -51,16 +51,6 @@ export const MatchSlideshow = () => {
     };
   }, []);
 
-  useEffect(() => {
-    if (slides.length === 0) return;
-
-    const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % slides.length);
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [slides.length]);
-
   if (slides.length === 0) {
     return (
       <div className="text-center py-20">

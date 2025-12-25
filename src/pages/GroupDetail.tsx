@@ -23,6 +23,7 @@ const GroupDetail = () => {
   const [loading, setLoading] = useState(true);
   const [leaderboardSearch, setLeaderboardSearch] = useState("");
   const [matchesSearch, setMatchesSearch] = useState("");
+  const [expandedDate, setExpandedDate] = useState<string | null>(null);
 
   // Calculate team stats (wins, losses, win rate)
   const teamStats: Record<string, TeamStats> = {};
@@ -58,7 +59,15 @@ const GroupDetail = () => {
     team.winRate = `${rate}%`;
   });
 
-  const sortedTeams = Object.values(teamStats).sort((a, b) => b.totalScore - a.totalScore);
+  // Sort by wins first (descending), then by total score (descending)
+  const sortedTeams = Object.values(teamStats).sort((a, b) => {
+    // Primary sort by wins (descending)
+    if (b.wins !== a.wins) {
+      return b.wins - a.wins;
+    }
+    // Secondary sort by total score (descending)
+    return b.totalScore - a.totalScore;
+  }); // Show all teams, not limited to 10
   
   // Filter leaderboard based on search - HOOK CALL
   const filteredLeaderboard = useMemo(() => {
@@ -78,6 +87,32 @@ const GroupDetail = () => {
       );
     });
   }, [matches, matchesSearch]);
+
+  // Group matches by date
+  const matchesByDate = useMemo(() => {
+    const grouped: Record<string, any[]> = {};
+    filteredMatches.forEach((match) => {
+      if (!grouped[match.date]) {
+        grouped[match.date] = [];
+      }
+      grouped[match.date].push(match);
+    });
+    // Sort dates in descending order
+    return Object.entries(grouped).sort(([dateA], [dateB]) => dateB.localeCompare(dateA));
+  }, [filteredMatches]);
+
+  // Calculate team match sequence
+  const getTeamMatchSequence = (teamName: string) => {
+    const completedMatches = matches
+      .filter(m => (m.team1_name === teamName || m.team2_name === teamName) && m.status === "completed")
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    
+    const sequence: Record<string, string> = {};
+    completedMatches.forEach((match, index) => {
+      sequence[match.id] = ['1st', '2nd', '3rd'][index] || (index + 1).toString();
+    });
+    return sequence;
+  };
 
   useEffect(() => {
     const fetchGroupMatches = async () => {
@@ -192,11 +227,35 @@ const GroupDetail = () => {
       {/* Group Standings Section */}
       <GroupStandings matches={matches} groupName={groupName} />
 
-      {/* Top Teams Leaderboard */}
-      <div className="mb-8 grid md:grid-cols-2 gap-6">
-        <Card className="p-6 bg-gradient-to-br from-white/10 to-white/5 border-white/20 backdrop-blur">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold text-white">🏆 Scoreboard Table</h2>
+      {/* Statistics + Scoreboard Section */}
+      <div className="mb-8 grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+        {/* Statistics */}
+        <Card className="lg:col-span-1 p-4 sm:p-6 bg-gradient-to-br from-white/10 to-white/5 border-white/20 backdrop-blur">
+          <h2 className="text-xl sm:text-2xl font-bold text-white mb-3 sm:mb-4">📊 Statistics</h2>
+          <div className="space-y-2 sm:space-y-3">
+            <div className="p-2 sm:p-3 bg-white/10 rounded-lg border border-white/20">
+              <div className="text-white/70 text-xs sm:text-sm">Total Matches</div>
+              <div className="text-2xl sm:text-4xl font-extrabold text-blue-400">{matches.length}</div>
+            </div>
+            <div className="p-2 sm:p-3 bg-white/10 rounded-lg border border-white/20">
+              <div className="text-white/70 text-xs sm:text-sm">Completed</div>
+              <div className="text-2xl sm:text-4xl font-extrabold text-green-400">
+                {matches.filter((m) => m.status === "completed").length}
+              </div>
+            </div>
+            <div className="p-2 sm:p-3 bg-white/10 rounded-lg border border-white/20">
+              <div className="text-white/70 text-xs sm:text-sm">Live/Upcoming</div>
+              <div className="text-2xl sm:text-4xl font-extrabold text-orange-400">
+                {matches.filter((m) => m.status !== "completed").length}
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        {/* Scoreboard */}
+        <Card className="lg:col-span-2 p-4 sm:p-6 bg-gradient-to-br from-white/10 to-white/5 border-white/20 backdrop-blur">
+          <div className="flex items-center justify-between mb-3 sm:mb-4 flex-wrap gap-2">
+            <h2 className="text-xl sm:text-2xl font-bold text-white">🏆 Point Table (All Teams)</h2>
             {leaderboardSearch && (
               <Button
                 variant="ghost"
@@ -210,76 +269,56 @@ const GroupDetail = () => {
           </div>
           
           {/* Search Input */}
-          <div className="relative mb-4">
+          <div className="relative mb-3 sm:mb-4">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/50" />
             <Input
               type="text"
               placeholder="Search team..."
               value={leaderboardSearch}
               onChange={(e) => setLeaderboardSearch(e.target.value)}
-              className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/50"
+              className="pl-10 text-sm sm:text-base bg-white/10 border-white/20 text-white placeholder:text-white/50"
             />
           </div>
 
-          <div className="space-y-3">
-            {filteredLeaderboard.slice(0, 10).map((team, idx) => (
+          <div className="space-y-3 max-h-96 overflow-y-auto">
+            {filteredLeaderboard.map((team, idx) => {
+              const rank = sortedTeams.findIndex(t => t.name === team.name) + 1;
+              return (
               <div
                 key={team.name}
-                className="p-4 bg-white/10 rounded-lg border border-white/20 hover:bg-white/15 transition"
+                className="p-3 sm:p-4 bg-white/10 rounded-lg border border-white/20 hover:bg-white/15 transition"
               >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-3">
-                    <div className="text-2xl font-bold text-yellow-400 w-8 text-center">
-                      {idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : `#${idx + 1}`}
+                <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+                  <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                    <div className="text-lg sm:text-xl font-bold text-yellow-400 w-7 sm:w-8 text-center flex-shrink-0">
+                      {rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : rank}
                     </div>
-                    <span className="text-white font-semibold">{team.name}</span>
+                    <span className="text-white font-semibold text-sm sm:text-base truncate">{team.name}</span>
                   </div>
-                <span className="text-yellow-300 font-extrabold text-xl"><span className="text-yellow-700">Total Score: </span>{team.totalScore}</span>
+                  <span className="text-yellow-300 font-extrabold text-base sm:text-lg flex-shrink-0">{team.totalScore}</span>
                 </div>
-                <div className="flex gap-4 text-xs text-white/70">
-                  <span>🎯 Total Wins Points: <span className="text-green-400 font-bold">{team.wins}</span></span>
-                  <span>🏅 Total Wins: <span className="text-amber-400 font-bold">{team.wins}</span></span>
-                  <span>❌ Loss: <span className="text-red-400 font-bold">{team.losses}</span></span>
-                  <span>📊 Rate: <span className="text-blue-400 font-bold">{team.winRate}</span></span>
+                <div className="flex flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm text-white/70">
+                  <span>🎯Total Wins Points: <span className="text-green-400 font-bold">{team.wins}</span></span>
+                  <span>🏅 Total Win: <span className="text-amber-400 font-bold">{team.wins}</span></span>
+                  <span>❌ L: <span className="text-red-400 font-bold">{team.losses}</span></span>
+                  <span>📊 {team.winRate}</span>
                 </div>
               </div>
-            ))}
+            );
+            })}
             {filteredLeaderboard.length === 0 && (
-              <div className="text-center py-8 text-white/50">
+              <div className="text-center py-8 text-white/50 text-sm sm:text-base">
                 No teams found matching "{leaderboardSearch}"
               </div>
             )}
           </div>
         </Card>
-
-        {/* Match Stats */}
-        <Card className="p-6 bg-gradient-to-br from-white/10 to-white/5 border-white/20 backdrop-blur">
-          <h2 className="text-2xl font-bold text-white mb-4">📊 Statistics</h2>
-          <div className="space-y-3">
-            <div className="p-3 bg-white/10 rounded-lg border border-white/20">
-              <div className="text-white/70 text-sm">Total Matches</div>
-              <div className="text-4xl font-extrabold text-blue-400">{matches.length}</div>
-            </div>
-            <div className="p-3 bg-white/10 rounded-lg border border-white/20">
-              <div className="text-white/70 text-sm">Completed</div>
-              <div className="text-4xl font-extrabold text-green-400">
-                {matches.filter((m) => m.status === "completed").length}
-              </div>
-            </div>
-            <div className="p-3 bg-white/10 rounded-lg border border-white/20">
-              <div className="text-white/70 text-sm">Live/Upcoming</div>
-              <div className="text-4xl font-extrabold text-orange-400">
-                {matches.filter((m) => m.status !== "completed").length}
-              </div>
-            </div>
-          </div>
-        </Card>
       </div>
 
       {/* Matches List */}
-      <Card className="p-6 bg-gradient-to-br from-white/10 to-white/5 border-white/20 backdrop-blur">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-white">📋 All Matches</h2>
+      <Card className="p-4 sm:p-6 bg-gradient-to-br from-white/10 to-white/5 border-white/20 backdrop-blur">
+        <div className="flex items-center justify-between mb-4 sm:mb-6 flex-wrap gap-2">
+          <h2 className="text-xl sm:text-2xl font-bold text-white">📋 All Matches</h2>
           {matchesSearch && (
             <Button
               variant="ghost"
@@ -293,65 +332,144 @@ const GroupDetail = () => {
         </div>
 
         {/* Search Input */}
-        <div className="relative mb-4">
+        <div className="relative mb-3 sm:mb-4">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/50" />
           <Input
             type="text"
             placeholder="Search by team or venue..."
             value={matchesSearch}
             onChange={(e) => setMatchesSearch(e.target.value)}
-            className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/50"
+            className="pl-10 text-sm sm:text-base bg-white/10 border-white/20 text-white placeholder:text-white/50"
           />
         </div>
 
-        <div className="grid gap-4">
-          {filteredMatches.map((match) => (
-            <div
-              key={match.id}
-              className="p-4 bg-white/10 rounded-lg border border-white/20 hover:bg-white/15 transition"
-            >
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-4 flex-1">
-                  <Badge
-                    variant={
-                      match.status === "live"
-                        ? "destructive"
-                        : match.status === "completed"
-                        ? "default"
-                        : "secondary"
-                    }
+        {/* Date wise grouped matches */}
+        <div className="space-y-4">
+          {matchesByDate.length > 0 ? (
+            matchesByDate.map(([date, dateMatches]) => {
+              const team1Sequence = getTeamMatchSequence(dateMatches[0]?.team1_name);
+              const team2Sequence = getTeamMatchSequence(dateMatches[0]?.team2_name);
+              
+              return (
+                <div key={date}>
+                  {/* Date Card Header */}
+                  <button
+                    onClick={() => setExpandedDate(expandedDate === date ? null : date)}
+                    className="w-full p-4 bg-gradient-to-r from-blue-600/30 to-purple-600/30 border border-blue-400/50 rounded-lg hover:from-blue-600/50 hover:to-purple-600/50 transition mb-2"
                   >
-                    {match.status.toUpperCase()}
-                  </Badge>
-                  <div className="text-white/70 text-sm">
-                    {match.date} • {match.match_time || "TBD"}
-                  </div>
-                </div>
-              </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl">📅</span>
+                        <div className="text-left">
+                          <div className="text-white font-bold text-lg">{date}</div>
+                          <div className="text-white/70 text-sm">{dateMatches.length} match{dateMatches.length > 1 ? 'es' : ''}</div>
+                        </div>
+                      </div>
+                      <span className="text-white text-2xl">
+                        {expandedDate === date ? '▼' : '▶'}
+                      </span>
+                    </div>
+                  </button>
 
-              {/* Match Score */}
-              <div className="grid grid-cols-3 gap-4 items-center mb-3">
-                <div className="text-right">
-                  <div className="text-white font-bold mb-1">{match.team1_name}</div>
-                  <div className="text-blue-400 text-2xl font-extrabold">{match.team1_score || 0}</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-white/50 font-bold">VS</div>
-                </div>
-                <div className="text-left">
-                  <div className="text-white font-bold mb-1">{match.team2_name}</div>
-                  <div className="text-orange-400 text-2xl font-extrabold">{match.team2_score || 0}</div>
-                </div>
-              </div>
+                  {/* Expanded match details - Show 2 teams with 3 matches each in serial */}
+                  {expandedDate === date && (
+                    <div className="ml-4 pl-4 border-l-2 border-blue-400/50">
+                      {/* Get unique teams from this date's matches */}
+                      {(() => {
+                        const uniqueTeams = new Set<string>();
+                        dateMatches.forEach(m => {
+                          uniqueTeams.add(m.team1_name);
+                          uniqueTeams.add(m.team2_name);
+                        });
+                        const teamsList = Array.from(uniqueTeams).slice(0, 2);
+                        
+                        return (
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                            {teamsList.map((teamName) => {
+                              // Get all matches for this team, sorted by date
+                              const teamMatches = matches
+                                .filter(m => (m.team1_name === teamName || m.team2_name === teamName))
+                                .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+                                .slice(0, 3);
+                              
+                              return (
+                                <div key={teamName} className="space-y-3">
+                                  <h4 className="text-lg font-bold text-blue-400 pb-2 border-b border-blue-400/30">{teamName}</h4>
+                                  {teamMatches.map((match, idx) => {
+                                    const isTeam1 = match.team1_name === teamName;
+                                    const team1Seq = getTeamMatchSequence(match.team1_name)[match.id] || '-';
+                                    const team2Seq = getTeamMatchSequence(match.team2_name)[match.id] || '-';
+                                    const currentTeamSeq = isTeam1 ? team1Seq : team2Seq;
+                                    
+                                    return (
+                                      <div
+                                        key={match.id}
+                                        className="p-3 sm:p-4 bg-white/10 rounded-lg border border-white/20 hover:bg-white/15 transition"
+                                      >
+                                        {/* Team Names Header - Team1 VS Team2 */}
+                                        <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/20">
+                                          <div className="text-white font-bold text-base sm:text-lg">{match.team1_name}</div>
+                                          <div className="text-white/70 font-bold text-sm">VS</div>
+                                          <div className="text-white font-bold text-base sm:text-lg">{match.team2_name}</div>
+                                        </div>
 
-              {/* Winner */}
-              {match.winner && (
-                <div className="text-center text-yellow-300 font-bold">
-                  🏆 Winner: {match.winner}
+                                        <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+                                          <Badge
+                                            variant={
+                                              match.status === "live"
+                                                ? "destructive"
+                                                : match.status === "completed"
+                                                ? "default"
+                                                : "secondary"
+                                            }
+                                          >
+                                            {match.status.toUpperCase()}
+                                          </Badge>
+                                          <div className="text-white/70 text-sm">
+                                            {match.match_time || "TBD"} • {match.venue || "TBD"}
+                                          </div>
+                                        </div>
+
+                                        {/* Match Score */}
+                                        <div className="grid grid-cols-3 gap-2 sm:gap-4 items-center mb-3">
+                                          <div className="text-right p-3 rounded-lg bg-blue-600/20 border-2 border-blue-400 animate-pulse">
+                                            <div className="text-white font-bold mb-2 text-sm sm:text-base">{match.team1_name}</div>
+                                            <div className="text-blue-400 text-2xl sm:text-3xl font-extrabold">{match.team1_score || 0}</div>
+                                          </div>
+                                          <div className="text-center">
+                                            <div className="text-white/50 font-bold text-lg">VS</div>
+                                          </div>
+                                          <div className="text-left p-3 rounded-lg bg-orange-600/20 border-2 border-orange-400 animate-pulse">
+                                            <div className="text-white font-bold mb-2 text-sm sm:text-base">{match.team2_name}</div>
+                                            <div className="text-orange-400 text-2xl sm:text-3xl font-extrabold">{match.team2_score || 0}</div>
+                                          </div>
+                                        </div>
+
+                                        {/* Winner */}
+                                        {match.winner && (
+                                          <div className="text-center text-yellow-300 font-bold text-sm">
+                                            🏆 Winner: {match.winner}
+                                          </div>
+                                        )}
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  )}
                 </div>
-              )}
+              );
+            })
+          ) : (
+            <div className="text-center py-12 text-white/50">
+              No matches found
             </div>
-          ))}
+          )}
         </div>
       </Card>
 

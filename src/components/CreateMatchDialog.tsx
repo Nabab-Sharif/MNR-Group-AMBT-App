@@ -545,10 +545,24 @@ export const CreateMatchDialog = ({ open, onOpenChange, onSuccess }: CreateMatch
                   <div className="space-y-2">
                     <Label>Photo</Label>
                     <div className="flex gap-2">
-                      <Input type="file" accept="image/*" onChange={(e) => handleFileChange('team1Player1Photo', e.target.files?.[0] || null)} />
-                      <Button type="button" size="icon" variant="outline" onClick={() => openCamera('team1Player1Photo')}><Camera className="h-4 w-4" /></Button>
+                      {!previews.team1Player1Photo ? (
+                        <>
+                          <Input type="file" accept="image/*" onChange={(e) => handleFileChange('team1Player1Photo', e.target.files?.[0] || null)} />
+                          <Button type="button" size="icon" variant="outline" onClick={() => openCamera('team1Player1Photo')}><Camera className="h-4 w-4" /></Button>
+                        </>
+                      ) : (
+                        <div className="relative w-24 h-24">
+                          <img src={previews.team1Player1Photo} alt="Preview" className="w-full h-full object-cover rounded border" />
+                          <button
+                            type="button"
+                            onClick={() => handleFileChange('team1Player1Photo', null)}
+                            className="absolute -top-2 -right-2 bg-red-600 hover:bg-red-700 text-white rounded-full p-1"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                      )}
                     </div>
-                    {previews.team1Player1Photo && <div className="w-24 h-24 rounded border"><img src={previews.team1Player1Photo} alt="Preview" className="w-full h-full object-cover rounded" /></div>}
                   </div>
                 </div>
               </div>
@@ -563,10 +577,24 @@ export const CreateMatchDialog = ({ open, onOpenChange, onSuccess }: CreateMatch
                   <div className="space-y-2">
                     <Label>Photo</Label>
                     <div className="flex gap-2">
-                      <Input type="file" accept="image/*" onChange={(e) => handleFileChange('team1Player2Photo', e.target.files?.[0] || null)} />
-                      <Button type="button" size="icon" variant="outline" onClick={() => openCamera('team1Player2Photo')}><Camera className="h-4 w-4" /></Button>
+                      {!previews.team1Player2Photo ? (
+                        <>
+                          <Input type="file" accept="image/*" onChange={(e) => handleFileChange('team1Player2Photo', e.target.files?.[0] || null)} />
+                          <Button type="button" size="icon" variant="outline" onClick={() => openCamera('team1Player2Photo')}><Camera className="h-4 w-4" /></Button>
+                        </>
+                      ) : (
+                        <div className="relative w-24 h-24">
+                          <img src={previews.team1Player2Photo} alt="Preview" className="w-full h-full object-cover rounded border" />
+                          <button
+                            type="button"
+                            onClick={() => handleFileChange('team1Player2Photo', null)}
+                            className="absolute -top-2 -right-2 bg-red-600 hover:bg-red-700 text-white rounded-full p-1"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                      )}
                     </div>
-                    {previews.team1Player2Photo && <div className="w-24 h-24 rounded border"><img src={previews.team1Player2Photo} alt="Preview" className="w-full h-full object-cover rounded" /></div>}
                   </div>
                 </div>
               </div>
@@ -615,10 +643,24 @@ export const CreateMatchDialog = ({ open, onOpenChange, onSuccess }: CreateMatch
                   <div className="space-y-2">
                     <Label>Photo</Label>
                     <div className="flex gap-2">
-                      <Input type="file" accept="image/*" onChange={(e) => handleFileChange('team2Player1Photo', e.target.files?.[0] || null)} />
-                      <Button type="button" size="icon" variant="outline" onClick={() => openCamera('team2Player1Photo')}><Camera className="h-4 w-4" /></Button>
+                      {!previews.team2Player1Photo ? (
+                        <>
+                          <Input type="file" accept="image/*" onChange={(e) => handleFileChange('team2Player1Photo', e.target.files?.[0] || null)} />
+                          <Button type="button" size="icon" variant="outline" onClick={() => openCamera('team2Player1Photo')}><Camera className="h-4 w-4" /></Button>
+                        </>
+                      ) : (
+                        <div className="relative w-24 h-24">
+                          <img src={previews.team2Player1Photo} alt="Preview" className="w-full h-full object-cover rounded border" />
+                          <button
+                            type="button"
+                            onClick={() => handleFileChange('team2Player1Photo', null)}
+                            className="absolute -top-2 -right-2 bg-red-600 hover:bg-red-700 text-white rounded-full p-1"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                      )}
                     </div>
-                    {previews.team2Player1Photo && <div className="w-24 h-24 rounded border"><img src={previews.team2Player1Photo} alt="Preview" className="w-full h-full object-cover rounded" /></div>}
                   </div>
                 </div>
               </div>
@@ -633,10 +675,24 @@ export const CreateMatchDialog = ({ open, onOpenChange, onSuccess }: CreateMatch
                   <div className="space-y-2">
                     <Label>Photo</Label>
                     <div className="flex gap-2">
-                      <Input type="file" accept="image/*" onChange={(e) => handleFileChange('team2Player2Photo', e.target.files?.[0] || null)} />
-                      <Button type="button" size="icon" variant="outline" onClick={() => openCamera('team2Player2Photo')}><Camera className="h-4 w-4" /></Button>
+                      {!previews.team2Player2Photo ? (
+                        <>
+                          <Input type="file" accept="image/*" onChange={(e) => handleFileChange('team2Player2Photo', e.target.files?.[0] || null)} />
+                          <Button type="button" size="icon" variant="outline" onClick={() => openCamera('team2Player2Photo')}><Camera className="h-4 w-4" /></Button>
+                        </>
+                      ) : (
+                        <div className="relative w-24 h-24">
+                          <img src={previews.team2Player2Photo} alt="Preview" className="w-full h-full object-cover rounded border" />
+                          <button
+                            type="button"
+                            onClick={() => handleFileChange('team2Player2Photo', null)}
+                            className="absolute -top-2 -right-2 bg-red-600 hover:bg-red-700 text-white rounded-full p-1"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                      )}
                     </div>
-                    {previews.team2Player2Photo && <div className="w-24 h-24 rounded border"><img src={previews.team2Player2Photo} alt="Preview" className="w-full h-full object-cover rounded" /></div>}
                   </div>
                 </div>
               </div>
