@@ -318,7 +318,7 @@ const GroupDetail = () => {
       {/* Matches List */}
       <Card className="p-4 sm:p-6 bg-gradient-to-br from-white/10 to-white/5 border-white/20 backdrop-blur">
         <div className="flex items-center justify-between mb-4 sm:mb-6 flex-wrap gap-2">
-          <h2 className="text-xl sm:text-2xl font-bold text-white">📋 All Matches</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-white">📋 All Wins Matches</h2>
           {matchesSearch && (
             <Button
               variant="ghost"

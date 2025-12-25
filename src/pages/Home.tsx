@@ -10,6 +10,7 @@ import { WelcomeMessage } from "@/components/WelcomeMessage";
 import { EnhancedMatchSlideshow } from "@/components/EnhancedMatchSlideshow";
 import { GroupCards } from "@/components/GroupCards";
 import { FullscreenScoreboard } from "@/components/FullscreenScoreboard";
+import { Footer } from "@/components/Footer";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -147,7 +148,7 @@ const Home = () => {
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-40 w-full">
         <div className="w-full px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <img src={logo} alt="MNR Group" className="h-12 w-12 rounded-full" />
+            <img src={logo} alt="MNR Group" className="h-12 w-12 rounded-full animate-logo-float animate-logo-glow" />
             <div>
               <h1 className="text-2xl font-bold">Anish Memorial Badminton Tournament</h1>
               <p className="text-sm text-muted-foreground">2025-2026 • Organized by MNR Group</p>
@@ -287,6 +288,9 @@ const Home = () => {
           </div>
         </div>
       )}
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 };

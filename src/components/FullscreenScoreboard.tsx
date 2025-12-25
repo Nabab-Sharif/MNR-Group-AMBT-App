@@ -1,6 +1,7 @@
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LiveScoreboard } from "./LiveScoreboard";
+import { useEffect } from "react";
 
 interface FullscreenScoreboardProps {
   match: any;
@@ -9,9 +10,19 @@ interface FullscreenScoreboardProps {
 }
 
 export const FullscreenScoreboard = ({ match, isAdmin, onClose }: FullscreenScoreboardProps) => {
+  useEffect(() => {
+    // Prevent body scrolling when fullscreen scoreboard is open
+    document.body.style.overflow = 'hidden';
+    
+    return () => {
+      // Restore body scrolling when closed
+      document.body.style.overflow = 'auto';
+    };
+  }, []);
+
   return (
     <div className="fixed inset-0 z-50 bg-gray-800 text-white overflow-hidden flex items-center justify-center">
-      <div className="container mx-auto px-4 py-8 text-xl md:text-3xl w-full h-full">
+      <div className="container mx-auto px-4 py-8 text-xl md:text-3xl w-full h-full overflow-hidden">
         <Button
           onClick={onClose}
           size="icon"

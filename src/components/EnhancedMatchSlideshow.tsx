@@ -40,6 +40,8 @@ export const EnhancedMatchSlideshow = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [slideFilter, setSlideFilter] = useState<'upcoming' | 'today' | 'tomorrow' | 'live' | 'winners' | 'today-winners-a' | 'today-winners-b'>('today');
   const [winnerDate, setWinnerDate] = useState<string | null>(null);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -148,6 +150,31 @@ export const EnhancedMatchSlideshow = () => {
       supabase.removeChannel(channel);
     };
   }, [slideFilter, winnerDate]);
+
+  // Touch handlers for swipe navigation
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    setTouchEnd(e.changedTouches[0].clientX);
+    handleSwipe(touchStart, e.changedTouches[0].clientX);
+  };
+
+  const handleSwipe = (start: number | null, end: number) => {
+    if (!start) return;
+    const distance = start - end;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+
+    if (isLeftSwipe) {
+      // Swipe left - show next slide
+      setCurrentIndex((prev) => (prev + 1) % slides.length);
+    } else if (isRightSwipe) {
+      // Swipe right - show previous slide
+      setCurrentIndex((prev) => (prev - 1 + slides.length) % slides.length);
+    }
+  };
 
   const filterButtons = (
     <div className="flex gap-2 justify-center mb-4 flex-wrap">
@@ -328,7 +355,11 @@ export const EnhancedMatchSlideshow = () => {
       {filterButtons}
       
       {/* Dark Theme Slide - Like Reference Image */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 rounded-2xl shadow-2xl w-full">
+      <div 
+        className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 rounded-2xl shadow-2xl w-full cursor-grab active:cursor-grabbing"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
         {/* Header */}
         <div className="flex items-center justify-between px-3 sm:px-4 md:px-8 py-2 sm:py-3 md:py-4 border-b border-white/10">
           <div className="flex items-center gap-2 sm:gap-3">
