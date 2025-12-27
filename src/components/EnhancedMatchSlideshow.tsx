@@ -38,7 +38,7 @@ interface Match {
 export const EnhancedMatchSlideshow = () => {
   const [slides, setSlides] = useState<Match[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [slideFilter, setSlideFilter] = useState<'upcoming' | 'today' | 'tomorrow' | 'live' | 'winners' | 'today-winners-a' | 'today-winners-b'>('today');
+  const [slideFilter, setSlideFilter] = useState<'upcoming' | 'today' | 'today-a' | 'today-b' | 'tomorrow' | 'live' | 'winners' | 'today-winners-a' | 'today-winners-b'>('today');
   const [winnerDate, setWinnerDate] = useState<string | null>(null);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
@@ -47,8 +47,8 @@ export const EnhancedMatchSlideshow = () => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail as { filter?: string; group?: string } | undefined;
       if (!detail) return;
-      if (detail.filter === 'today' || detail.filter === 'tomorrow' || detail.filter === 'upcoming' || detail.filter === 'live' || detail.filter === 'winners' || detail.filter === 'today-winners-a' || detail.filter === 'today-winners-b') {
-        setSlideFilter(detail.filter as 'upcoming' | 'today' | 'tomorrow' | 'live' | 'winners' | 'today-winners-a' | 'today-winners-b');
+      if (detail.filter === 'today' || detail.filter === 'today-a' || detail.filter === 'today-b' || detail.filter === 'tomorrow' || detail.filter === 'upcoming' || detail.filter === 'live' || detail.filter === 'winners' || detail.filter === 'today-winners-a' || detail.filter === 'today-winners-b') {
+        setSlideFilter(detail.filter as 'upcoming' | 'today' | 'today-a' | 'today-b' | 'tomorrow' | 'live' | 'winners' | 'today-winners-a' | 'today-winners-b');
         setCurrentIndex(0);
         const el = document.getElementById('enhanced-slideshow');
         if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -74,6 +74,10 @@ export const EnhancedMatchSlideshow = () => {
         query = query.eq("status", "live");
       } else if (slideFilter === 'today') {
         query = query.eq("status", "upcoming").eq("date", today);
+      } else if (slideFilter === 'today-a') {
+        query = query.eq("status", "upcoming").eq("date", today).eq("group_name", "A");
+      } else if (slideFilter === 'today-b') {
+        query = query.eq("status", "upcoming").eq("date", today).eq("group_name", "B");
       } else if (slideFilter === 'tomorrow') {
         query = query.eq("status", "upcoming").eq("date", tomorrow);
       } else if (slideFilter === 'today-winners-a') {
@@ -117,8 +121,12 @@ export const EnhancedMatchSlideshow = () => {
           }
         }
       } else if (slideFilter === 'winners') {
-        // Show winners from last 2 days (today and yesterday)
-        query = query.eq("status", "completed").not("winner", "is", null).or(`date.eq.${today},date.eq.${yesterday}`);
+        // Show winners from last 2 days (today and yesterday) - sorted by date descending
+        query = query
+          .eq("status", "completed")
+          .not("winner", "is", null)
+          .in("date", [today, yesterday])
+          .order("date", { ascending: false });
       } else {
         query = query.eq("status", "upcoming").neq("date", today).neq("date", tomorrow);
       }
@@ -185,6 +193,22 @@ export const EnhancedMatchSlideshow = () => {
         className={slideFilter === 'today' ? 'bg-green-600 hover:bg-green-700' : ''}
       >
         Today
+      </Button>
+      <Button
+        variant={slideFilter === 'today-a' ? 'default' : 'outline'}
+        onClick={() => setSlideFilter('today-a')}
+        size="sm"
+        className={slideFilter === 'today-a' ? 'bg-green-600 hover:bg-green-700' : ''}
+      >
+        Today A
+      </Button>
+      <Button
+        variant={slideFilter === 'today-b' ? 'default' : 'outline'}
+        onClick={() => setSlideFilter('today-b')}
+        size="sm"
+        className={slideFilter === 'today-b' ? 'bg-green-600 hover:bg-green-700' : ''}
+      >
+        Today B
       </Button>
       <Button
         variant={slideFilter === 'upcoming' ? 'default' : 'outline'}

@@ -76,14 +76,15 @@ const GroupDetail = () => {
     );
   }, [sortedTeams, leaderboardSearch]);
 
-  // Filter matches based on search - HOOK CALL
+  // Filter matches based on search AND show only completed matches - HOOK CALL
   const filteredMatches = useMemo(() => {
     return matches.filter((match) => {
       const searchLower = matchesSearch.toLowerCase();
       return (
-        match.team1_name.toLowerCase().includes(searchLower) ||
+        match.status === "completed" &&
+        (match.team1_name.toLowerCase().includes(searchLower) ||
         match.team2_name.toLowerCase().includes(searchLower) ||
-        (match.venue && match.venue.toLowerCase().includes(searchLower))
+        (match.venue && match.venue.toLowerCase().includes(searchLower)))
       );
     });
   }, [matches, matchesSearch]);
@@ -318,7 +319,7 @@ const GroupDetail = () => {
       {/* Matches List */}
       <Card className="p-4 sm:p-6 bg-gradient-to-br from-white/10 to-white/5 border-white/20 backdrop-blur">
         <div className="flex items-center justify-between mb-4 sm:mb-6 flex-wrap gap-2">
-          <h2 className="text-xl sm:text-2xl font-bold text-white">📋 All Wins Matches</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-white">🏆 Completed Matches (Wins)</h2>
           {matchesSearch && (
             <Button
               variant="ghost"
@@ -371,35 +372,13 @@ const GroupDetail = () => {
                     </div>
                   </button>
 
-                  {/* Expanded match details - Show 2 teams with 3 matches each in serial */}
+                  {/* Expanded match details */}
                   {expandedDate === date && (
-                    <div className="ml-4 pl-4 border-l-2 border-blue-400/50">
-                      {/* Get unique teams from this date's matches */}
-                      {(() => {
-                        const uniqueTeams = new Set<string>();
-                        dateMatches.forEach(m => {
-                          uniqueTeams.add(m.team1_name);
-                          uniqueTeams.add(m.team2_name);
-                        });
-                        const teamsList = Array.from(uniqueTeams).slice(0, 2);
-                        
-                        return (
-                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                            {teamsList.map((teamName) => {
-                              // Get all matches for this team, sorted by date
-                              const teamMatches = matches
-                                .filter(m => (m.team1_name === teamName || m.team2_name === teamName))
-                                .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-                                .slice(0, 3);
-                              
-                              return (
-                                <div key={teamName} className="space-y-3">
-                                  <h4 className="text-lg font-bold text-blue-400 pb-2 border-b border-blue-400/30">{teamName}</h4>
-                                  {teamMatches.map((match, idx) => {
-                                    const isTeam1 = match.team1_name === teamName;
+                    <div className="ml-4 pl-4 border-l-2 border-blue-400/50 space-y-3">
+                      {/* Display all matches from this date without duplicate grouping */}
+                      {dateMatches.map((match) => {
                                     const team1Seq = getTeamMatchSequence(match.team1_name)[match.id] || '-';
                                     const team2Seq = getTeamMatchSequence(match.team2_name)[match.id] || '-';
-                                    const currentTeamSeq = isTeam1 ? team1Seq : team2Seq;
                                     
                                     return (
                                       <div
@@ -454,12 +433,6 @@ const GroupDetail = () => {
                                       </div>
                                     );
                                   })}
-                                </div>
-                              );
-                            })}
-                          </div>
-                        );
-                      })()}
                     </div>
                   )}
                 </div>
