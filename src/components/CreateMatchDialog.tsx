@@ -337,31 +337,11 @@ export const CreateMatchDialog = ({ open, onOpenChange, onSuccess }: CreateMatch
         return;
       }
 
-      // ✅ RULE: Check if team names already exist in this group
-      const { data: existingTeams } = await supabase
-        .from('matches')
-        .select('team1_name, team2_name')
-        .eq('group_name', validatedData.groupName);
-
-      if (existingTeams && existingTeams.length > 0) {
-        const existingTeamNames = new Set<string>();
-        existingTeams.forEach(match => {
-          if (match.team1_name) existingTeamNames.add(match.team1_name.toLowerCase().trim());
-          if (match.team2_name) existingTeamNames.add(match.team2_name.toLowerCase().trim());
-        });
-
-        // Check for duplicate team names
-        if (existingTeamNames.has(validatedData.team1Name.toLowerCase().trim())) {
-          toast.error(`❌ Team "${validatedData.team1Name}" already exists in group "${validatedData.groupName}"!`);
-          setLoading(false);
-          return;
-        }
-
-        if (existingTeamNames.has(validatedData.team2Name.toLowerCase().trim())) {
-          toast.error(`❌ Team "${validatedData.team2Name}" already exists in group "${validatedData.groupName}"!`);
-          setLoading(false);
-          return;
-        }
+      // Check if team names are different from each other
+      if (validatedData.team1Name.toLowerCase().trim() === validatedData.team2Name.toLowerCase().trim()) {
+        toast.error("❌ Team 1 and Team 2 must have different names!");
+        setLoading(false);
+        return;
       }
       
       let team1Player1PhotoUrl = null;
