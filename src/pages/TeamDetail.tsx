@@ -40,9 +40,14 @@ const TeamDetail = () => {
 
   // Calculate team stats
   const calculateTeamStats = (allMatches: any[]) => {
-    const teamMatches = allMatches.filter(
-      (m) => m.team1_name === decodedTeamName || m.team2_name === decodedTeamName
-    );
+    // Normalize team name for matching (case-insensitive, trimmed)
+    const normalizedTeamName = decodedTeamName.toLowerCase().trim();
+    
+    const teamMatches = allMatches.filter((m) => {
+      const team1Normalized = (m.team1_name || "").toLowerCase().trim();
+      const team2Normalized = (m.team2_name || "").toLowerCase().trim();
+      return team1Normalized === normalizedTeamName || team2Normalized === normalizedTeamName;
+    });
 
     let wins = 0;
     let losses = 0;
@@ -53,13 +58,15 @@ const TeamDetail = () => {
     let leaderPlayer: TeamPlayer | undefined;
 
     teamMatches.forEach((match) => {
-      const isTeam1 = match.team1_name === decodedTeamName;
+      const team1Normalized = (match.team1_name || "").toLowerCase().trim();
+      const isTeam1 = team1Normalized === normalizedTeamName;
       const teamScore = isTeam1 ? match.team1_score : match.team2_score;
 
       scoreTotal += teamScore || 0;
 
       if (match.status === "completed") {
-        if (match.winner === decodedTeamName) {
+        const winnerNormalized = (match.winner || "").toLowerCase().trim();
+        if (winnerNormalized === normalizedTeamName) {
           wins++;
           winScores.push(teamScore || 0);
         } else {

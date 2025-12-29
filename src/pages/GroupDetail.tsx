@@ -29,25 +29,30 @@ const GroupDetail = () => {
   const teamStats: Record<string, TeamStats> = {};
   
   matches.forEach((m) => {
-    if (!teamStats[m.team1_name]) {
-      teamStats[m.team1_name] = { name: m.team1_name, totalScore: 0, wins: 0, losses: 0, winRate: "0%" };
+    // Normalize team names (lowercase + trimmed)
+    const team1Key = (m.team1_name || "").toLowerCase().trim();
+    const team2Key = (m.team2_name || "").toLowerCase().trim();
+    
+    if (!teamStats[team1Key]) {
+      teamStats[team1Key] = { name: m.team1_name, totalScore: 0, wins: 0, losses: 0, winRate: "0%" };
     }
-    if (!teamStats[m.team2_name]) {
-      teamStats[m.team2_name] = { name: m.team2_name, totalScore: 0, wins: 0, losses: 0, winRate: "0%" };
+    if (!teamStats[team2Key]) {
+      teamStats[team2Key] = { name: m.team2_name, totalScore: 0, wins: 0, losses: 0, winRate: "0%" };
     }
 
     // Add scores
-    teamStats[m.team1_name].totalScore += m.team1_score || 0;
-    teamStats[m.team2_name].totalScore += m.team2_score || 0;
+    teamStats[team1Key].totalScore += m.team1_score || 0;
+    teamStats[team2Key].totalScore += m.team2_score || 0;
 
     // Track wins/losses
     if (m.status === "completed") {
-      if (m.winner === m.team1_name) {
-        teamStats[m.team1_name].wins += 1;
-        teamStats[m.team2_name].losses += 1;
-      } else if (m.winner === m.team2_name) {
-        teamStats[m.team2_name].wins += 1;
-        teamStats[m.team1_name].losses += 1;
+      const winnerKey = (m.winner || "").toLowerCase().trim();
+      if (winnerKey === team1Key) {
+        teamStats[team1Key].wins += 1;
+        teamStats[team2Key].losses += 1;
+      } else if (winnerKey === team2Key) {
+        teamStats[team2Key].wins += 1;
+        teamStats[team1Key].losses += 1;
       }
     }
   });
