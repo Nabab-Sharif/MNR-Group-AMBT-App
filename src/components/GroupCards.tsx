@@ -19,8 +19,30 @@ export const GroupCards = ({ matches }: GroupCardsProps) => {
   const [selectedPlayer, setSelectedPlayer] = useState<any>(null);
   const [playerProfileOpen, setPlayerProfileOpen] = useState(false);
 
+  // Get current date
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // Separate matches: current/future first, then past matches
+  const upcomingMatches = matches.filter((match: any) => {
+    if (!match.date) return false;
+    const matchDate = new Date(match.date);
+    matchDate.setHours(0, 0, 0, 0);
+    return matchDate >= today;
+  });
+
+  const pastMatches = matches.filter((match: any) => {
+    if (!match.date) return false;
+    const matchDate = new Date(match.date);
+    matchDate.setHours(0, 0, 0, 0);
+    return matchDate < today;
+  }).reverse(); // Show most recent past matches first
+
+  // Combine: upcoming first, then past
+  const filteredMatches = [...upcomingMatches, ...pastMatches];
+
   // Group matches by group_name
-  const groupedMatches = matches.reduce((acc: any, match: any) => {
+  const groupedMatches = filteredMatches.reduce((acc: any, match: any) => {
     if (!acc[match.group_name]) {
       acc[match.group_name] = [];
     }
@@ -74,31 +96,43 @@ export const GroupCards = ({ matches }: GroupCardsProps) => {
                 <Badge variant="secondary" className="bg-cyan-600/30 border border-cyan-400/50 text-cyan-300 group-hover:bg-cyan-600/50 group-hover:border-cyan-400/80 transition-all duration-300">{groupMatches.length} Matches</Badge>
               </div>
               <div className="space-y-3">
-                {groupMatches.slice(0, 3).map((match: any) => (
-                  <div key={match.id} className="p-3 bg-white/5 hover:bg-white/15 rounded-lg space-y-2 transition-all duration-200 cursor-default border border-white/10 hover:border-cyan-400/50 hover:shadow-lg hover:shadow-cyan-500/20">
-                    <div className="flex justify-between items-center text-sm">
-                      <span className="font-semibold text-white/90 hover:text-cyan-300 transition-colors">{match.team1_name}</span>
-                      {/* <span className="text-xs text-white/50">VS</span> */}
-                      <span className="bg-gradient-to-r from-rose-500 to-pink-500 text-white font-bold text-sm sm:text-base md:text-lg px-3 sm:px-4 py-1 sm:py-1.5 rounded-lg shadow-lg hover:shadow-xl hover:from-rose-600 hover:to-pink-600 transition-all">
-                        VS
-                      </span>
-                      <span className="font-semibold text-white/90 hover:text-cyan-300 transition-colors">{match.team2_name}</span>
-                    </div>
-                    <div className="flex justify-between items-center text-xs text-white/60 mb-2">
-                      <span>{match.date}</span>
-                      <Badge variant={
-                        match.status === 'live' ? 'destructive' :
-                          match.status === 'completed' ? 'default' :
-                            'secondary'
-                      } className="text-xs bg-white/10 border border-white/20 text-white/80">
-                        {getDisplayStatus(match)}
-                      </Badge>
-                    </div>
+                {groupMatches.slice(0, 6).map((match: any, index: number) => {
+                  // Define different colored borders for each match
+                  const borderColors = [
+                    'hover:border-cyan-400/80 hover:shadow-cyan-500/30',
+                    'hover:border-blue-400/80 hover:shadow-blue-500/30',
+                    'hover:border-purple-400/80 hover:shadow-purple-500/30',
+                    'hover:border-pink-400/80 hover:shadow-pink-500/30',
+                    'hover:border-green-400/80 hover:shadow-green-500/30',
+                    'hover:border-yellow-400/80 hover:shadow-yellow-500/30'
+                  ];
+                  const borderColor = borderColors[index % borderColors.length];
 
-                    {/* Player chips - clickable for profile */}
-                    <div className="flex gap-2 items-center justify-between">
-                      <div className="flex items-center gap-1">
-                        <div
+                  return (
+                    <div key={match.id} className={`p-3 bg-white/5 hover:bg-white/15 rounded-lg space-y-2 transition-all duration-200 cursor-default border border-white/10 ${borderColor} hover:shadow-lg`}>
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="font-semibold text-white/90 hover:text-cyan-300 transition-colors">{match.team1_name}</span>
+                        {/* <span className="text-xs text-white/50">VS</span> */}
+                        <span className="bg-gradient-to-r from-rose-500 to-pink-500 text-white font-bold text-sm sm:text-base md:text-lg px-3 sm:px-4 py-1 sm:py-1.5 rounded-lg shadow-lg hover:shadow-xl hover:from-rose-600 hover:to-pink-600 transition-all">
+                          VS
+                        </span>
+                        <span className="font-semibold text-white/90 hover:text-cyan-300 transition-colors">{match.team2_name}</span>
+                      </div>
+                      <div className="flex justify-between items-center text-xs text-white/60 mb-2">
+                        <span>{match.date}</span>
+                        <Badge variant={
+                          match.status === 'live' ? 'destructive' :
+                            match.status === 'completed' ? 'default' :
+                              'secondary'
+                        } className="text-xs bg-white/10 border border-white/20 text-white/80">
+                          {getDisplayStatus(match)}
+                        </Badge>
+                      </div>
+
+                      {/* Player chips - clickable for profile */}
+                      <div className="flex gap-2 items-center justify-between">
+                        <div className="flex items-center gap-1">
+                          <div
                           onClick={(e) => {
                             e.stopPropagation();
                             handlePlayerClick({
@@ -177,65 +211,13 @@ export const GroupCards = ({ matches }: GroupCardsProps) => {
                         )}
                       </div>
                     </div>
+                    </div>
                   </div>
-
-                  {/* Status Filter Buttons */}
-                  {/* <div className="flex gap-1 flex-wrap">
-                    <Button
-                      size="sm"
-                      variant={getDisplayStatus(match) === 'upcoming' ? 'default' : 'outline'}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        updateMatchStatus(match.id, 'upcoming');
-                        window.dispatchEvent(new CustomEvent('open-slideshow', { detail: { filter: 'upcoming', group: groupName } }));
-                      }}
-                      className="text-xs h-6"
-                    >
-                      Upcoming
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant={getDisplayStatus(match) === 'today' ? 'default' : 'outline'}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        updateMatchStatus(match.id, 'today');
-                        window.dispatchEvent(new CustomEvent('open-slideshow', { detail: { filter: 'today', group: groupName } }));
-                      }}
-                      className="text-xs h-6"
-                    >
-                      Today
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant={getDisplayStatus(match) === 'tomorrow' ? 'default' : 'outline'}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        updateMatchStatus(match.id, 'tomorrow');
-                        window.dispatchEvent(new CustomEvent('open-slideshow', { detail: { filter: 'tomorrow', group: groupName } }));
-                      }}
-                      className="text-xs h-6"
-                    >
-                      Tomorrow
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant={match.status === 'live' ? 'default' : 'outline'}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        updateMatchStatus(match.id, 'live');
-                      }}
-                      className="text-xs h-6"
-                    >
-                      Live
-                    </Button>
-                  </div> */}
-
-
-                </div>
-              ))}
-              {groupMatches.length > 3 && (
+                  );
+                })}
+              {groupMatches.length > 6 && (
                 <p className="text-xs text-center text-white/60 mt-3">
-                  +{groupMatches.length - 3} more matches
+                  +{groupMatches.length - 6} more matches
                 </p>
               )}
             </div>
