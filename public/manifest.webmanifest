@@ -1,7 +1,7 @@
 {
-    "name": "Anish Memorial Badminton Tournament",
+    "name": "Anis Memorial Badminton Tournament",
     "short_name": "Badminton",
-    "description": "Official tournament management system for Anish Memorial Badminton Tournament 2025-2026 organized by MNR Group",
+    "description": "Official tournament management system for Anis Memorial Badminton Tournament 2025-2026 organized by MNR Group",
     "start_url": "/",
     "scope": "/",
     "display": "standalone",

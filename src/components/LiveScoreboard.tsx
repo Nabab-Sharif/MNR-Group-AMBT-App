@@ -495,7 +495,7 @@ export const LiveScoreboard = ({ match, isAdmin = false, onFullscreen, onWin, on
         {/* Header */}
         <div className="bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-400 text-center py-2 sm:py-3">
           <h1 className="text-slate-900 font-bold text-xs sm:text-sm md:text-base lg:text-lg tracking-wide">
-            🏸 ANISH MEMORIAL BADMINTON TOURNAMENT 2025-2026 🏸
+            🏸 ANIS MEMORIAL BADMINTON TOURNAMENT 2025-2026 🏸
           </h1>
         </div>
         
@@ -714,7 +714,7 @@ export const LiveScoreboard = ({ match, isAdmin = false, onFullscreen, onWin, on
                 {/* Header */}
                 <div className="bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-400 text-center py-3 sm:py-4">
                   <h1 className="text-slate-900 font-bold text-base sm:text-lg md:text-xl lg:text-2xl tracking-wide">
-                    🏸 ANISH MEMORIAL BADMINTON TOURNAMENT 2025-2026 🏸
+                    🏸 ANIS MEMORIAL BADMINTON TOURNAMENT 2025-2026 🏸
                   </h1>
                 </div>
                 

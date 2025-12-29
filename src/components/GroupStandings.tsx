@@ -215,12 +215,18 @@ const GroupStandings = ({ matches, groupName }: GroupStandingsProps) => {
           <div 
             key={team.teamName}
             onClick={() => navigate(`/team/${encodeURIComponent(groupName || '')}/${encodeURIComponent(team.teamName)}`)}
-            className="cursor-pointer group flex flex-col active:scale-95 transition-transform duration-150"
+            className="cursor-pointer group flex flex-col active:scale-95 transition-transform duration-150 relative"
           >
-            {/* Card with Hover Effects - RESPONSIVE */}
-            <div className="relative p-3 sm:p-4 lg:p-6 bg-gradient-to-br from-blue-600/20 to-purple-600/20 border border-blue-500/30 rounded-lg sm:rounded-xl backdrop-blur transition-all duration-300 hover:border-blue-400/80 hover:bg-gradient-to-br hover:from-blue-600/40 hover:to-purple-600/40 hover:shadow-2xl hover:shadow-blue-500/30 group-hover:scale-105 group-hover:-translate-y-2 group-active:scale-100 group-active:shadow-xl group-active:shadow-blue-500/50 min-h-auto flex flex-col">
+            {/* Decorative background elements */}
+            <div className="absolute inset-0 overflow-hidden rounded-lg sm:rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <div className="absolute -top-40 -right-40 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl"></div>
+              <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl"></div>
+            </div>
+
+            {/* Card with Footer-inspired Design */}
+            <div className="relative p-3 sm:p-4 lg:p-6 bg-gradient-to-r from-slate-950 via-purple-950 to-slate-950 border border-white/10 rounded-lg sm:rounded-xl backdrop-blur transition-all duration-300 hover:border-cyan-400/80 hover:shadow-lg hover:shadow-cyan-500/30 group-hover:bg-gradient-to-r group-hover:from-slate-900 group-hover:via-purple-900 group-hover:to-slate-900 min-h-auto flex flex-col">
               
-              {/* Team Leader Picture - Top Left - ENHANCED */}
+              {/* Team Leader Picture - Top Left */}
               <div className="absolute top-1 sm:top-2 left-1 sm:left-2 z-20">
                 <div
                   onClick={(e) => {
@@ -232,16 +238,16 @@ const GroupStandings = ({ matches, groupName }: GroupStandingsProps) => {
                   className="cursor-pointer hover:scale-110 transition-transform"
                   title={team.leaderPlayer?.name || 'Team Leader'}
                 >
-                  <Avatar className="w-10 h-10 sm:w-14 sm:h-14 lg:w-16 lg:h-16 border-2 sm:border-4 border-blue-400/60 shadow-lg shadow-blue-500/30 hover:ring-4 hover:ring-yellow-300 transition-all">
+                  <Avatar className="w-10 h-10 sm:w-14 sm:h-14 lg:w-16 lg:h-16 border-2 sm:border-4 border-cyan-400/60 shadow-lg shadow-cyan-500/30 hover:ring-4 hover:ring-yellow-300 transition-all">
                     <AvatarImage src={team.leaderPlayer?.photo || ""} alt={team.leaderPlayer?.name || "Leader"} />
-                    <AvatarFallback className="bg-gradient-to-br from-blue-600 to-purple-600 text-white font-bold text-xs sm:text-sm">
+                    <AvatarFallback className="bg-gradient-to-br from-cyan-600 to-purple-600 text-white font-bold text-xs sm:text-sm">
                       {team.leaderPlayer?.name?.charAt(0) || "T"}
                     </AvatarFallback>
                   </Avatar>
                 </div>
               </div>
 
-              {/* Rank Number Badge - Right Side - ENHANCED */}
+              {/* Rank Number Badge - Right Side */}
               <div 
                 className="ranking-badge-3d absolute top-1 sm:top-2 right-1 sm:right-2 w-10 h-10 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-full flex items-center justify-center text-white font-extrabold text-lg sm:text-xl lg:text-2xl border-2 sm:border-3 border-yellow-300/50 shadow-lg shadow-yellow-500/30 cursor-pointer transition-all duration-300 hover:scale-125 hover:ring-4 hover:ring-yellow-300 hover:shadow-2xl hover:shadow-yellow-500/50 active:scale-110 z-10 bg-gradient-to-br from-yellow-500/40 to-orange-500/40"
                 style={{ transformStyle: "preserve-3d" }}
@@ -253,16 +259,16 @@ const GroupStandings = ({ matches, groupName }: GroupStandingsProps) => {
               {/* Team Header - Adjusted for Side Badges - RESPONSIVE */}
               <div className="flex items-center justify-between mb-2 sm:mb-3 lg:mb-4 pt-1 sm:pt-2 relative z-0 px-1 sm:px-2">
                 <div className="flex-1 min-w-0 ml-10 sm:ml-14 lg:ml-16">
-                  <h3 className="text-sm sm:text-base lg:text-lg xl:text-xl font-bold text-white group-hover:text-yellow-300 transition-colors truncate">{team.teamName}</h3>
+                  <h3 className="text-sm sm:text-base lg:text-lg xl:text-xl font-bold text-white group-hover:text-cyan-300 transition-colors truncate">{team.teamName}</h3>
                   <p className="text-white/60 text-xs sm:text-sm">{team.wins + team.losses} matches</p>
                 </div>
               </div>
 
               {/* Win Points Display - NEW */}
-              <div className="px-2 sm:px-3 py-1 sm:py-2 mb-2 bg-amber-500/20 rounded-lg border border-amber-500/30 group-hover:bg-amber-500/30 transition-all">
+              <div className="px-2 sm:px-3 py-1 sm:py-2 mb-2 bg-cyan-600/20 rounded-lg border border-cyan-500/30 group-hover:bg-cyan-600/40 group-hover:border-cyan-400/60 transition-all duration-300">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-white/70 text-xs sm:text-sm font-semibold">🎯 Total Wins Points</span>
-                  <span className="text-base sm:text-lg lg:text-xl font-extrabold text-amber-300">{team.winPoints}</span>
+                  <span className="text-white/70 text-xs sm:text-sm font-semibold">🎯 Total Wins</span>
+                  <span className="text-base sm:text-lg lg:text-xl font-extrabold text-cyan-300 group-hover:text-cyan-200 transition-colors">{team.winPoints}</span>
                 </div>
               </div>
 
@@ -270,16 +276,16 @@ const GroupStandings = ({ matches, groupName }: GroupStandingsProps) => {
               <div className="grid grid-cols-2 gap-1 sm:gap-2 lg:gap-3 mb-2 sm:mb-3 lg:mb-4 flex-grow">
                 {/* Wins */}
                 <div 
-                  className="p-2 sm:p-3 bg-green-500/20 rounded-lg border border-green-500/30 group-hover:bg-green-500/30 transition-all">
+                  className="p-2 sm:p-3 bg-green-500/20 rounded-lg border border-green-500/30 group-hover:bg-green-500/40 group-hover:border-green-400/60 transition-all duration-300 hover:scale-105">
                   <div className="text-white/70 text-xs sm:text-sm font-semibold">Wins</div>
-                  <div className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-extrabold text-green-400">{team.wins}</div>
+                  <div className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-extrabold text-green-400 group-hover:text-green-300 transition-colors">{team.wins}</div>
                 </div>
 
                 {/* Losses */}
                 <div 
-                  className="p-2 sm:p-3 bg-red-500/20 rounded-lg border border-red-500/30 group-hover:bg-red-500/30 transition-all">
+                  className="p-2 sm:p-3 bg-red-500/20 rounded-lg border border-red-500/30 group-hover:bg-red-500/40 group-hover:border-red-400/60 transition-all duration-300 hover:scale-105">
                   <div className="text-white/70 text-xs sm:text-sm font-semibold">Losses</div>
-                  <div className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-extrabold text-red-400">{team.losses}</div>
+                  <div className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-extrabold text-red-400 group-hover:text-red-300 transition-colors">{team.losses}</div>
                 </div>
 
                 {/* Score Total - Clickable */}

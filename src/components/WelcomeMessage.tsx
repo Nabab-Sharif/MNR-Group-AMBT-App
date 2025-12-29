@@ -81,7 +81,7 @@ export const WelcomeMessage = ({ match, onClose }: WelcomeMessageProps) => {
             🎉 Welcome! 🎉
           </h1>
           <h2 className="text-2xl sm:text-4xl font-bold text-yellow-400 mt-2">
-            Anish Memorial Badminton Tournament
+            Anis Memorial Badminton Tournament
           </h2>
           <p className="text-white/80 text-base sm:text-lg mt-1">
             Organized by MNR Group

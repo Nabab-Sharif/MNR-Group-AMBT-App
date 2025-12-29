@@ -259,7 +259,7 @@ export const AdminDashboard = ({ session }: AdminDashboardProps) => {
             <div className="flex items-center gap-4">
               <img src={logo} alt="Logo" className="h-12 w-12 rounded-full" />
               <div>
-                <h1 className="text-3xl font-bold">Anish Memorial Badminton Tournament</h1>
+                <h1 className="text-3xl font-bold">Anis Memorial Badminton Tournament</h1>
                 <p className="text-lg text-muted-foreground">Admin Control Panel</p>
               </div>
             </div>

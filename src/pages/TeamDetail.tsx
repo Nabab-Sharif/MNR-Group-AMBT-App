@@ -180,26 +180,39 @@ const TeamDetail = () => {
   }, [decodedGroupName]);
 
   const teamMatches = useMemo(
-    () =>
-      matches.filter(
-        (m) => m.team1_name === decodedTeamName || m.team2_name === decodedTeamName
-      ),
+    () => {
+      const normalizedTeamName = decodedTeamName.toLowerCase().trim();
+      return matches.filter((m) => {
+        const team1Normalized = (m.team1_name || "").toLowerCase().trim();
+        const team2Normalized = (m.team2_name || "").toLowerCase().trim();
+        return team1Normalized === normalizedTeamName || team2Normalized === normalizedTeamName;
+      });
+    },
     [matches, decodedTeamName]
   );
 
   const winMatches = useMemo(
-    () => teamMatches.filter((m) => m.winner === decodedTeamName && m.status === "completed"),
+    () => {
+      const normalizedTeamName = decodedTeamName.toLowerCase().trim();
+      return teamMatches.filter((m) => {
+        const winnerNormalized = (m.winner || "").toLowerCase().trim();
+        return winnerNormalized === normalizedTeamName && m.status === "completed";
+      });
+    },
     [teamMatches, decodedTeamName]
   );
 
   const lossMatches = useMemo(
-    () =>
-      teamMatches.filter(
-        (m) =>
-          m.winner !== decodedTeamName &&
-          m.status === "completed" &&
-          (m.team1_name === decodedTeamName || m.team2_name === decodedTeamName)
-      ),
+    () => {
+      const normalizedTeamName = decodedTeamName.toLowerCase().trim();
+      return teamMatches.filter((m) => {
+        const winnerNormalized = (m.winner || "").toLowerCase().trim();
+        return (
+          winnerNormalized !== normalizedTeamName &&
+          m.status === "completed"
+        );
+      });
+    },
     [teamMatches, decodedTeamName]
   );
 

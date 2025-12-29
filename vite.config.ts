@@ -19,7 +19,7 @@ export default defineConfig(({ mode }) => ({
       manifest: {
         name: 'AMBT',
         short_name: 'Badminton',
-        description: 'Official tournament management system for Anish Memorial Badminton Tournament 2025-2026',
+        description: 'Official tournament management system for Anis Memorial Badminton Tournament 2025-2026',
         theme_color: '#0f172a',
         background_color: '#0f172a',
         display: 'standalone',

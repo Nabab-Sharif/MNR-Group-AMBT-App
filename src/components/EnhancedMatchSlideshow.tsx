@@ -433,7 +433,7 @@ export const EnhancedMatchSlideshow = () => {
         <div className="flex items-center justify-between px-3 sm:px-4 md:px-8 py-2 sm:py-3 md:py-4 border-b border-white/10">
           <div className="flex items-center gap-2 sm:gap-3">
             <img src={logo} alt="Logo" className="w-7 h-7 sm:w-9 sm:h-9 md:w-12 md:h-12 rounded-full border-2 border-white/30" />
-            <span className="text-white font-bold text-xs sm:text-sm md:text-lg truncate">Anish Memorial Badminton Tournament</span>
+            <span className="text-white font-bold text-xs sm:text-sm md:text-lg truncate">Anis Memorial Badminton Tournament</span>
           </div>
           <div className="flex items-center gap-2 text-white/70 text-xs sm:text-sm">
             <span className="hidden sm:inline">Welcome</span>

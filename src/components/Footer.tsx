@@ -65,7 +65,7 @@ export const Footer = () => {
             {/* Copyright Info */}
             <div className="text-center pt-4 border-t border-white/10">
               <p className="text-xs sm:text-sm text-white/50">
-                © {currentYear} Anish Memorial Badminton Tournament. All rights reserved. | Organized by <span className="text-cyan-400 font-semibold">MNR Group</span>
+                © {currentYear} Anis Memorial Badminton Tournament. All rights reserved. | Organized by <span className="text-cyan-400 font-semibold">MNR Group</span>
               </p>
             </div>
           </div>

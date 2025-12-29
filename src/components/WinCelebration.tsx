@@ -197,7 +197,7 @@ export const WinCelebration = ({ match, onClose }: WinCelebrationProps) => {
       <div className="relative text-center space-y-4 sm:space-y-6 animate-celebration-entrance max-w-7xl w-full mx-auto px-2 sm:px-4" ref={contentRef} style={{ transformStyle: 'preserve-3d' }}>
         {/* Tournament Header - Larger */}
         <div className="bg-gradient-to-r from-cyan-600 via-purple-600 to-cyan-600 rounded-2xl px-6 py-4 sm:py-5 animate-fade-in shadow-lg border-2 border-white/30">
-          <div className="text-white text-sm sm:text-base md:text-lg font-bold tracking-wide">ANISH MEMORIAL BADMINTON TOURNAMENT</div>
+          <div className="text-white text-sm sm:text-base md:text-lg font-bold tracking-wide">ANIS MEMORIAL BADMINTON TOURNAMENT</div>
           <div className="text-white/90 text-xs sm:text-sm md:text-base mt-1">2025-2026 • Organized by MNR Group</div>
         </div>
 

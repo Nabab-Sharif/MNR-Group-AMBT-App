@@ -150,7 +150,7 @@ const Home = () => {
           <div className="flex items-center gap-4">
             <img src={logo} alt="MNR Group" className="h-12 w-12 rounded-full animate-logo-float animate-logo-glow" />
             <div>
-              <h1 className="text-2xl font-bold">Anish Memorial Badminton Tournament</h1>
+              <h1 className="text-2xl font-bold">Anis Memorial Badminton Tournament</h1>
               <p className="text-sm text-muted-foreground">2025-2026 • Organized by MNR Group</p>
             </div>
           </div>
