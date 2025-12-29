@@ -42,6 +42,8 @@ export const EnhancedMatchSlideshow = () => {
   const [winnerDate, setWinnerDate] = useState<string | null>(null);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const [todayDataExists, setTodayDataExists] = useState(false);
+  const [todayUpcomingData, setTodayUpcomingData] = useState<Match[]>([]);
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -58,6 +60,47 @@ export const EnhancedMatchSlideshow = () => {
     window.addEventListener('open-slideshow', handler as EventListener);
     return () => window.removeEventListener('open-slideshow', handler as EventListener);
   }, []);
+
+  // Check if today has any upcoming matches or any completed matches
+  useEffect(() => {
+    const checkTodayData = async () => {
+      const today = new Date().toISOString().split('T')[0];
+      
+      // Get today's upcoming matches
+      const { data: upcomingData } = await supabase
+        .from("matches")
+        .select("*")
+        .eq("status", "upcoming")
+        .eq("date", today);
+      
+      // Get today's completed matches
+      const { data: completedData } = await supabase
+        .from("matches")
+        .select("*")
+        .eq("status", "completed")
+        .eq("date", today);
+      
+      const hasUpcoming = upcomingData && upcomingData.length > 0;
+      const hasCompleted = completedData && completedData.length > 0;
+      const hasAnyToday = hasUpcoming || hasCompleted;
+      
+      setTodayDataExists(hasAnyToday);
+      setTodayUpcomingData(upcomingData || []);
+      
+      // Only auto-switch if user is on 'today' filter and no data exists
+      if (!hasAnyToday && slideFilter === 'today') {
+        setSlideFilter('today-winners-a');
+      } else if (hasCompleted && !hasUpcoming && slideFilter === 'today') {
+        // All today matches completed - auto-switch to winners
+        setSlideFilter('today-winners-a');
+      }
+    };
+    
+    checkTodayData();
+    
+    const interval = setInterval(checkTodayData, 5000); // Check every 5 seconds
+    return () => clearInterval(interval);
+  }, [slideFilter]);
 
   useEffect(() => {
     const fetchSlides = async () => {
@@ -186,14 +229,16 @@ export const EnhancedMatchSlideshow = () => {
 
   const filterButtons = (
     <div className="flex gap-2 justify-center mb-4 flex-wrap">
-      <Button
-        variant={slideFilter === 'today' ? 'default' : 'outline'}
-        onClick={() => setSlideFilter('today')}
-        size="sm"
-        className={slideFilter === 'today' ? 'bg-green-600 hover:bg-green-700' : ''}
-      >
-        Today
-      </Button>
+      {todayDataExists && (
+        <Button
+          variant={slideFilter === 'today' ? 'default' : 'outline'}
+          onClick={() => setSlideFilter('today')}
+          size="sm"
+          className={slideFilter === 'today' ? 'bg-green-600 hover:bg-green-700' : ''}
+        >
+          Today
+        </Button>
+      )}
       <Button
         variant={slideFilter === 'today-a' ? 'default' : 'outline'}
         onClick={() => setSlideFilter('today-a')}

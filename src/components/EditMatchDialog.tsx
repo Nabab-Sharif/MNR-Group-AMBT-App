@@ -117,6 +117,45 @@ export const EditMatchDialog = ({ open, onOpenChange, onSuccess, match }: EditMa
     setLoading(true);
 
     try {
+      // ✅ RULE: Team names must be different
+      if (formData.team1Name.trim().toLowerCase() === formData.team2Name.trim().toLowerCase()) {
+        toast.error("❌ Team names must be different!");
+        setLoading(false);
+        return;
+      }
+
+      // ✅ RULE: Check if team names conflict with existing teams (excluding current match)
+      const { data: existingTeams } = await supabase
+        .from('matches')
+        .select('team1_name, team2_name')
+        .eq('group_name', formData.groupName)
+        .neq('id', match.id);
+
+      if (existingTeams && existingTeams.length > 0) {
+        const existingTeamNames = new Set<string>();
+        existingTeams.forEach(m => {
+          if (m.team1_name) existingTeamNames.add(m.team1_name.toLowerCase().trim());
+          if (m.team2_name) existingTeamNames.add(m.team2_name.toLowerCase().trim());
+        });
+
+        // Check if new names conflict (allow keeping original names)
+        if (formData.team1Name.trim().toLowerCase() !== match.team1_name?.toLowerCase()) {
+          if (existingTeamNames.has(formData.team1Name.trim().toLowerCase())) {
+            toast.error(`❌ Team "${formData.team1Name}" already exists!`);
+            setLoading(false);
+            return;
+          }
+        }
+
+        if (formData.team2Name.trim().toLowerCase() !== match.team2_name?.toLowerCase()) {
+          if (existingTeamNames.has(formData.team2Name.trim().toLowerCase())) {
+            toast.error(`❌ Team "${formData.team2Name}" already exists!`);
+            setLoading(false);
+            return;
+          }
+        }
+      }
+
       let team1Player1PhotoUrl = match.team1_player1_photo;
       let team1Player2PhotoUrl = match.team1_player2_photo;
       let team2Player1PhotoUrl = match.team2_player1_photo;

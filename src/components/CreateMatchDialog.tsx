@@ -330,6 +330,40 @@ export const CreateMatchDialog = ({ open, onOpenChange, onSuccess }: CreateMatch
     try {
       const validatedData = matchSchema.parse(formData);
       
+      // ✅ RULE: Team names must be different
+      if (validatedData.team1Name.trim().toLowerCase() === validatedData.team2Name.trim().toLowerCase()) {
+        toast.error("❌ Team names must be different!");
+        setLoading(false);
+        return;
+      }
+
+      // ✅ RULE: Check if team names already exist in this group
+      const { data: existingTeams } = await supabase
+        .from('matches')
+        .select('team1_name, team2_name')
+        .eq('group_name', validatedData.groupName);
+
+      if (existingTeams && existingTeams.length > 0) {
+        const existingTeamNames = new Set<string>();
+        existingTeams.forEach(match => {
+          if (match.team1_name) existingTeamNames.add(match.team1_name.toLowerCase().trim());
+          if (match.team2_name) existingTeamNames.add(match.team2_name.toLowerCase().trim());
+        });
+
+        // Check for duplicate team names
+        if (existingTeamNames.has(validatedData.team1Name.toLowerCase().trim())) {
+          toast.error(`❌ Team "${validatedData.team1Name}" already exists in group "${validatedData.groupName}"!`);
+          setLoading(false);
+          return;
+        }
+
+        if (existingTeamNames.has(validatedData.team2Name.toLowerCase().trim())) {
+          toast.error(`❌ Team "${validatedData.team2Name}" already exists in group "${validatedData.groupName}"!`);
+          setLoading(false);
+          return;
+        }
+      }
+      
       let team1Player1PhotoUrl = null;
       let team1Player2PhotoUrl = null;
       let team2Player1PhotoUrl = null;
@@ -448,11 +482,15 @@ export const CreateMatchDialog = ({ open, onOpenChange, onSuccess }: CreateMatch
           const slideTitle = `${validatedData.team1Name} vs ${validatedData.team2Name}`;
           const slideDescription = `Match #${match.match_number} • ${validatedData.groupName} • ${validatedData.date}`;
           
+          // Win slides get lower order index (negative) so they appear first
+          // Upcoming match slides get normal positive order index
+          const slideOrderIndex = -1000 - i; // Negative index = high priority (appears first)
+          
           await supabase.from('home_slides').insert({
             title: slideTitle,
             description: slideDescription,
             image_url: team1Player1PhotoUrl || team2Player1PhotoUrl || null,
-            order_index: nextOrderIndex + i
+            order_index: slideOrderIndex
           });
         }
       }

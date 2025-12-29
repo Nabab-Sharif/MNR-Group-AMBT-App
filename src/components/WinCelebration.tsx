@@ -101,7 +101,7 @@ export const WinCelebration = ({ match, onClose }: WinCelebrationProps) => {
     player1: match.team1_player1_name,
     player2: match.team1_player2_name,
     player1Photo: match.team1_player1_photo,
-    player2Photo: match.team2_player2_photo,
+    player2Photo: match.team1_player2_photo,
     score: match.team1_score || 15,
   } : {
     name: match.team2_name,
