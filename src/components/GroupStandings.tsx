@@ -49,88 +49,97 @@ const GroupStandings = ({ matches, groupName }: GroupStandingsProps) => {
       winScores: number[];
       loseScores: number[];
       players: Map<string, { name: string; photo?: string | null }>;
+      originalName: string;
     }
   > = {};
 
   // Process all matches
   matches.forEach((match) => {
+    // Normalize team names for grouping (lowercase + trimmed)
+    const team1Key = match.team1_name?.toLowerCase().trim() || "";
+    const team2Key = match.team2_name?.toLowerCase().trim() || "";
+
     // Initialize team stats if not exist
-    if (!teamStats[match.team1_name]) {
-      teamStats[match.team1_name] = {
+    if (!teamStats[team1Key]) {
+      teamStats[team1Key] = {
         wins: 0,
         losses: 0,
         scoreTotal: 0,
         winScores: [],
         loseScores: [],
         players: new Map(),
+        originalName: match.team1_name,
       };
     }
-    if (!teamStats[match.team2_name]) {
-      teamStats[match.team2_name] = {
+    if (!teamStats[team2Key]) {
+      teamStats[team2Key] = {
         wins: 0,
         losses: 0,
         scoreTotal: 0,
         winScores: [],
         loseScores: [],
         players: new Map(),
+        originalName: match.team2_name,
       };
     }
 
     // Add players to team
     if (match.team1_player1_name) {
-      teamStats[match.team1_name].players.set(match.team1_player1_name, {
+      teamStats[team1Key].players.set(match.team1_player1_name, {
         name: match.team1_player1_name,
         photo: match.team1_player1_photo,
       });
     }
     if (match.team1_player2_name) {
-      teamStats[match.team1_name].players.set(match.team1_player2_name, {
+      teamStats[team1Key].players.set(match.team1_player2_name, {
         name: match.team1_player2_name,
         photo: match.team1_player2_photo,
       });
     }
     if (match.team2_player1_name) {
-      teamStats[match.team2_name].players.set(match.team2_player1_name, {
+      teamStats[team2Key].players.set(match.team2_player1_name, {
         name: match.team2_player1_name,
         photo: match.team2_player1_photo,
       });
     }
     if (match.team2_player2_name) {
-      teamStats[match.team2_name].players.set(match.team2_player2_name, {
+      teamStats[team2Key].players.set(match.team2_player2_name, {
         name: match.team2_player2_name,
         photo: match.team2_player2_photo,
       });
     }
 
-    // Update scores and wins/losses
-    teamStats[match.team1_name].scoreTotal += match.team1_score || 0;
-    teamStats[match.team2_name].scoreTotal += match.team2_score || 0;
+    // Update scores and wins/losses using normalized keys
+    teamStats[team1Key].scoreTotal += match.team1_score || 0;
+    teamStats[team2Key].scoreTotal += match.team2_score || 0;
 
     if (match.status === "completed" && match.winner) {
-      if (match.winner === match.team1_name) {
-        teamStats[match.team1_name].wins += 1;
-        teamStats[match.team1_name].winScores.push(match.team1_score || 0);
-        teamStats[match.team2_name].losses += 1;
-        teamStats[match.team2_name].loseScores.push(match.team2_score || 0);
-      } else {
-        teamStats[match.team2_name].wins += 1;
-        teamStats[match.team2_name].winScores.push(match.team2_score || 0);
-        teamStats[match.team1_name].losses += 1;
-        teamStats[match.team1_name].loseScores.push(match.team1_score || 0);
+      const winnerKey = match.winner?.toLowerCase().trim() || "";
+      
+      if (winnerKey === team1Key) {
+        teamStats[team1Key].wins += 1;
+        teamStats[team1Key].winScores.push(match.team1_score || 0);
+        teamStats[team2Key].losses += 1;
+        teamStats[team2Key].loseScores.push(match.team2_score || 0);
+      } else if (winnerKey === team2Key) {
+        teamStats[team2Key].wins += 1;
+        teamStats[team2Key].winScores.push(match.team2_score || 0);
+        teamStats[team1Key].losses += 1;
+        teamStats[team1Key].loseScores.push(match.team1_score || 0);
       }
     }
   });
 
   // Convert to array and sort by wins, win points, lose score, and total score
   const standings: TeamStanding[] = Object.entries(teamStats)
-    .map(([teamName, stats]) => {
+    .map(([_, stats]) => {
       const players = Array.from(stats.players.values());
       const winPoints = stats.wins; // Win Points = Total number of wins
       const loseScore = stats.loseScores.reduce((a, b) => a + b, 0);
       const averageWinScore = stats.wins > 0 ? stats.winScores.reduce((a, b) => a + b, 0) / stats.wins : 0;
       
       return {
-        teamName,
+        teamName: stats.originalName,
         wins: stats.wins,
         losses: stats.losses,
         scoreTotal: stats.scoreTotal,
