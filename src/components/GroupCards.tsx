@@ -164,7 +164,7 @@ export const GroupCards = ({ matches }: GroupCardsProps) => {
                 <h3 className="text-2xl font-bold text-primary group-hover:text-primary/80 transition-all duration-300">
                   {groupName}
                 </h3>
-                <Badge variant="secondary" className="bg-cyan-600/30 border border-cyan-400/50 text-cyan-300 group-hover:bg-cyan-600/50 group-hover:border-cyan-400/80 transition-all duration-300">{groupMatches.length} Sets</Badge>
+                <Badge variant="secondary" className="bg-cyan-600/30 border border-cyan-400/50 text-cyan-300 group-hover:bg-cyan-600/50 group-hover:border-cyan-400/80 transition-all duration-300">Total Group Sets: {groupMatches.length} </Badge>
               </div>
               <div className="space-y-3">
                 {groupMatches.slice(0, 6).map((match: any, index: number) => {

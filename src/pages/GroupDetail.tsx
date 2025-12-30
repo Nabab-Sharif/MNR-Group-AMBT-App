@@ -227,7 +227,7 @@ const GroupDetail = () => {
           </div>
         </div>
         <Badge className="bg-gradient-to-r from-primary to-accent text-primary-foreground px-4 py-2 text-lg">
-          {matches.length} Sets
+         Total Group Sets: {matches.length} 
         </Badge>
       </div>
 
@@ -241,7 +241,7 @@ const GroupDetail = () => {
           <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-3 sm:mb-4">📊 Statistics</h2>
           <div className="space-y-2 sm:space-y-3">
             <div className="p-2 sm:p-3 bg-primary/10 rounded-lg border border-primary/20">
-              <div className="text-muted-foreground text-xs sm:text-sm">Total Sets</div>
+              <div className="text-muted-foreground text-xs sm:text-sm">Total Group Sets</div>
               <div className="text-2xl sm:text-4xl font-extrabold text-primary">{matches.length}</div>
             </div>
             <div className="p-2 sm:p-3 bg-primary/10 rounded-lg border border-primary/20">
@@ -308,7 +308,7 @@ const GroupDetail = () => {
                   {team.wins + team.losses > 0 && <span>📋Total Match: <span className="text-amber-300 font-bold">{Math.ceil((team.wins + team.losses) / 3)}</span></span>}
                   <span>🎯Total Wins Points: <span className="text-green-400 font-bold">{team.wins}</span></span>
                   <span>🏅 Total Win Sets: <span className="text-amber-400 font-bold">{team.wins}</span></span>
-                  <span>❌ Loss Sets: <span className="text-red-400 font-bold">{team.losses}</span></span>
+                  <span>❌ Total Loss Sets: <span className="text-red-400 font-bold">{team.losses}</span></span>
                   <span>📊 {team.winRate}</span>
                 </div>
               </div>
@@ -326,7 +326,7 @@ const GroupDetail = () => {
       {/* Matches List */}
       <Card className="p-4 sm:p-6 bg-gradient-to-br from-white/10 to-white/5 border-white/20 backdrop-blur">
         <div className="flex items-center justify-between mb-4 sm:mb-6 flex-wrap gap-2">
-          <h2 className="text-xl sm:text-2xl font-bold text-white">🏆 Completed Sets (Wins)</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-white">🏆 Completed Group Sets</h2>
           {matchesSearch && (
             <Button
               variant="ghost"
@@ -454,12 +454,12 @@ const GroupDetail = () => {
       </Card>
 
       {/* Back Button */}
-      <div className="mt-8 text-center">
+      <div className="mt-8 mb-8 text-center">
         <Button
           onClick={() => navigate("/")}
           className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-3 rounded-lg font-bold text-lg"
         >
-          ← Back to Home
+          ← Back
         </Button>
       </div>
       <Footer />
