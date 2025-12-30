@@ -3,7 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Trophy, Target, TrendingUp, Calendar, User, Building2, MapPin } from "lucide-react";
+import { ArrowLeft, Trophy, Target, TrendingUp, Calendar, User, Building2, MapPin, Zap, Award } from "lucide-react";
+import { Footer } from "@/components/Footer";
 
 interface PlayerStats {
   name: string;
@@ -139,17 +140,20 @@ export default function PlayerProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-sky-400 via-sky-500 to-purple-600 flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="text-white text-xl">Loading player profile...</div>
+        </div>
       </div>
     );
   }
 
   if (!player) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-sky-400 via-sky-500 to-purple-600 flex flex-col items-center justify-center gap-4">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex flex-col items-center justify-center gap-4">
         <div className="text-white text-xl">Player not found</div>
-        <Button onClick={() => navigate(-1)} variant="outline" className="text-white border-white">
+        <Button onClick={() => navigate(-1)} variant="outline" className="text-white border-white hover:bg-white/10">
           Go Back
         </Button>
       </div>
@@ -161,148 +165,200 @@ export default function PlayerProfilePage() {
     : 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-800 via-sky-800 to-purple-800 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 flex flex-col">
+      {/* Animated Background Elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-cyan-500/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute top-1/2 right-1/4 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+      </div>
 
-      {/* Header */}
-      <div className="bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-400 text-center py-3 sm:py-4">
+      {/* Header - Full Width */}
+      <div className="bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-400 text-center py-3 sm:py-4 shadow-2xl relative z-10">
         <h1 className="text-slate-900 font-bold text-base sm:text-lg md:text-xl lg:text-2xl tracking-wide">
           🏸 ANIS MEMORIAL BADMINTON TOURNAMENT 2025-2026 🏸
         </h1>
       </div>
 
-      {/* Organized By Bar */}
-      <div className="bg-gradient-to-r from-cyan-500 to-sky-500 text-center py-2">
-        <p className="text-white text-xs md:text-3xl sm:text-sm font-medium">✨ Organized by MNR Group ✨</p>
+      {/* Organized By Bar - Full Width */}
+      <div className="bg-gradient-to-r from-cyan-500 to-sky-500 text-center py-2 shadow-lg relative z-10">
+        <p className="text-white text-xs md:text-sm sm:text-sm font-medium">✨ Organized by MNR Group ✨</p>
       </div>
 
-      <div className="mx-auto">
+      {/* Main Content Area - Flex Grow */}
+      <div className="flex-1 px-4 md:px-6 py-6">
+        <div className="max-w-4xl mx-auto relative z-20">
+          {/* Back Button */}
+          <Button
+            onClick={() => navigate(-1)}
+            variant="ghost"
+            className="text-white mb-6 hover:bg-white/20 hover:text-white transition-all"
+          >
+            <ArrowLeft className="h-5 w-5 mr-2" /> Back
+          </Button>
 
-        {/* Back Button */}
-        <Button
-          onClick={() => navigate(-1)}
-          variant="ghost"
-          className="text-white my-4 hover:bg-white/20"
-        >
-          <ArrowLeft className="h-5 w-5 mr-2" /> Back
+          {/* Profile Header Card with 3D Effect */}
+          <div className="relative mb-8">
+            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 rounded-2xl blur-xl opacity-50 animate-pulse"></div>
+          <Card className="relative bg-gradient-to-br from-slate-800 via-purple-900 to-slate-900 backdrop-blur-xl border-white/30 shadow-2xl">
+            <CardContent className="p-8">
+              <div className="flex flex-col items-center">
+                {/* Avatar with 3D Perspective */}
+                <div className="relative mb-6">
+                  <div className="absolute inset-0 bg-gradient-to-br from-cyan-400 to-purple-600 rounded-full blur-lg opacity-50 animate-pulse"></div>
+                  <div className="relative w-40 h-40 rounded-full bg-gradient-to-br from-cyan-400 to-purple-600 flex items-center justify-center border-4 border-white/50 shadow-2xl overflow-hidden transform hover:scale-110 transition-transform duration-300">
+                    {player.photo ? (
+                      <img src={player.photo} alt={player.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-white text-6xl font-bold">{player.name.charAt(0).toUpperCase()}</span>
+                    )}
+                  </div>
+                </div>
 
-        </Button>
+                {/* Name with Gradient */}
+                <h1 className="text-4xl md:text-5xl font-black bg-gradient-to-r from-cyan-300 via-white to-purple-300 bg-clip-text text-transparent mb-3">
+                  {player.name}
+                </h1>
 
-        {/* Profile Header */}
-        <Card className="bg-white/10 backdrop-blur-lg border-white/20 mb-6">
-          <CardContent className="p-6">
-            <div className="flex flex-col items-center">
-              {/* Avatar */}
-              <div className="w-32 h-32 rounded-full bg-white flex items-center justify-center text-4xl font-bold border-4 border-white shadow-2xl overflow-hidden mb-4">
-                {player.photo ? (
-                  <img src={player.photo} alt={player.name} className="w-full h-full object-cover" />
-                ) : (
-                  <span className="text-sky-600">{player.name.charAt(0).toUpperCase()}</span>
+                {/* Department & Unit Info */}
+                {(player.department || player.unit) && (
+                  <div className="flex flex-wrap justify-center gap-4 text-white/80 text-sm">
+                    {player.department && (
+                      <div className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full border border-white/20 hover:border-white/40 transition-all">
+                        <Building2 className="h-5 w-5 text-cyan-400" />
+                        <span>{player.department}</span>
+                      </div>
+                    )}
+                    {player.unit && (
+                      <div className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full border border-white/20 hover:border-white/40 transition-all">
+                        <MapPin className="h-5 w-5 text-purple-400" />
+                        <span>{player.unit}</span>
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
-
-              {/* Name & Info */}
-              <h1 className="text-3xl font-bold text-white mb-2">{player.name}</h1>
-
-              {(player.department || player.unit) && (
-                <div className="flex flex-wrap justify-center gap-3 text-white/80 text-sm">
-                  {player.department && (
-                    <div className="flex items-center gap-1">
-                      <Building2 className="h-4 w-4" />
-                      <span>{player.department}</span>
-                    </div>
-                  )}
-                  {player.unit && (
-                    <div className="flex items-center gap-1">
-                      <MapPin className="h-4 w-4" />
-                      <span>{player.unit}</span>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          <Card className="bg-gradient-to-br from-orange-400 to-orange-500 border-0">
-            <CardContent className="p-4 text-center">
-              <Target className="h-8 w-8 text-white mx-auto mb-2" />
-              <div className="text-3xl font-bold text-white">{player.total_score}</div>
-              <div className="text-white/80 text-sm">Total Score</div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-green-400 to-green-500 border-0">
-            <CardContent className="p-4 text-center">
-              <Trophy className="h-8 w-8 text-white mx-auto mb-2" />
-              <div className="text-3xl font-bold text-white">{player.matches_won}</div>
-              <div className="text-white/80 text-sm">Total Sets Won</div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-red-400 to-red-500 border-0">
-            <CardContent className="p-4 text-center">
-              <TrendingUp className="h-8 w-8 text-white mx-auto mb-2" />
-              <div className="text-3xl font-bold text-white">{player.matches_lost}</div>
-              <div className="text-white/80 text-sm">Total Sets Lost</div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-purple-400 to-purple-500 border-0">
-            <CardContent className="p-4 text-center">
-              <User className="h-8 w-8 text-white mx-auto mb-2" />
-              <div className="text-3xl font-bold text-white">{winRate}%</div>
-              <div className="text-white/80 text-sm">Win Rate</div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Match History */}
-        <Card className="bg-white/10 backdrop-blur-lg border-white/20">
-          <CardContent className="p-4">
-            <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-              <Calendar className="h-5 w-5" />
-              Match History
-            </h2>
+        {/* Stats Grid with 3D Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          {/* Total Score Card */}
+          <div className="group relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-orange-400 to-red-500 rounded-xl blur-lg opacity-60 group-hover:opacity-100 transition-opacity"></div>
+            <Card className="relative bg-gradient-to-br from-orange-500 to-red-600 border-0 shadow-xl transform group-hover:scale-105 transition-transform duration-300">
+              <CardContent className="p-6 text-center">
+                <div className="flex justify-center mb-4">
+                  <Target className="h-12 w-12 text-white animate-bounce" />
+                </div>
+                <div className="text-5xl font-black text-white mb-2">{player.total_score}</div>
+                <div className="text-white/90 text-sm font-semibold">Total Points</div>
+              </CardContent>
+            </Card>
+          </div>
 
-            <div className="space-y-3">
-              {player.matchHistory.map((match, index) => (
-                <div
-                  key={index}
-                  className={`p-3 rounded-lg ${match.result === 'won'
-                    ? 'bg-green-500/30 border border-green-400/50'
-                    : match.result === 'lost'
-                      ? 'bg-red-500/30 border border-red-400/50'
-                      : 'bg-white/10 border border-white/20'
-                    }`}
-                >
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <div className="text-white font-medium">vs {match.opponent_team}</div>
-                      <div className="text-white/60 text-xs">
-                        {match.date} • {match.match_time}
+          {/* Matches Won Card */}
+          <div className="group relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-green-400 to-emerald-500 rounded-xl blur-lg opacity-60 group-hover:opacity-100 transition-opacity"></div>
+            <Card className="relative bg-gradient-to-br from-green-500 to-emerald-600 border-0 shadow-xl transform group-hover:scale-105 transition-transform duration-300">
+              <CardContent className="p-6 text-center">
+                <div className="flex justify-center mb-4">
+                  <Trophy className="h-12 w-12 text-white animate-bounce" style={{ animationDelay: '0.1s' }} />
+                </div>
+                <div className="text-5xl font-black text-white mb-2">{player.matches_won}</div>
+                <div className="text-white/90 text-sm font-semibold">Total Sets Won</div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Matches Lost Card */}
+          <div className="group relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-red-400 to-pink-500 rounded-xl blur-lg opacity-60 group-hover:opacity-100 transition-opacity"></div>
+            <Card className="relative bg-gradient-to-br from-red-500 to-pink-600 border-0 shadow-xl transform group-hover:scale-105 transition-transform duration-300">
+              <CardContent className="p-6 text-center">
+                <div className="flex justify-center mb-4">
+                  <TrendingUp className="h-12 w-12 text-white animate-bounce" style={{ animationDelay: '0.2s' }} />
+                </div>
+                <div className="text-5xl font-black text-white mb-2">{player.matches_lost}</div>
+                <div className="text-white/90 text-sm font-semibold">Total Sets Lost</div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Win Rate Card */}
+          <div className="group relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-400 to-violet-500 rounded-xl blur-lg opacity-60 group-hover:opacity-100 transition-opacity"></div>
+            <Card className="relative bg-gradient-to-br from-purple-500 to-violet-600 border-0 shadow-xl transform group-hover:scale-105 transition-transform duration-300">
+              <CardContent className="p-6 text-center">
+                <div className="flex justify-center mb-4">
+                  <Award className="h-12 w-12 text-white animate-bounce" style={{ animationDelay: '0.3s' }} />
+                </div>
+                <div className="text-5xl font-black text-white mb-2">{winRate}%</div>
+                <div className="text-white/90 text-sm font-semibold">Win Rate</div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        {/* Match History Card */}
+        <div className="relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-2xl blur-lg opacity-30"></div>
+          <Card className="relative bg-gradient-to-br from-slate-800 via-purple-900 to-slate-900 backdrop-blur-xl border-white/30 shadow-2xl">
+            <CardContent className="p-6">
+              <h2 className="text-2xl font-bold text-transparent bg-gradient-to-r from-cyan-300 to-purple-300 bg-clip-text mb-6 flex items-center gap-3">
+                <Calendar className="h-6 w-6 text-cyan-400" />
+                Match History
+              </h2>
+
+              <div className="space-y-3">
+                {player.matchHistory.map((match, index) => (
+                  <div
+                    key={index}
+                    className={`p-4 rounded-lg border backdrop-blur-sm transition-all hover:scale-102 transform ${match.result === 'won'
+                      ? 'bg-gradient-to-r from-green-500/20 to-emerald-500/20 border-green-400/50 hover:border-green-400'
+                      : match.result === 'lost'
+                        ? 'bg-gradient-to-r from-red-500/20 to-pink-500/20 border-red-400/50 hover:border-red-400'
+                        : 'bg-gradient-to-r from-white/10 to-white/5 border-white/20 hover:border-white/40'
+                      }`}
+                  >
+                    <div className="flex justify-between items-center">
+                      <div className="flex-1">
+                        <div className="text-white font-bold text-lg flex items-center gap-2">
+                          <Zap className="h-5 w-5" />
+                          vs {match.opponent_team}
+                        </div>
+                        <div className="text-white/60 text-xs mt-1">
+                          📅 {match.date} • ⏰ {match.match_time}
+                        </div>
                       </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-white font-bold text-lg">Score: {match.score}</div>
-                      <div className={`text-xs font-medium ${match.result === 'won' ? 'text-green-300' :
-                        match.result === 'lost' ? 'text-red-300' : 'text-white/60'
-                        }`}>
-                        {match.result === 'won' ? '🏆 Won' : match.result === 'lost' ? '❌ Lost' : '⏳ Pending'}
+                      <div className="text-right">
+                        <div className="text-white font-bold text-2xl bg-gradient-to-r from-cyan-300 to-purple-300 bg-clip-text text-transparent">
+                          {match.score}
+                        </div>
+                        <div className={`text-xs font-bold mt-1 ${match.result === 'won' ? 'text-green-300' :
+                          match.result === 'lost' ? 'text-red-300' : 'text-white/60'
+                          }`}>
+                          {match.result === 'won' ? '🏆 WON' : match.result === 'lost' ? '❌ LOST' : '⏳ PENDING'}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
 
-              {player.matchHistory.length === 0 && (
-                <div className="text-white/60 text-center py-4">No match history available</div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+                {player.matchHistory.length === 0 && (
+                  <div className="text-white/60 text-center py-8 text-lg">No match history available</div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+          </div>
+        </div>
       </div>
+      
+      {/* Footer - Full Width */}
+      <Footer />
     </div>
+    
   );
 }

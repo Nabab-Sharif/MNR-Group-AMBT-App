@@ -50,6 +50,9 @@ All colors MUST be HSL.
     * {
         @apply border-border;
     }
+    html {
+        @apply bg-background text-foreground;
+    }
     body {
         @apply bg-background text-foreground;
         position: relative;

@@ -159,12 +159,12 @@ export const GroupCards = ({ matches }: GroupCardsProps) => {
             </div>
 
             {/* Card with Footer-inspired Design */}
-            <div className="relative p-6 bg-gradient-to-r from-slate-950 via-purple-950 to-slate-950 border border-white/10 rounded-2xl transition-all duration-300 hover:border-cyan-400/80 hover:shadow-lg hover:shadow-cyan-500/30 group-hover:bg-gradient-to-r group-hover:from-slate-900 group-hover:via-purple-900 group-hover:to-slate-900">
+            <div className="relative p-6 bg-card border border-primary/30 rounded-2xl transition-all duration-300 hover:border-primary/80 hover:shadow-lg hover:shadow-primary/30 group-hover:bg-card/80">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent group-hover:from-cyan-300 group-hover:to-blue-300 transition-all duration-300">
+                <h3 className="text-2xl font-bold text-primary group-hover:text-primary/80 transition-all duration-300">
                   {groupName}
                 </h3>
-                <Badge variant="secondary" className="bg-cyan-600/30 border border-cyan-400/50 text-cyan-300 group-hover:bg-cyan-600/50 group-hover:border-cyan-400/80 transition-all duration-300">{groupMatches.length} Matches</Badge>
+                <Badge variant="secondary" className="bg-cyan-600/30 border border-cyan-400/50 text-cyan-300 group-hover:bg-cyan-600/50 group-hover:border-cyan-400/80 transition-all duration-300">{groupMatches.length} Sets</Badge>
               </div>
               <div className="space-y-3">
                 {groupMatches.slice(0, 6).map((match: any, index: number) => {
@@ -180,18 +180,18 @@ export const GroupCards = ({ matches }: GroupCardsProps) => {
                   const borderColor = borderColors[index % borderColors.length];
 
                   return (
-                    <div key={match.id} className={`p-3 bg-white/5 hover:bg-white/15 rounded-lg space-y-2 transition-all duration-200 cursor-default border border-white/10 ${borderColor} hover:shadow-lg`}>
+                    <div key={match.id} className={`p-3 bg-card/50 hover:bg-card rounded-lg space-y-2 transition-all duration-200 cursor-default border border-primary/20 ${borderColor} hover:shadow-lg`}>
                       <div className="flex justify-between items-center text-sm gap-2">
                         <div className="flex-1 text-center">
-                          <span className="font-semibold text-white/90 hover:text-cyan-300 transition-colors block">{match.team1_name}</span>
-                          <span className="text-lg font-bold text-cyan-300">{match.team1_score ?? 0}</span>
+                          <span className="font-semibold text-foreground hover:text-primary transition-colors block">{match.team1_name}</span>
+                          <span className="text-lg font-bold text-primary">{match.team1_score ?? 0}</span>
                           {match.status === 'completed' && (
                             <span className={`text-xs font-semibold block ${match.team1_score > match.team2_score ? 'text-green-400' : 'text-red-400'}`}>
                               {match.team1_score > match.team2_score ? 'WON' : 'LOST'}
                             </span>
                           )}
                         </div>
-                        <span className="bg-gradient-to-r from-rose-500 to-pink-500 text-white font-bold text-xs px-2 py-1 rounded-lg shadow-lg hover:shadow-xl hover:from-rose-600 hover:to-pink-600 transition-all">
+                        <span className="bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold text-xs px-2 py-1 rounded-lg shadow-lg hover:shadow-xl transition-all">
                           VS
                         </span>
                         <div className="flex-1 text-center">

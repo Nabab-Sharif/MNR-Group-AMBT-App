@@ -116,9 +116,9 @@ export const CameraCapture = ({ open, onOpenChange, onCapture, fieldName }: Came
               <Button
                 size="lg"
                 onClick={capturePhoto}
-                className="rounded-full h-16 w-16 bg-white hover:bg-gray-200"
+                className="rounded-full h-16 w-16 bg-primary hover:bg-primary/90"
               >
-                <Camera className="h-8 w-8 text-black" />
+                <Camera className="h-8 w-8 text-primary-foreground" />
               </Button>
             </div>
 

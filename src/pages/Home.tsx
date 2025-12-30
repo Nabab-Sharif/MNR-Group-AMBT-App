@@ -11,6 +11,7 @@ import { EnhancedMatchSlideshow } from "@/components/EnhancedMatchSlideshow";
 import { GroupCards } from "@/components/GroupCards";
 import { FullscreenScoreboard } from "@/components/FullscreenScoreboard";
 import { Footer } from "@/components/Footer";
+import { ThemeSelector } from "@/components/ThemeSelector";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -154,7 +155,7 @@ const Home = () => {
               <p className="text-sm text-muted-foreground">2025-2026 • Organized by MNR Group</p>
             </div>
           </div>
-          {/* Admin login removed from public home page */}
+          <ThemeSelector />
         </div>
       </header>
 

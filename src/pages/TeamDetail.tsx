@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft } from "lucide-react";
+import { Footer } from "@/components/Footer";
 
 interface TeamPlayer {
   name: string;
@@ -506,9 +507,9 @@ const TeamDetail = () => {
       </Card>
 
       {/* Tabs for Details */}
-      <Card className="bg-gradient-to-br from-blue-600/20 to-purple-600/20 border-blue-500/30 p-6 animate-slide-up">
+      <Card className="bg-card/50 border-primary/30 p-6 animate-slide-up">
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 bg-gray-800/50 mb-6">
+          <TabsList className="grid w-full grid-cols-4 bg-muted/50 mb-6">
             <TabsTrigger value="overview" className="text-white">
               Overview
             </TabsTrigger>
@@ -623,6 +624,7 @@ const TeamDetail = () => {
           </TabsContent>
         </Tabs>
       </Card>
+      <Footer />
     </div>
   );
 };

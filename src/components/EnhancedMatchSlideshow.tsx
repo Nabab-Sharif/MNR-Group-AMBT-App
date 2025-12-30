@@ -29,6 +29,7 @@ interface Match {
   winner: string | null;
   group_name: string;
   date: string;
+  updated_at?: string;
   day: string;
   venue: string;
   match_time: string | null;
@@ -38,7 +39,7 @@ interface Match {
 export const EnhancedMatchSlideshow = () => {
   const [slides, setSlides] = useState<Match[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [slideFilter, setSlideFilter] = useState<string>('today');
+  const [slideFilter, setSlideFilter] = useState<string>('winners-A');
   const [winnerDate, setWinnerDate] = useState<string | null>(null);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
@@ -88,9 +89,9 @@ export const EnhancedMatchSlideshow = () => {
       setTodayDataExists(hasAnyToday);
       setTodayUpcomingData(upcomingData || []);
       
-      // Auto-switch: if today data no longer exists and filter is 'today' or 'today-*', switch to 'winners'
+      // Auto-switch: if today data no longer exists and filter is 'today' or 'today-*', switch to 'winners-A'
       if (!hasAnyToday && (slideFilter === 'today' || slideFilter.startsWith('today-'))) {
-        setSlideFilter('winners');
+        setSlideFilter('winners-A');
         setCurrentIndex(0);
       }
     };
@@ -133,18 +134,44 @@ export const EnhancedMatchSlideshow = () => {
         const groupName = slideFilter.replace('today-', '');
         query = query.eq("status", "upcoming").eq("date", today).eq("group_name", groupName);
       } else if (slideFilter === 'winners') {
-        // Show all winners from last 7 days - sorted by date descending
-        const daysToShow = 7;
-        const datesToInclude = [];
-        for (let i = 0; i < daysToShow; i++) {
-          const date = new Date(Date.now() - (i * 86400000)).toISOString().split('T')[0];
-          datesToInclude.push(date);
-        }
-        query = query
+        // Show winners for the most recent match date (by latest updated_at), all groups, single date only
+        const { data: allWinners } = await supabase
+          .from("matches")
+          .select("date, updated_at")
           .eq("status", "completed")
           .not("winner", "is", null)
-          .in("date", datesToInclude)
-          .order("date", { ascending: false });
+          .order("updated_at", { ascending: false });
+
+        if (allWinners && allWinners.length > 0) {
+          // Find the most recent date by grouping unique dates and picking the one with the latest updated_at
+          const dateToLatestUpdate: Record<string, string> = {};
+          for (const match of allWinners) {
+            if (!dateToLatestUpdate[match.date] || match.updated_at > dateToLatestUpdate[match.date]) {
+              dateToLatestUpdate[match.date] = match.updated_at;
+            }
+          }
+          const uniqueDates = Object.keys(dateToLatestUpdate).sort((a, b) => {
+            const timeA = new Date(dateToLatestUpdate[a]).getTime();
+            const timeB = new Date(dateToLatestUpdate[b]).getTime();
+            return timeB - timeA;
+          });
+
+          if (uniqueDates.length > 0) {
+            const latestDate = uniqueDates[0];
+            setWinnerDate(latestDate);
+            query = query
+              .eq("status", "completed")
+              .not("winner", "is", null)
+              .eq("date", latestDate)
+              .order("updated_at", { ascending: false });
+          } else {
+            setSlides([]);
+            return;
+          }
+        } else {
+          setSlides([]);
+          return;
+        }
       } else if (slideFilter.startsWith('winners-')) {
         // Handle dynamic 'winners-[GroupName]' filters like 'winners-B>A'
         const groupName = slideFilter.replace('winners-', '');
@@ -159,19 +186,19 @@ export const EnhancedMatchSlideshow = () => {
           .eq("group_name", groupName)
           .not("winner", "is", null)
           .in("date", datesToInclude)
-          .order("date", { ascending: false });
+          .order("updated_at", { ascending: false });
       } else if (slideFilter === 'today-winners-a') {
         // Legacy support for A Group winners (deprecated)
         if (winnerDate) {
           query = query.eq("status", "completed").eq("group_name", "A").eq("date", winnerDate).not("winner", "is", null);
         } else {
-          const { data: latestData } = await supabase
+            const { data: latestData } = await supabase
             .from("matches")
             .select("date")
             .eq("status", "completed")
             .eq("group_name", "A")
             .not("winner", "is", null)
-            .order("date", { ascending: false })
+            .order("updated_at", { ascending: false })
             .limit(1);
           
           if (latestData && latestData.length > 0) {
@@ -187,13 +214,13 @@ export const EnhancedMatchSlideshow = () => {
         if (winnerDate) {
           query = query.eq("status", "completed").eq("group_name", "B").eq("date", winnerDate).not("winner", "is", null);
         } else {
-          const { data: latestData } = await supabase
+            const { data: latestData } = await supabase
             .from("matches")
             .select("date")
             .eq("status", "completed")
             .eq("group_name", "B")
             .not("winner", "is", null)
-            .order("date", { ascending: false })
+            .order("updated_at", { ascending: false })
             .limit(1);
           
           if (latestData && latestData.length > 0) {
@@ -209,7 +236,18 @@ export const EnhancedMatchSlideshow = () => {
       const { data } = await query;
       
       if (data) {
-        setSlides(data as Match[]);
+        let slidesData = data as Match[];
+
+        // If we're showing winners, ensure slides are ordered by updated_at (most recently updated first)
+        if (slideFilter.includes('winners')) {
+          slidesData = slidesData.sort((a, b) => {
+            const aTime = a.updated_at ? new Date(a.updated_at).getTime() : new Date(a.date).getTime();
+            const bTime = b.updated_at ? new Date(b.updated_at).getTime() : new Date(b.date).getTime();
+            return bTime - aTime;
+          });
+        }
+
+        setSlides(slidesData);
         setCurrentIndex(0);
       } else {
         setSlides([]);
@@ -294,14 +332,6 @@ export const EnhancedMatchSlideshow = () => {
       {/* Winners Filters */}
       <div className="flex gap-2 items-center flex-wrap">
         <span className="text-xs font-semibold text-muted-foreground mr-2">WINNERS:</span>
-        <Button
-          variant={slideFilter === 'winners' ? 'default' : 'outline'}
-          onClick={() => setSlideFilter('winners')}
-          size="sm"
-          className={slideFilter === 'winners' ? 'bg-yellow-600 hover:bg-yellow-700' : ''}
-        >
-          🏆 All
-        </Button>
         
         {/* Dynamic Group Winners buttons */}
         {availableGroups.map((groupName) => (
@@ -358,8 +388,8 @@ export const EnhancedMatchSlideshow = () => {
           {photo ? (
             <img src={photo} alt={name} className="w-full h-full object-cover rounded-full" />
           ) : (
-            <div className="w-full h-full bg-gray-400 flex items-center justify-center rounded-full">
-              <User className="h-8 w-8 sm:h-12 sm:w-12 text-white/70" />
+            <div className="w-full h-full bg-muted flex items-center justify-center rounded-full">
+              <User className="h-8 w-8 sm:h-12 sm:w-12 text-muted-foreground/70" />
             </div>
           )}
         </div>
@@ -378,11 +408,11 @@ export const EnhancedMatchSlideshow = () => {
       return (
         <div className="text-center space-y-2">
           <div className="flex justify-center">
-            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full overflow-hidden border-2 border-white/50 flex items-center justify-center bg-gray-400">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full overflow-hidden border-2 border-primary/50 flex items-center justify-center bg-muted">
               {playerPhoto ? (
                 <img src={playerPhoto} alt={playerName} className="w-full h-full object-cover" />
               ) : (
-                <User className="h-6 w-6 sm:h-8 sm:w-8 text-white/70" />
+                <User className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground/70" />
               )}
             </div>
           </div>
@@ -398,11 +428,11 @@ export const EnhancedMatchSlideshow = () => {
     return (
       <div className="text-center space-y-2">
         <div className="flex justify-center">
-          <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full overflow-hidden border-2 border-yellow-400/50 flex items-center justify-center bg-gray-400 shadow-lg shadow-yellow-400/30">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full overflow-hidden border-2 border-accent/50 flex items-center justify-center bg-muted shadow-lg shadow-accent/30">
             {playerPhoto ? (
               <img src={playerPhoto} alt={playerName} className="w-full h-full object-cover" />
             ) : (
-              <User className="h-6 w-6 sm:h-8 sm:w-8 text-white/70" />
+              <User className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground/70" />
             )}
           </div>
         </div>
@@ -446,7 +476,7 @@ export const EnhancedMatchSlideshow = () => {
       
       {/* Dark Theme Slide - Like Reference Image */}
       <div 
-        className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 rounded-2xl shadow-2xl w-full cursor-grab active:cursor-grabbing"
+        className="relative overflow-hidden bg-card rounded-2xl shadow-2xl w-full cursor-grab active:cursor-grabbing"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
@@ -469,7 +499,7 @@ export const EnhancedMatchSlideshow = () => {
           {/* Left Side - Match Info & Scoreboard */}
           <div className="space-y-3 sm:space-y-4 md:space-y-6 flex flex-col justify-center">
             {/* Team Names with Score - Scoreboard Style */}
-            <div className="space-y-2 sm:space-y-3 bg-gradient-to-b from-white/10 to-white/5 rounded-xl p-4 sm:p-6 border border-white/20">
+            <div className="space-y-2 sm:space-y-3 bg-card/50 rounded-xl p-4 sm:p-6 border border-primary/20">
               <div className="flex items-center justify-between gap-2 sm:gap-3">
                 <div className="flex-1">
                   <div className="text-white text-lg sm:text-2xl md:text-3xl font-black truncate">{currentSlide.team1_name}</div>
@@ -489,7 +519,7 @@ export const EnhancedMatchSlideshow = () => {
                   </div>
                   <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden border border-white/20">
                     <div 
-                      className="h-full bg-gradient-to-r from-cyan-500 to-blue-600 transition-all duration-500"
+                      className="h-full bg-primary transition-all duration-500"
                       style={{ width: `${Math.min(((currentSlide.team1_score || 0) / 30) * 100, 100)}%` }}
                     />
                   </div>
@@ -519,7 +549,7 @@ export const EnhancedMatchSlideshow = () => {
                   </div>
                   <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden border border-white/20">
                     <div 
-                      className="h-full bg-gradient-to-r from-rose-500 to-pink-600 transition-all duration-500"
+                      className="h-full bg-destructive transition-all duration-500"
                       style={{ width: `${Math.min(((currentSlide.team2_score || 0) / 30) * 100, 100)}%` }}
                     />
                   </div>
@@ -529,8 +559,8 @@ export const EnhancedMatchSlideshow = () => {
 
             {/* Winner Banner - Only show on winners slide */}
             {currentSlide.winner && (slideFilter === 'winners' || slideFilter === 'today-winners-a' || slideFilter === 'today-winners-b') && (
-              <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-400 p-0.5 shadow-2xl">
-                <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 rounded-lg px-4 sm:px-6 py-4 sm:py-5 text-center relative">
+              <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-primary via-primary to-primary p-0.5 shadow-2xl">
+                <div className="bg-card rounded-lg px-4 sm:px-6 py-4 sm:py-5 text-center relative">
                   {/* Animated background particles */}
                   <div className="absolute inset-0 overflow-hidden rounded-lg">
                     <div className="absolute -top-1/2 -right-1/2 w-96 h-96 bg-yellow-400/10 rounded-full blur-3xl animate-pulse"></div>
@@ -543,7 +573,7 @@ export const EnhancedMatchSlideshow = () => {
                       <span className="text-2xl animate-bounce" style={{ animationDelay: '0.1s' }}>✨</span>
                       <span className="text-2xl animate-bounce" style={{ animationDelay: '0.2s' }}>🎉</span>
                     </div>
-                    <div className="text-white font-black text-2xl sm:text-4xl bg-gradient-to-r from-yellow-300 via-orange-300 to-amber-300 bg-clip-text text-transparent">
+                    <div className="text-accent font-black text-2xl sm:text-4xl">
                       {currentSlide.winner}
                     </div>
                     <div className="text-amber-300 font-bold text-xs sm:text-sm tracking-widest uppercase">
@@ -579,7 +609,7 @@ export const EnhancedMatchSlideshow = () => {
 
           {/* Right Side - 4 Player Photos Grid */}
           {(slideFilter === 'winners' || slideFilter === 'today-winners-a' || slideFilter === 'today-winners-b') ? (
-            <div className="relative rounded-xl p-4 sm:p-6 border border-white/20 bg-gradient-to-br from-white/10 to-white/5 overflow-hidden">
+            <div className="relative rounded-xl p-4 sm:p-6 border border-primary/20 bg-card/50 overflow-hidden">
               {/* Decorative gradient background */}
               <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 via-transparent to-orange-500/5 rounded-xl pointer-events-none"></div>
               

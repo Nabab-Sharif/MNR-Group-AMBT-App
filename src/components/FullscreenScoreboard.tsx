@@ -21,7 +21,7 @@ export const FullscreenScoreboard = ({ match, isAdmin, onClose }: FullscreenScor
   }, []);
 
   return (
-    <div className="fixed inset-0 z-50 bg-gray-800 text-white overflow-hidden flex items-center justify-center">
+    <div className="fixed inset-0 z-50 bg-background text-foreground overflow-hidden flex items-center justify-center">
       <div className="container mx-auto px-4 py-8 text-xl md:text-3xl w-full h-full overflow-hidden">
         <Button
           onClick={onClose}
@@ -31,12 +31,12 @@ export const FullscreenScoreboard = ({ match, isAdmin, onClose }: FullscreenScor
         >
           <X className="h-6 w-6" />
         </Button>
-        <div className="scoreboard bg-gray-900 p-6 rounded-lg w-full h-full flex flex-col justify-center items-center">
-          <div className="value first font-bold text-yellow-300">1st Men: <span>...</span></div>
-          <div className="value second font-bold text-yellow-300">2nd Men: <span>...</span></div>
-          <div className="total font-bold text-yellow-300">Total: <span>...</span></div>
-          <div className="result font-bold text-yellow-300">Result: <span>...</span></div>
-          <div className="meta font-bold text-yellow-300">Date: <span>...</span> | Time: <span>...</span> | Day: <span>...</span></div>
+        <div className="scoreboard bg-card p-6 rounded-lg w-full h-full flex flex-col justify-center items-center">
+          <div className="value first font-bold text-accent">1st Men: <span>...</span></div>
+          <div className="value second font-bold text-accent">2nd Men: <span>...</span></div>
+          <div className="total font-bold text-accent">Total: <span>...</span></div>
+          <div className="result font-bold text-accent">Result: <span>...</span></div>
+          <div className="meta font-bold text-accent">Date: <span>...</span> | Time: <span>...</span> | Day: <span>...</span></div>
         </div>
       </div>
     </div>

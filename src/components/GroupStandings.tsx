@@ -210,7 +210,7 @@ const GroupStandings = ({ matches, groupName }: GroupStandingsProps) => {
         />
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-2 sm:gap-3 lg:gap-4 xl:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
         {filteredStandings.map((team) => (
           <div 
             key={team.teamName}
@@ -219,12 +219,12 @@ const GroupStandings = ({ matches, groupName }: GroupStandingsProps) => {
           >
             {/* Decorative background elements */}
             <div className="absolute inset-0 overflow-hidden rounded-lg sm:rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              <div className="absolute -top-40 -right-40 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl"></div>
-              <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl"></div>
+              <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/10 rounded-full blur-3xl"></div>
+              <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-secondary/10 rounded-full blur-3xl"></div>
             </div>
 
             {/* Card with Footer-inspired Design */}
-            <div className="relative p-3 sm:p-4 lg:p-6 bg-gradient-to-r from-slate-950 via-purple-950 to-slate-950 border border-white/10 rounded-lg sm:rounded-xl backdrop-blur transition-all duration-300 hover:border-cyan-400/80 hover:shadow-lg hover:shadow-cyan-500/30 group-hover:bg-gradient-to-r group-hover:from-slate-900 group-hover:via-purple-900 group-hover:to-slate-900 min-h-auto flex flex-col">
+            <div className="relative p-3 sm:p-4 lg:p-6 bg-card border border-primary/20 rounded-lg sm:rounded-xl backdrop-blur transition-all duration-300 hover:border-primary/80 hover:shadow-lg hover:shadow-primary/30 group-hover:bg-card/80 min-h-auto flex flex-col">
               
               {/* Team Leader Picture - Top Left */}
               <div className="absolute top-1 sm:top-2 left-1 sm:left-2 z-20">

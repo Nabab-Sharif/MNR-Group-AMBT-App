@@ -127,16 +127,16 @@ export const DataManagement = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Export All */}
-        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-4 text-white">
+        <div className="bg-card border border-primary/30 rounded-xl p-4 text-foreground">
           <div className="flex items-center gap-2 mb-2">
-            <Download className="h-5 w-5" />
+            <Download className="h-5 w-5 text-primary" />
             <span className="font-bold">Export All</span>
           </div>
-          <p className="text-sm opacity-90 mb-3">Download all matches and slides as JSON</p>
+          <p className="text-sm opacity-90 mb-3 text-muted-foreground">Download all matches and slides as JSON</p>
           <Button 
             onClick={handleExportAll} 
             disabled={loading}
-            className="w-full bg-white text-blue-600 hover:bg-blue-50"
+            className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
           >
             <FileJson className="h-4 w-4 mr-2" />
             Export Data
@@ -144,12 +144,12 @@ export const DataManagement = () => {
         </div>
 
         {/* Import */}
-        <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-4 text-white">
+        <div className="bg-card border border-primary/30 rounded-xl p-4 text-foreground">
           <div className="flex items-center gap-2 mb-2">
-            <Upload className="h-5 w-5" />
+            <Upload className="h-5 w-5 text-primary" />
             <span className="font-bold">Import Data</span>
           </div>
-          <p className="text-sm opacity-90 mb-3">Import matches and slides from JSON</p>
+          <p className="text-sm opacity-90 mb-3 text-muted-foreground">Import matches and slides from JSON</p>
           <input
             ref={fileInputRef}
             type="file"
@@ -160,7 +160,7 @@ export const DataManagement = () => {
           <Button 
             onClick={() => fileInputRef.current?.click()} 
             disabled={loading}
-            className="w-full bg-white text-green-600 hover:bg-green-50"
+            className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
           >
             <Upload className="h-4 w-4 mr-2" />
             Import JSON
@@ -168,17 +168,17 @@ export const DataManagement = () => {
         </div>
 
         {/* Delete Matches */}
-        <div className="bg-gradient-to-br from-red-500 to-red-600 rounded-xl p-4 text-white">
+        <div className="bg-card border border-destructive/30 rounded-xl p-4 text-foreground">
           <div className="flex items-center gap-2 mb-2">
-            <Trash2 className="h-5 w-5" />
+            <Trash2 className="h-5 w-5 text-destructive" />
             <span className="font-bold">Delete Matches</span>
           </div>
-          <p className="text-sm opacity-90 mb-3">Remove all matches permanently</p>
+          <p className="text-sm opacity-90 mb-3 text-muted-foreground">Remove all matches permanently</p>
           <Button 
             onClick={handleDeleteAllMatches} 
             disabled={loading}
             variant="destructive"
-            className="w-full bg-white text-red-600 hover:bg-red-50"
+            className="w-full"
           >
             <Trash2 className="h-4 w-4 mr-2" />
             Delete All
@@ -186,17 +186,17 @@ export const DataManagement = () => {
         </div>
 
         {/* Delete Slides */}
-        <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-4 text-white">
+        <div className="bg-card border border-destructive/30 rounded-xl p-4 text-foreground">
           <div className="flex items-center gap-2 mb-2">
-            <Trash2 className="h-5 w-5" />
+            <Trash2 className="h-5 w-5 text-destructive" />
             <span className="font-bold">Delete Slides</span>
           </div>
-          <p className="text-sm opacity-90 mb-3">Remove all slides permanently</p>
+          <p className="text-sm opacity-90 mb-3 text-muted-foreground">Remove all slides permanently</p>
           <Button 
             onClick={handleDeleteAllSlides} 
             disabled={loading}
             variant="destructive"
-            className="w-full bg-white text-orange-600 hover:bg-orange-50"
+            className="w-full"
           >
             <Trash2 className="h-4 w-4 mr-2" />
             Delete All

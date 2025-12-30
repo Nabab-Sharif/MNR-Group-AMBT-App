@@ -248,11 +248,11 @@ export const EditMatchDialog = ({ open, onOpenChange, onSuccess, match }: EditMa
             </div>
           </div>
 
-          <div className="space-y-4 p-4 bg-gradient-green rounded-lg">
-            <h3 className="font-semibold text-lg text-primary-foreground">Team 1</h3>
+          <div className="space-y-4 p-4 bg-card border border-primary/30 rounded-lg">
+            <h3 className="font-semibold text-lg text-primary">Team 1</h3>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className="text-primary-foreground">Team Name *</Label>
+                <Label className="text-foreground">Team Name *</Label>
                 <Input
                   value={formData.team1Name}
                   onChange={(e) => setFormData(prev => ({ ...prev, team1Name: e.target.value }))}
@@ -261,7 +261,7 @@ export const EditMatchDialog = ({ open, onOpenChange, onSuccess, match }: EditMa
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-primary-foreground">Team Leader *</Label>
+                <Label className="text-foreground">Team Leader *</Label>
                 <Input
                   value={formData.team1Leader}
                   onChange={(e) => setFormData(prev => ({ ...prev, team1Leader: e.target.value }))}
@@ -270,7 +270,7 @@ export const EditMatchDialog = ({ open, onOpenChange, onSuccess, match }: EditMa
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-primary-foreground">Player 1 Name *</Label>
+                <Label className="text-foreground">Player 1 Name *</Label>
                 <Input
                   value={formData.team1Player1Name}
                   onChange={(e) => setFormData(prev => ({ ...prev, team1Player1Name: e.target.value }))}
@@ -279,7 +279,7 @@ export const EditMatchDialog = ({ open, onOpenChange, onSuccess, match }: EditMa
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-primary-foreground">Player 1 Photo</Label>
+                <Label className="text-foreground">Player 1 Photo</Label>
                 <div className="flex gap-2">
                   <Input type="file" accept="image/*" onChange={(e) => handleFileChange('team1Player1Photo', e.target.files?.[0] || null)} className="bg-background/90" />
                   <Button type="button" size="icon" variant="outline" onClick={() => openCamera('team1Player1Photo')}><Camera className="h-4 w-4" /></Button>
@@ -287,7 +287,7 @@ export const EditMatchDialog = ({ open, onOpenChange, onSuccess, match }: EditMa
                 {previews.team1Player1Photo && <div className="w-32 h-32 rounded border border-primary/30"><img src={previews.team1Player1Photo} alt="Preview" className="w-full h-full object-cover rounded" /></div>}
               </div>
               <div className="space-y-2">
-                <Label className="text-primary-foreground">Player 2 Name *</Label>
+                <Label className="text-foreground">Player 2 Name *</Label>
                 <Input
                   value={formData.team1Player2Name}
                   onChange={(e) => setFormData(prev => ({ ...prev, team1Player2Name: e.target.value }))}
@@ -296,7 +296,7 @@ export const EditMatchDialog = ({ open, onOpenChange, onSuccess, match }: EditMa
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-primary-foreground">Player 2 Photo</Label>
+                <Label className="text-foreground">Player 2 Photo</Label>
                 <div className="flex gap-2">
                   <Input type="file" accept="image/*" onChange={(e) => handleFileChange('team1Player2Photo', e.target.files?.[0] || null)} className="bg-background/90" />
                   <Button type="button" size="icon" variant="outline" onClick={() => openCamera('team1Player2Photo')}><Camera className="h-4 w-4" /></Button>
@@ -306,11 +306,11 @@ export const EditMatchDialog = ({ open, onOpenChange, onSuccess, match }: EditMa
             </div>
           </div>
 
-          <div className="space-y-4 p-4 bg-gradient-orange rounded-lg">
-            <h3 className="font-semibold text-lg text-primary-foreground">Team 2</h3>
+          <div className="space-y-4 p-4 bg-card border border-secondary/30 rounded-lg">
+            <h3 className="font-semibold text-lg text-secondary">Team 2</h3>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className="text-primary-foreground">Team Name *</Label>
+                <Label className="text-foreground">Team Name *</Label>
                 <Input
                   value={formData.team2Name}
                   onChange={(e) => setFormData(prev => ({ ...prev, team2Name: e.target.value }))}
@@ -319,7 +319,7 @@ export const EditMatchDialog = ({ open, onOpenChange, onSuccess, match }: EditMa
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-primary-foreground">Team Leader *</Label>
+                <Label className="text-foreground">Team Leader *</Label>
                 <Input
                   value={formData.team2Leader}
                   onChange={(e) => setFormData(prev => ({ ...prev, team2Leader: e.target.value }))}
@@ -328,7 +328,7 @@ export const EditMatchDialog = ({ open, onOpenChange, onSuccess, match }: EditMa
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-primary-foreground">Player 1 Name *</Label>
+                <Label className="text-foreground">Player 1 Name *</Label>
                 <Input
                   value={formData.team2Player1Name}
                   onChange={(e) => setFormData(prev => ({ ...prev, team2Player1Name: e.target.value }))}
@@ -337,7 +337,7 @@ export const EditMatchDialog = ({ open, onOpenChange, onSuccess, match }: EditMa
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-primary-foreground">Player 1 Photo</Label>
+                <Label className="text-foreground">Player 1 Photo</Label>
                 <div className="flex gap-2">
                   <Input type="file" accept="image/*" onChange={(e) => handleFileChange('team2Player1Photo', e.target.files?.[0] || null)} className="bg-background/90" />
                   <Button type="button" size="icon" variant="outline" onClick={() => openCamera('team2Player1Photo')}><Camera className="h-4 w-4" /></Button>
@@ -345,7 +345,7 @@ export const EditMatchDialog = ({ open, onOpenChange, onSuccess, match }: EditMa
                 {previews.team2Player1Photo && <div className="w-32 h-32 rounded border border-primary/30"><img src={previews.team2Player1Photo} alt="Preview" className="w-full h-full object-cover rounded" /></div>}
               </div>
               <div className="space-y-2">
-                <Label className="text-primary-foreground">Player 2 Name *</Label>
+                <Label className="text-foreground">Player 2 Name *</Label>
                 <Input
                   value={formData.team2Player2Name}
                   onChange={(e) => setFormData(prev => ({ ...prev, team2Player2Name: e.target.value }))}
@@ -354,7 +354,7 @@ export const EditMatchDialog = ({ open, onOpenChange, onSuccess, match }: EditMa
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-primary-foreground">Player 2 Photo</Label>
+                <Label className="text-foreground">Player 2 Photo</Label>
                 <div className="flex gap-2">
                   <Input type="file" accept="image/*" onChange={(e) => handleFileChange('team2Player2Photo', e.target.files?.[0] || null)} className="bg-background/90" />
                   <Button type="button" size="icon" variant="outline" onClick={() => openCamera('team2Player2Photo')}><Camera className="h-4 w-4" /></Button>

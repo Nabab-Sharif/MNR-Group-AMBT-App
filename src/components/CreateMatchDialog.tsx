@@ -521,8 +521,8 @@ export const CreateMatchDialog = ({ open, onOpenChange, onSuccess }: CreateMatch
             </div>
 
             {/* Team 1 */}
-            <div className="space-y-4 p-4 bg-gradient-to-br from-green-600/20 to-green-700/10 rounded-lg border-2 border-green-500/30">
-              <h3 className="font-semibold text-lg text-green-700 dark:text-green-400">Team 1</h3>
+            <div className="space-y-4 p-4 bg-card border-2 border-primary/30 rounded-lg">
+              <h3 className="font-semibold text-lg text-primary">Team 1</h3>
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2"><Label>Team Name *</Label><Input value={formData.team1Name} onChange={(e) => handleTeam1NameChange(e.target.value)} required className="bg-background" /></div>
                 <div className="space-y-2 relative">
@@ -619,8 +619,8 @@ export const CreateMatchDialog = ({ open, onOpenChange, onSuccess }: CreateMatch
             </div>
 
             {/* Team 2 */}
-            <div className="space-y-4 p-4 bg-gradient-to-br from-orange-600/20 to-orange-700/10 rounded-lg border-2 border-orange-500/30">
-              <h3 className="font-semibold text-lg text-orange-700 dark:text-orange-400">Team 2</h3>
+            <div className="space-y-4 p-4 bg-card border-2 border-secondary/30 rounded-lg">
+              <h3 className="font-semibold text-lg text-secondary">Team 2</h3>
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2"><Label>Team Name *</Label><Input value={formData.team2Name} onChange={(e) => handleTeam2NameChange(e.target.value)} required className="bg-background" /></div>
                 <div className="space-y-2 relative">

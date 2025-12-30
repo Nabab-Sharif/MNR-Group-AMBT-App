@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, Search, X } from "lucide-react";
 import GroupStandings from "@/components/GroupStandings";
+import { Footer } from "@/components/Footer";
 
 interface TeamStats {
   name: string;
@@ -145,8 +146,8 @@ const GroupDetail = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-800 via-slate-900 to-slate-800 flex items-center justify-center">
-        <div className="text-white text-2xl font-bold">Loading...</div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-foreground text-2xl font-bold">Loading...</div>
       </div>
     );
   }
@@ -208,7 +209,7 @@ const GroupDetail = () => {
   const sortedPlayers = Object.values(playerMap).sort((a, b) => b.totalPoints - a.totalPoints);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-800 via-slate-900 to-slate-800 p-6">
+    <div className="min-h-screen bg-background p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
@@ -216,16 +217,16 @@ const GroupDetail = () => {
             variant="outline"
             size="icon"
             onClick={() => navigate("/")}
-            className="bg-white/10 border-white/30 hover:bg-white/20"
+            className="bg-primary/10 border-primary/30 hover:bg-primary/20"
           >
-            <ArrowLeft className="h-5 w-5 text-white" />
+            <ArrowLeft className="h-5 w-5 text-foreground" />
           </Button>
           <div>
-            <h1 className="text-4xl font-extrabold text-white">{groupName}</h1>
-            <p className="text-white/70">Tournament Group Details</p>
+            <h1 className="text-4xl font-extrabold text-foreground">{groupName}</h1>
+            <p className="text-muted-foreground">Tournament Group Details</p>
           </div>
         </div>
-        <Badge className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-2 text-lg">
+        <Badge className="bg-gradient-to-r from-primary to-accent text-primary-foreground px-4 py-2 text-lg">
           {matches.length} Sets
         </Badge>
       </div>
@@ -236,21 +237,21 @@ const GroupDetail = () => {
       {/* Statistics + Scoreboard Section */}
       <div className="mb-8 grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Statistics */}
-        <Card className="lg:col-span-1 p-4 sm:p-6 bg-gradient-to-br from-white/10 to-white/5 border-white/20 backdrop-blur">
-          <h2 className="text-xl sm:text-2xl font-bold text-white mb-3 sm:mb-4">📊 Statistics</h2>
+        <Card className="lg:col-span-1 p-4 sm:p-6 bg-card border-primary/20 backdrop-blur">
+          <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-3 sm:mb-4">📊 Statistics</h2>
           <div className="space-y-2 sm:space-y-3">
-            <div className="p-2 sm:p-3 bg-white/10 rounded-lg border border-white/20">
-              <div className="text-white/70 text-xs sm:text-sm">Total Sets</div>
-              <div className="text-2xl sm:text-4xl font-extrabold text-blue-400">{matches.length}</div>
+            <div className="p-2 sm:p-3 bg-primary/10 rounded-lg border border-primary/20">
+              <div className="text-muted-foreground text-xs sm:text-sm">Total Sets</div>
+              <div className="text-2xl sm:text-4xl font-extrabold text-primary">{matches.length}</div>
             </div>
-            <div className="p-2 sm:p-3 bg-white/10 rounded-lg border border-white/20">
-              <div className="text-white/70 text-xs sm:text-sm">Completed</div>
+            <div className="p-2 sm:p-3 bg-primary/10 rounded-lg border border-primary/20">
+              <div className="text-muted-foreground text-xs sm:text-sm">Completed</div>
               <div className="text-2xl sm:text-4xl font-extrabold text-green-400">
                 {matches.filter((m) => m.status === "completed").length}
               </div>
             </div>
-            <div className="p-2 sm:p-3 bg-white/10 rounded-lg border border-white/20">
-              <div className="text-white/70 text-xs sm:text-sm">Live/Upcoming</div>
+            <div className="p-2 sm:p-3 bg-primary/10 rounded-lg border border-primary/20">
+              <div className="text-muted-foreground text-xs sm:text-sm">Live/Upcoming</div>
               <div className="text-2xl sm:text-4xl font-extrabold text-orange-400">
                 {matches.filter((m) => m.status !== "completed").length}
               </div>
@@ -259,15 +260,15 @@ const GroupDetail = () => {
         </Card>
 
         {/* Scoreboard */}
-        <Card className="lg:col-span-2 p-4 sm:p-6 bg-gradient-to-br from-white/10 to-white/5 border-white/20 backdrop-blur">
+        <Card className="lg:col-span-2 p-4 sm:p-6 bg-card border-primary/20 backdrop-blur">
           <div className="flex items-center justify-between mb-3 sm:mb-4 flex-wrap gap-2">
-            <h2 className="text-xl sm:text-2xl font-bold text-white">🏆 Point Table (All Teams)</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground">🏆 Point Table (All Teams)</h2>
             {leaderboardSearch && (
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setLeaderboardSearch("")}
-                className="text-white/70 hover:text-white"
+                className="text-muted-foreground hover:text-foreground"
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -461,6 +462,7 @@ const GroupDetail = () => {
           ← Back to Home
         </Button>
       </div>
+      <Footer />
     </div>
   );
 };
