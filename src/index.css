@@ -65,7 +65,7 @@ All colors MUST be HSL.
         left: -10vw;
         top: -20vh;
         width: 80vw;
-        height: 80vw;
+        /* height: 80vw; */
         border-radius: 50%;
         background: radial-gradient(circle at 30% 30%, hsl(var(--primary) / 0.20), transparent 40%), radial-gradient(circle at 70% 70%, hsl(var(--accent) / 0.12), transparent 50%);
         filter: blur(80px) saturate(120%);
@@ -81,7 +81,7 @@ All colors MUST be HSL.
         right: -8vw;
         bottom: -15vh;
         width: 70vw;
-        height: 70vw;
+        /* height: 70vw; */
         border-radius: 50%;
         background: radial-gradient(circle at 40% 30%, hsl(var(--accent) / 0.18), transparent 35%), radial-gradient(circle at 65% 65%, hsl(var(--secondary) / 0.10), transparent 55%);
         filter: blur(100px) saturate(110%);
