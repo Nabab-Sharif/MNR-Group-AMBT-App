@@ -226,7 +226,7 @@ const GroupDetail = () => {
           </div>
         </div>
         <Badge className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-2 text-lg">
-          {matches.length} Matches
+          {matches.length} Sets
         </Badge>
       </div>
 
@@ -240,7 +240,7 @@ const GroupDetail = () => {
           <h2 className="text-xl sm:text-2xl font-bold text-white mb-3 sm:mb-4">📊 Statistics</h2>
           <div className="space-y-2 sm:space-y-3">
             <div className="p-2 sm:p-3 bg-white/10 rounded-lg border border-white/20">
-              <div className="text-white/70 text-xs sm:text-sm">Total Matches</div>
+              <div className="text-white/70 text-xs sm:text-sm">Total Sets</div>
               <div className="text-2xl sm:text-4xl font-extrabold text-blue-400">{matches.length}</div>
             </div>
             <div className="p-2 sm:p-3 bg-white/10 rounded-lg border border-white/20">
@@ -304,10 +304,10 @@ const GroupDetail = () => {
                   <span className="text-yellow-300 font-extrabold text-base sm:text-lg flex-shrink-0">{team.totalScore}</span>
                 </div>
                 <div className="flex flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm text-white/70">
-                  {team.wins + team.losses > 0 && <span>📋Total Set: <span className="text-amber-300 font-bold">{Math.ceil((team.wins + team.losses) / 3)}</span></span>}
+                  {team.wins + team.losses > 0 && <span>📋Total Match: <span className="text-amber-300 font-bold">{Math.ceil((team.wins + team.losses) / 3)}</span></span>}
                   <span>🎯Total Wins Points: <span className="text-green-400 font-bold">{team.wins}</span></span>
-                  <span>🏅 Total Win Matches: <span className="text-amber-400 font-bold">{team.wins}</span></span>
-                  <span>❌ L: <span className="text-red-400 font-bold">{team.losses}</span></span>
+                  <span>🏅 Total Win Sets: <span className="text-amber-400 font-bold">{team.wins}</span></span>
+                  <span>❌ Loss Sets: <span className="text-red-400 font-bold">{team.losses}</span></span>
                   <span>📊 {team.winRate}</span>
                 </div>
               </div>
@@ -325,7 +325,7 @@ const GroupDetail = () => {
       {/* Matches List */}
       <Card className="p-4 sm:p-6 bg-gradient-to-br from-white/10 to-white/5 border-white/20 backdrop-blur">
         <div className="flex items-center justify-between mb-4 sm:mb-6 flex-wrap gap-2">
-          <h2 className="text-xl sm:text-2xl font-bold text-white">🏆 Completed Matches (Wins)</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-white">🏆 Completed Sets (Wins)</h2>
           {matchesSearch && (
             <Button
               variant="ghost"
@@ -369,7 +369,7 @@ const GroupDetail = () => {
                         <span className="text-2xl">📅</span>
                         <div className="text-left">
                           <div className="text-white font-bold text-lg">{date}</div>
-                          <div className="text-white/70 text-sm">{dateMatches.length} match{dateMatches.length > 1 ? 'es' : ''}</div>
+                          <div className="text-white/70 text-sm">{dateMatches.length} set{dateMatches.length > 1 ? 'es' : ''}</div>
                         </div>
                       </div>
                       <span className="text-white text-2xl">

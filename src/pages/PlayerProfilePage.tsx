@@ -237,7 +237,7 @@ export default function PlayerProfilePage() {
             <CardContent className="p-4 text-center">
               <Trophy className="h-8 w-8 text-white mx-auto mb-2" />
               <div className="text-3xl font-bold text-white">{player.matches_won}</div>
-              <div className="text-white/80 text-sm">Matches Won</div>
+              <div className="text-white/80 text-sm">Total Sets Won</div>
             </CardContent>
           </Card>
 
@@ -245,7 +245,7 @@ export default function PlayerProfilePage() {
             <CardContent className="p-4 text-center">
               <TrendingUp className="h-8 w-8 text-white mx-auto mb-2" />
               <div className="text-3xl font-bold text-white">{player.matches_lost}</div>
-              <div className="text-white/80 text-sm">Matches Lost</div>
+              <div className="text-white/80 text-sm">Total Sets Lost</div>
             </CardContent>
           </Card>
 

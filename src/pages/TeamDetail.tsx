@@ -312,7 +312,7 @@ const TeamDetail = () => {
                   <span className="text-red-300 font-bold">{teamData.losses}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-white/60">Total Matches</span>
+                  <span className="text-white/60">Total Sets</span>
                   <span className="text-blue-300 font-bold">{teamData.wins + teamData.losses}</span>
                 </div>
               </div>
@@ -323,11 +323,11 @@ const TeamDetail = () => {
           {teamData.wins + teamData.losses > 0 && (
             <div 
               className="p-4 bg-amber-600/20 rounded-lg border border-amber-600/30 hover:bg-amber-600/30 transition-all">
-              <div className="text-white/70 text-sm font-semibold">📋 Current Set</div>
+              <div className="text-white/70 text-sm font-semibold">📋 Total Matches</div>
               <div className="text-2xl font-bold text-amber-300">{Math.ceil((teamData.wins + teamData.losses) / 3)}</div>
               <div className="mt-3 pt-3 border-t border-amber-600/50 space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-white/60">Total Matches</span>
+                  <span className="text-white/60">Total Sets</span>
                   <span className="text-blue-300 font-bold">{teamData.wins + teamData.losses}</span>
                 </div>
               </div>
@@ -343,7 +343,7 @@ const TeamDetail = () => {
             {expandedStats === 'avgwin' && (
               <div className="mt-3 pt-3 border-t border-cyan-500/50 space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-white/60">Total Wins</span>
+                  <span className="text-white/60">Total Wins Sets</span>
                   <span className="text-green-300 font-bold">{teamData.wins}</span>
                 </div>
                 <div className="flex justify-between">
@@ -367,7 +367,7 @@ const TeamDetail = () => {
             {expandedStats === 'avgloss' && (
               <div className="mt-3 pt-3 border-t border-orange-500/50 space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-white/60">Total Losses</span>
+                  <span className="text-white/60">Total Losses Sets</span>
                   <span className="text-red-300 font-bold">{teamData.losses}</span>
                 </div>
                 <div className="flex justify-between">
@@ -375,7 +375,7 @@ const TeamDetail = () => {
                   <span className="text-purple-300 font-bold">{teamData.winRate}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-white/60">Total Matches</span>
+                  <span className="text-white/60">Total Sets</span>
                   <span className="text-blue-300 font-bold">{teamData.wins + teamData.losses}</span>
                 </div>
               </div>
@@ -386,16 +386,16 @@ const TeamDetail = () => {
           <div 
             onClick={() => setExpandedStats(expandedStats === 'matches' ? null : 'matches')}
             className="p-4 bg-indigo-500/20 rounded-lg border border-indigo-500/30 hover:bg-indigo-500/40 cursor-pointer transition-all hover:shadow-lg hover:shadow-indigo-500/30">
-            <div className="text-white/70 text-sm font-semibold">🎯 Total Matches</div>
+            <div className="text-white/70 text-sm font-semibold">🎯 Total Sets</div>
             <div className="text-2xl font-bold text-indigo-300">{teamData.wins + teamData.losses}</div>
             {expandedStats === 'matches' && (
               <div className="mt-3 pt-3 border-t border-indigo-500/50 space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-white/60">Wins</span>
+                  <span className="text-white/60">Wins Sets</span>
                   <span className="text-green-300 font-bold">{teamData.wins}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-white/60">Losses</span>
+                  <span className="text-white/60">Losses Sets</span>
                   <span className="text-red-300 font-bold">{teamData.losses}</span>
                 </div>
                 <div className="flex justify-between">
@@ -415,16 +415,16 @@ const TeamDetail = () => {
           <div 
             onClick={() => setExpandedStats(expandedStats === 'wins' ? null : 'wins')}
             className="p-4 bg-green-500/20 rounded-lg border border-green-500/30 hover:bg-green-500/40 cursor-pointer transition-all hover:shadow-lg hover:shadow-green-500/30">
-            <div className="text-white/70 text-sm font-semibold">🏆 WINS</div>
+            <div className="text-white/70 text-sm font-semibold">🏆Total Wins Sets</div>
             <div className="text-3xl font-bold text-green-400">{teamData.wins}</div>
             {expandedStats === 'wins' && (
               <div className="mt-3 pt-3 border-t border-green-500/50 space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-white/60">Total Wins</span>
+                  <span className="text-white/60">Total Wins Sets</span>
                   <span className="text-green-300 font-bold">{teamData.winPoints}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-white/60">Losses</span>
+                  <span className="text-white/60">Losses Sets</span>
                   <span className="text-red-300 font-bold">{teamData.losses}</span>
                 </div>
                 <div className="flex justify-between">
@@ -439,12 +439,12 @@ const TeamDetail = () => {
           <div 
             onClick={() => setExpandedStats(expandedStats === 'losses' ? null : 'losses')}
             className="p-4 bg-red-500/20 rounded-lg border border-red-500/30 hover:bg-red-500/40 cursor-pointer transition-all hover:shadow-lg hover:shadow-red-500/30">
-            <div className="text-white/70 text-sm font-semibold">❌ LOSSES</div>
+            <div className="text-white/70 text-sm font-semibold">❌ Total Loss Sets</div>
             <div className="text-3xl font-bold text-red-400">{teamData.losses}</div>
             {expandedStats === 'losses' && (
               <div className="mt-3 pt-3 border-t border-red-500/50 space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-white/60">Total Losses</span>
+                  <span className="text-white/60">Total Losses Sets</span>
                   <span className="text-red-300 font-bold">{teamData.losses}</span>
                 </div>
                 <div className="flex justify-between">
@@ -468,15 +468,15 @@ const TeamDetail = () => {
             {expandedStats === 'winrate' && (
               <div className="mt-3 pt-3 border-t border-purple-500/50 space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-white/60">Total Wins</span>
+                  <span className="text-white/60">Total Wins Sets</span>
                   <span className="text-green-300 font-bold">{teamData.wins}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-white/60">Losses</span>
+                  <span className="text-white/60">Losses Sets</span>
                   <span className="text-red-300 font-bold">{teamData.losses}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-white/60">Total Matches</span>
+                  <span className="text-white/60">Total Sets</span>
                   <span className="text-blue-300 font-bold">{teamData.wins + teamData.losses}</span>
                 </div>
               </div>
@@ -513,10 +513,10 @@ const TeamDetail = () => {
               Overview
             </TabsTrigger>
             <TabsTrigger value="wins" className="text-white">
-              Wins ({winMatches.length})
+              Set Wins ({winMatches.length})
             </TabsTrigger>
             <TabsTrigger value="losses" className="text-white">
-              Losses ({lossMatches.length})
+              Set Losses ({lossMatches.length})
             </TabsTrigger>
             <TabsTrigger value="players" className="text-white">
               Players ({teamData.players.length})
@@ -528,12 +528,12 @@ const TeamDetail = () => {
             <div className="space-y-4">
               <h3 className="text-lg font-bold text-white">Team Summary</h3>
               <p className="text-white/70">
-                {decodedTeamName} has played {teamData.wins + teamData.losses} matches with a win rate of{" "}
+                {decodedTeamName} has played {teamData.wins + teamData.losses} sets with a win rate of{" "}
                 <span className="text-amber-300 font-bold">{teamData.winRate}</span>.
               </p>
               <p className="text-white/70">
-                The team has won <span className="text-green-400 font-bold">{teamData.wins}</span> matches and lost{" "}
-                <span className="text-red-400 font-bold">{teamData.losses}</span> matches.
+                The team has won <span className="text-green-400 font-bold">{teamData.wins}</span> sets and lost{" "}
+                <span className="text-red-400 font-bold">{teamData.losses}</span> sets.
               </p>
               <p className="text-white/70">
                 Average winning score: <span className="text-cyan-400 font-bold">{teamData.averageWinScore}</span>
@@ -544,7 +544,7 @@ const TeamDetail = () => {
           {/* Wins Tab */}
           <TabsContent value="wins">
             <div className="space-y-3">
-              <h3 className="text-lg font-bold text-white mb-4">🏆 Winning Matches ({winMatches.length})</h3>
+              <h3 className="text-lg font-bold text-white mb-4">🏆 Winning Sets ({winMatches.length})</h3>
               {winMatches.length > 0 ? (
                 winMatches.map((match) => (
                   <div key={match.id} className="p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
@@ -570,7 +570,7 @@ const TeamDetail = () => {
           {/* Losses Tab */}
           <TabsContent value="losses">
             <div className="space-y-3">
-              <h3 className="text-lg font-bold text-white mb-4">❌ Losing Matches ({lossMatches.length})</h3>
+              <h3 className="text-lg font-bold text-white mb-4">❌ Losing Sets ({lossMatches.length})</h3>
               {lossMatches.length > 0 ? (
                 lossMatches.map((match) => (
                   <div key={match.id} className="p-4 bg-red-500/10 border border-red-500/30 rounded-lg">

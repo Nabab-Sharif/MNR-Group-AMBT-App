@@ -260,7 +260,7 @@ const GroupStandings = ({ matches, groupName }: GroupStandingsProps) => {
               <div className="flex items-center justify-between mb-2 sm:mb-3 lg:mb-4 pt-1 sm:pt-2 relative z-0 px-1 sm:px-2">
                 <div className="flex-1 min-w-0 ml-10 sm:ml-14 lg:ml-16">
                   <h3 className="text-sm sm:text-base lg:text-lg xl:text-xl font-bold text-white group-hover:text-cyan-300 transition-colors truncate">{team.teamName}</h3>
-                  <p className="text-white/60 text-xs sm:text-sm">{team.wins + team.losses} matches</p>
+                  <p className="text-white/60 text-xs sm:text-sm">{team.wins + team.losses} sets</p>
                 </div>
               </div>
 
@@ -269,17 +269,19 @@ const GroupStandings = ({ matches, groupName }: GroupStandingsProps) => {
                 {team.wins + team.losses > 0 && (
                   <div className="px-2 sm:px-3 py-1 sm:py-2 bg-amber-600/20 rounded-lg border border-amber-500/30 group-hover:bg-amber-600/40 group-hover:border-amber-400/60 transition-all duration-300">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="text-white/70 text-xs sm:text-sm font-semibold">📋 Total Set</span>
+                      <span className="text-white/70 text-xs sm:text-sm font-semibold">📋 Total Match</span>
                       <span className="text-base sm:text-lg lg:text-xl font-extrabold text-amber-300 group-hover:text-amber-200 transition-colors">{Math.ceil((team.wins + team.losses) / 3)}</span>
                     </div>
                   </div>
                 )}
+
                 <div className="px-2 sm:px-3 py-1 sm:py-2 bg-cyan-600/20 rounded-lg border border-cyan-500/30 group-hover:bg-cyan-600/40 group-hover:border-cyan-400/60 transition-all duration-300">
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-white/70 text-xs sm:text-sm font-semibold">🎯 Total Wins Points</span>
                     <span className="text-base sm:text-lg lg:text-xl font-extrabold text-cyan-300 group-hover:text-cyan-200 transition-colors">{team.winPoints}</span>
                   </div>
                 </div>
+                
               </div>
 
               {/* Stats Grid - All Clickable - RESPONSIVE */}
@@ -287,14 +289,14 @@ const GroupStandings = ({ matches, groupName }: GroupStandingsProps) => {
                 {/* Wins */}
                 <div 
                   className="p-2 sm:p-3 bg-green-500/20 rounded-lg border border-green-500/30 group-hover:bg-green-500/40 group-hover:border-green-400/60 transition-all duration-300 hover:scale-105">
-                  <div className="text-white/70 text-xs sm:text-sm font-semibold">Wins</div>
+                  <div className="text-white/70 text-xs sm:text-sm font-semibold">Set Wins</div>
                   <div className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-extrabold text-green-400 group-hover:text-green-300 transition-colors">{team.wins}</div>
                 </div>
 
                 {/* Losses */}
                 <div 
                   className="p-2 sm:p-3 bg-red-500/20 rounded-lg border border-red-500/30 group-hover:bg-red-500/40 group-hover:border-red-400/60 transition-all duration-300 hover:scale-105">
-                  <div className="text-white/70 text-xs sm:text-sm font-semibold">Losses</div>
+                  <div className="text-white/70 text-xs sm:text-sm font-semibold">Set Losses</div>
                   <div className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-extrabold text-red-400 group-hover:text-red-300 transition-colors">{team.losses}</div>
                 </div>
 
@@ -318,7 +320,7 @@ const GroupStandings = ({ matches, groupName }: GroupStandingsProps) => {
                         <span className="text-orange-300 font-bold">{team.loseScore}</span>
                       </div>
                       <div className="flex justify-between items-center text-xs">
-                        <span className="text-white/60">🎯 Total Matches</span>
+                        <span className="text-white/60">🎯 Total Set</span>
                         <span className="text-purple-300 font-bold">{team.wins + team.losses}</span>
                       </div>
                     </div>
