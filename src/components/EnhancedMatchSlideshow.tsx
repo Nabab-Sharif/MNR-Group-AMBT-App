@@ -38,19 +38,20 @@ interface Match {
 export const EnhancedMatchSlideshow = () => {
   const [slides, setSlides] = useState<Match[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [slideFilter, setSlideFilter] = useState<'upcoming' | 'today' | 'today-a' | 'today-b' | 'tomorrow' | 'live' | 'winners' | 'today-winners-a' | 'today-winners-b'>('today');
+  const [slideFilter, setSlideFilter] = useState<string>('today');
   const [winnerDate, setWinnerDate] = useState<string | null>(null);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [todayDataExists, setTodayDataExists] = useState(false);
   const [todayUpcomingData, setTodayUpcomingData] = useState<Match[]>([]);
+  const [availableGroups, setAvailableGroups] = useState<string[]>([]);
 
   useEffect(() => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail as { filter?: string; group?: string } | undefined;
       if (!detail) return;
-      if (detail.filter === 'today' || detail.filter === 'today-a' || detail.filter === 'today-b' || detail.filter === 'tomorrow' || detail.filter === 'upcoming' || detail.filter === 'live' || detail.filter === 'winners' || detail.filter === 'today-winners-a' || detail.filter === 'today-winners-b') {
-        setSlideFilter(detail.filter as 'upcoming' | 'today' | 'today-a' | 'today-b' | 'tomorrow' | 'live' | 'winners' | 'today-winners-a' | 'today-winners-b');
+      if (detail.filter) {
+        setSlideFilter(detail.filter);
         setCurrentIndex(0);
         const el = document.getElementById('enhanced-slideshow');
         if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -87,12 +88,10 @@ export const EnhancedMatchSlideshow = () => {
       setTodayDataExists(hasAnyToday);
       setTodayUpcomingData(upcomingData || []);
       
-      // Only auto-switch if user is on 'today' filter and no data exists
-      if (!hasAnyToday && slideFilter === 'today') {
-        setSlideFilter('today-winners-a');
-      } else if (hasCompleted && !hasUpcoming && slideFilter === 'today') {
-        // All today matches completed - auto-switch to winners
-        setSlideFilter('today-winners-a');
+      // Auto-switch: if today data no longer exists and filter is 'today' or 'today-*', switch to 'winners'
+      if (!hasAnyToday && (slideFilter === 'today' || slideFilter.startsWith('today-'))) {
+        setSlideFilter('winners');
+        setCurrentIndex(0);
       }
     };
     
@@ -108,27 +107,64 @@ export const EnhancedMatchSlideshow = () => {
       const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
       const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
 
+      // Fetch all available groups from all matches
+      const { data: allMatches } = await supabase
+        .from("matches")
+        .select("group_name");
+
+      if (allMatches) {
+        const uniqueGroups = Array.from(
+          new Set(allMatches.map((m: any) => m.group_name).filter(Boolean))
+        ).sort() as string[];
+        setAvailableGroups(uniqueGroups);
+      }
+
       let query = supabase
         .from("matches")
         .select("*")
         .order("match_number", { ascending: true });
 
-      if (slideFilter === 'live') {
-        query = query.eq("status", "live");
-      } else if (slideFilter === 'today') {
+      // Handle today filters
+      if (slideFilter === 'today') {
+        // Show all today's upcoming matches
         query = query.eq("status", "upcoming").eq("date", today);
-      } else if (slideFilter === 'today-a') {
-        query = query.eq("status", "upcoming").eq("date", today).eq("group_name", "A");
-      } else if (slideFilter === 'today-b') {
-        query = query.eq("status", "upcoming").eq("date", today).eq("group_name", "B");
-      } else if (slideFilter === 'tomorrow') {
-        query = query.eq("status", "upcoming").eq("date", tomorrow);
+      } else if (slideFilter.startsWith('today-') && !slideFilter.includes('winners')) {
+        // Handle dynamic 'today-[GroupName]' filters like 'today-B>A'
+        const groupName = slideFilter.replace('today-', '');
+        query = query.eq("status", "upcoming").eq("date", today).eq("group_name", groupName);
+      } else if (slideFilter === 'winners') {
+        // Show all winners from last 7 days - sorted by date descending
+        const daysToShow = 7;
+        const datesToInclude = [];
+        for (let i = 0; i < daysToShow; i++) {
+          const date = new Date(Date.now() - (i * 86400000)).toISOString().split('T')[0];
+          datesToInclude.push(date);
+        }
+        query = query
+          .eq("status", "completed")
+          .not("winner", "is", null)
+          .in("date", datesToInclude)
+          .order("date", { ascending: false });
+      } else if (slideFilter.startsWith('winners-')) {
+        // Handle dynamic 'winners-[GroupName]' filters like 'winners-B>A'
+        const groupName = slideFilter.replace('winners-', '');
+        const daysToShow = 7;
+        const datesToInclude = [];
+        for (let i = 0; i < daysToShow; i++) {
+          const date = new Date(Date.now() - (i * 86400000)).toISOString().split('T')[0];
+          datesToInclude.push(date);
+        }
+        query = query
+          .eq("status", "completed")
+          .eq("group_name", groupName)
+          .not("winner", "is", null)
+          .in("date", datesToInclude)
+          .order("date", { ascending: false });
       } else if (slideFilter === 'today-winners-a') {
-        // Show A Group winners from the winner date only
+        // Legacy support for A Group winners (deprecated)
         if (winnerDate) {
           query = query.eq("status", "completed").eq("group_name", "A").eq("date", winnerDate).not("winner", "is", null);
         } else {
-          // If no date is set, fetch the latest A group winner date first
           const { data: latestData } = await supabase
             .from("matches")
             .select("date")
@@ -141,14 +177,16 @@ export const EnhancedMatchSlideshow = () => {
           if (latestData && latestData.length > 0) {
             setWinnerDate(latestData[0].date);
             query = query.eq("status", "completed").eq("group_name", "A").eq("date", latestData[0].date).not("winner", "is", null);
+          } else {
+            setSlides([]);
+            return;
           }
         }
       } else if (slideFilter === 'today-winners-b') {
-        // Show B Group winners from the winner date only
+        // Legacy support for B Group winners (deprecated)
         if (winnerDate) {
           query = query.eq("status", "completed").eq("group_name", "B").eq("date", winnerDate).not("winner", "is", null);
         } else {
-          // If no date is set, fetch the latest B group winner date first
           const { data: latestData } = await supabase
             .from("matches")
             .select("date")
@@ -161,17 +199,11 @@ export const EnhancedMatchSlideshow = () => {
           if (latestData && latestData.length > 0) {
             setWinnerDate(latestData[0].date);
             query = query.eq("status", "completed").eq("group_name", "B").eq("date", latestData[0].date).not("winner", "is", null);
+          } else {
+            setSlides([]);
+            return;
           }
         }
-      } else if (slideFilter === 'winners') {
-        // Show winners from last 2 days (today and yesterday) - sorted by date descending
-        query = query
-          .eq("status", "completed")
-          .not("winner", "is", null)
-          .in("date", [today, yesterday])
-          .order("date", { ascending: false });
-      } else {
-        query = query.eq("status", "upcoming").neq("date", today).neq("date", tomorrow);
       }
 
       const { data } = await query;
@@ -179,6 +211,8 @@ export const EnhancedMatchSlideshow = () => {
       if (data) {
         setSlides(data as Match[]);
         setCurrentIndex(0);
+      } else {
+        setSlides([]);
       }
     };
 
@@ -229,87 +263,74 @@ export const EnhancedMatchSlideshow = () => {
 
   const filterButtons = (
     <div className="flex gap-2 justify-center mb-4 flex-wrap">
-      {todayDataExists && (
+      {/* Today Filters */}
+      <div className="flex gap-2 items-center flex-wrap">
+        <span className="text-xs font-semibold text-muted-foreground mr-2">TODAY:</span>
+        {todayDataExists && (
+          <Button
+            variant={slideFilter === 'today' ? 'default' : 'outline'}
+            onClick={() => setSlideFilter('today')}
+            size="sm"
+            className={slideFilter === 'today' ? 'bg-green-600 hover:bg-green-700' : ''}
+          >
+            All Today
+          </Button>
+        )}
+        
+        {/* Dynamic Today Group buttons */}
+        {availableGroups.map((groupName) => (
+          <Button
+            key={`today-${groupName}`}
+            variant={slideFilter === `today-${groupName}` ? 'default' : 'outline'}
+            onClick={() => setSlideFilter(`today-${groupName}`)}
+            size="sm"
+            className={slideFilter === `today-${groupName}` ? 'bg-green-600 hover:bg-green-700' : ''}
+          >
+            {groupName}
+          </Button>
+        ))}
+      </div>
+
+      {/* Winners Filters */}
+      <div className="flex gap-2 items-center flex-wrap">
+        <span className="text-xs font-semibold text-muted-foreground mr-2">WINNERS:</span>
         <Button
-          variant={slideFilter === 'today' ? 'default' : 'outline'}
-          onClick={() => setSlideFilter('today')}
+          variant={slideFilter === 'winners' ? 'default' : 'outline'}
+          onClick={() => setSlideFilter('winners')}
           size="sm"
-          className={slideFilter === 'today' ? 'bg-green-600 hover:bg-green-700' : ''}
+          className={slideFilter === 'winners' ? 'bg-yellow-600 hover:bg-yellow-700' : ''}
         >
-          Today
+          🏆 All
         </Button>
-      )}
-      <Button
-        variant={slideFilter === 'today-a' ? 'default' : 'outline'}
-        onClick={() => setSlideFilter('today-a')}
-        size="sm"
-        className={slideFilter === 'today-a' ? 'bg-green-600 hover:bg-green-700' : ''}
-      >
-        Today A
-      </Button>
-      <Button
-        variant={slideFilter === 'today-b' ? 'default' : 'outline'}
-        onClick={() => setSlideFilter('today-b')}
-        size="sm"
-        className={slideFilter === 'today-b' ? 'bg-green-600 hover:bg-green-700' : ''}
-      >
-        Today B
-      </Button>
-      <Button
-        variant={slideFilter === 'upcoming' ? 'default' : 'outline'}
-        onClick={() => setSlideFilter('upcoming')}
-        size="sm"
-        className={slideFilter === 'upcoming' ? 'bg-purple-600 hover:bg-purple-700' : ''}
-      >
-        Upcoming
-      </Button>
-      <Button
-        variant={slideFilter === 'tomorrow' ? 'default' : 'outline'}
-        onClick={() => setSlideFilter('tomorrow')}
-        size="sm"
-        className={slideFilter === 'tomorrow' ? 'bg-blue-600 hover:bg-blue-700' : ''}
-      >
-        Tomorrow
-      </Button>
-      <Button
-        variant={slideFilter === 'live' ? 'default' : 'outline'}
-        onClick={() => setSlideFilter('live')}
-        size="sm"
-        className={slideFilter === 'live' ? 'bg-red-600 hover:bg-red-700' : ''}
-      >
-        🔴 Live
-      </Button>
-      <Button
-        variant={slideFilter === 'today-winners-a' ? 'default' : 'outline'}
-        onClick={() => setSlideFilter('today-winners-a')}
-        size="sm"
-        className={slideFilter === 'today-winners-a' ? 'bg-blue-600 hover:bg-blue-700' : ''}
-      >
-        🏆 A Group {winnerDate || 'Winner'}
-      </Button>
-      <Button
-        variant={slideFilter === 'today-winners-b' ? 'default' : 'outline'}
-        onClick={() => setSlideFilter('today-winners-b')}
-        size="sm"
-        className={slideFilter === 'today-winners-b' ? 'bg-orange-600 hover:bg-orange-700' : ''}
-      >
-        🏆 B Group {winnerDate || 'Winner'}
-      </Button>
-      <Button
-        variant={slideFilter === 'winners' ? 'default' : 'outline'}
-        onClick={() => setSlideFilter('winners')}
-        size="sm"
-        className={slideFilter === 'winners' ? 'bg-yellow-600 hover:bg-yellow-700' : ''}
-      >
-        🏆 All Winners
-      </Button>
+        
+        {/* Dynamic Group Winners buttons */}
+        {availableGroups.map((groupName) => (
+          <Button
+            key={`winners-${groupName}`}
+            variant={slideFilter === `winners-${groupName}` ? 'default' : 'outline'}
+            onClick={() => setSlideFilter(`winners-${groupName}`)}
+            size="sm"
+            className={slideFilter === `winners-${groupName}` ? 'bg-yellow-600 hover:bg-yellow-700' : ''}
+          >
+            🏆 {groupName}
+          </Button>
+        ))}
+      </div>
     </div>
   );
 
   if (slides.length === 0) {
     const getFilterLabel = () => {
-      if (slideFilter === 'live') return 'live';
+      if (slideFilter === 'today') return "today's matches";
+      if (slideFilter.startsWith('today-') && !slideFilter.includes('winners')) {
+        const groupName = slideFilter.replace('today-', '');
+        return `today's ${groupName} group matches`;
+      }
       if (slideFilter === 'winners') return 'winner';
+      if (slideFilter.startsWith('winners-')) {
+        const groupName = slideFilter.replace('winners-', '');
+        return `${groupName} group winner`;
+      }
       if (slideFilter === 'today-winners-a') return 'A Group winner';
       if (slideFilter === 'today-winners-b') return 'B Group winner';
       return slideFilter;

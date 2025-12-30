@@ -319,6 +319,21 @@ const TeamDetail = () => {
             )}
           </div>
 
+          {/* Current Set */}
+          {teamData.wins + teamData.losses > 0 && (
+            <div 
+              className="p-4 bg-amber-600/20 rounded-lg border border-amber-600/30 hover:bg-amber-600/30 transition-all">
+              <div className="text-white/70 text-sm font-semibold">📋 Current Set</div>
+              <div className="text-2xl font-bold text-amber-300">{Math.ceil((teamData.wins + teamData.losses) / 3)}</div>
+              <div className="mt-3 pt-3 border-t border-amber-600/50 space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-white/60">Total Matches</span>
+                  <span className="text-blue-300 font-bold">{teamData.wins + teamData.losses}</span>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Avg Win Score - Clickable */}
           <div 
             onClick={() => setExpandedStats(expandedStats === 'avgwin' ? null : 'avgwin')}

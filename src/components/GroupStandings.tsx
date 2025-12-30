@@ -264,11 +264,21 @@ const GroupStandings = ({ matches, groupName }: GroupStandingsProps) => {
                 </div>
               </div>
 
-              {/* Win Points Display - NEW */}
-              <div className="px-2 sm:px-3 py-1 sm:py-2 mb-2 bg-cyan-600/20 rounded-lg border border-cyan-500/30 group-hover:bg-cyan-600/40 group-hover:border-cyan-400/60 transition-all duration-300">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-white/70 text-xs sm:text-sm font-semibold">🎯 Total Wins</span>
-                  <span className="text-base sm:text-lg lg:text-xl font-extrabold text-cyan-300 group-hover:text-cyan-200 transition-colors">{team.winPoints}</span>
+              {/* Win Points Display with Set */}
+              <div className="space-y-2 sm:space-y-2 mb-2">
+                {team.wins + team.losses > 0 && (
+                  <div className="px-2 sm:px-3 py-1 sm:py-2 bg-amber-600/20 rounded-lg border border-amber-500/30 group-hover:bg-amber-600/40 group-hover:border-amber-400/60 transition-all duration-300">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-white/70 text-xs sm:text-sm font-semibold">📋 Total Set</span>
+                      <span className="text-base sm:text-lg lg:text-xl font-extrabold text-amber-300 group-hover:text-amber-200 transition-colors">{Math.ceil((team.wins + team.losses) / 3)}</span>
+                    </div>
+                  </div>
+                )}
+                <div className="px-2 sm:px-3 py-1 sm:py-2 bg-cyan-600/20 rounded-lg border border-cyan-500/30 group-hover:bg-cyan-600/40 group-hover:border-cyan-400/60 transition-all duration-300">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-white/70 text-xs sm:text-sm font-semibold">🎯 Total Wins Points</span>
+                    <span className="text-base sm:text-lg lg:text-xl font-extrabold text-cyan-300 group-hover:text-cyan-200 transition-colors">{team.winPoints}</span>
+                  </div>
                 </div>
               </div>
 

@@ -29,7 +29,8 @@ export const AdminDashboard = ({ session }: AdminDashboardProps) => {
   const [fullscreenMatch, setFullscreenMatch] = useState<any>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [filter, setFilter] = useState<"live" | "upcoming" | "today" | "tomorrow" | "completed">("live");
-  const [groupFilter, setGroupFilter] = useState<"all" | "A" | "B">("all");
+  const [groupFilter, setGroupFilter] = useState<string>("all");
+  const [availableGroups, setAvailableGroups] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<'matches' | 'slides' | 'data'>('matches');
   const [stats, setStats] = useState({ teams: 0, matches: 0, live: 0 });
   const [isAdmin, setIsAdmin] = useState(false);
@@ -93,7 +94,14 @@ export const AdminDashboard = ({ session }: AdminDashboardProps) => {
     }
 
     const { data } = await query.order("created_at", { ascending: false });
-    if (data) setMatches(data);
+    if (data) {
+      setMatches(data);
+      // Extract unique group names and update available groups
+      const uniqueGroups = Array.from(
+        new Set(data.map((m: any) => m.group_name).filter(Boolean))
+      ).sort();
+      setAvailableGroups(uniqueGroups);
+    }
 
     // Check for live matches
     const { data: liveMatches } = await supabase
@@ -423,7 +431,7 @@ export const AdminDashboard = ({ session }: AdminDashboardProps) => {
                   {completedCount} Completed
                 </Button>
               </div>
-              <div className="flex gap-2 items-center">
+              <div className="flex gap-2 items-center flex-wrap">
                 <span className="text-sm text-muted-foreground">Filter by Group:</span>
                 <Button
                   variant={groupFilter === "all" ? "default" : "outline"}
@@ -432,20 +440,16 @@ export const AdminDashboard = ({ session }: AdminDashboardProps) => {
                 >
                   All
                 </Button>
-                <Button
-                  variant={groupFilter === "A" ? "default" : "outline"}
-                  onClick={() => setGroupFilter("A")}
-                  className="text-xs"
-                >
-                  Group A
-                </Button>
-                <Button
-                  variant={groupFilter === "B" ? "default" : "outline"}
-                  onClick={() => setGroupFilter("B")}
-                  className="text-xs"
-                >
-                  Group B
-                </Button>
+                {availableGroups.map((group) => (
+                  <Button
+                    key={group}
+                    variant={groupFilter === group ? "default" : "outline"}
+                    onClick={() => setGroupFilter(group)}
+                    className="text-xs"
+                  >
+                    Group {group}
+                  </Button>
+                ))}
               </div>
               <MatchList 
                 matches={matches} 

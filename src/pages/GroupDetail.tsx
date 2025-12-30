@@ -304,8 +304,9 @@ const GroupDetail = () => {
                   <span className="text-yellow-300 font-extrabold text-base sm:text-lg flex-shrink-0">{team.totalScore}</span>
                 </div>
                 <div className="flex flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm text-white/70">
+                  {team.wins + team.losses > 0 && <span>📋Total Set: <span className="text-amber-300 font-bold">{Math.ceil((team.wins + team.losses) / 3)}</span></span>}
                   <span>🎯Total Wins Points: <span className="text-green-400 font-bold">{team.wins}</span></span>
-                  <span>🏅 Total Win: <span className="text-amber-400 font-bold">{team.wins}</span></span>
+                  <span>🏅 Total Win Matches: <span className="text-amber-400 font-bold">{team.wins}</span></span>
                   <span>❌ L: <span className="text-red-400 font-bold">{team.losses}</span></span>
                   <span>📊 {team.winRate}</span>
                 </div>

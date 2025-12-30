@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { updateMatchStatus, getDisplayStatus } from "@/lib/matchStatus";
-import { User } from "lucide-react";
+import { User, X } from "lucide-react";
 import { PlayerProfile } from "./PlayerProfile";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -18,10 +18,13 @@ export const GroupCards = ({ matches }: GroupCardsProps) => {
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
   const [selectedPlayer, setSelectedPlayer] = useState<any>(null);
   const [playerProfileOpen, setPlayerProfileOpen] = useState(false);
+  const [filterDate, setFilterDate] = useState<string | null>(null);
+  const [filterGroupName, setFilterGroupName] = useState<string | null>(null);
 
   // Get current date
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+  const todayString = today.toISOString().split('T')[0];
 
   // Separate matches: current/future first, then past matches
   const upcomingMatches = matches.filter((match: any) => {
@@ -39,7 +42,28 @@ export const GroupCards = ({ matches }: GroupCardsProps) => {
   }).reverse(); // Show most recent past matches first
 
   // Combine: upcoming first, then past
-  const filteredMatches = [...upcomingMatches, ...pastMatches];
+  let filteredMatches = [...upcomingMatches, ...pastMatches];
+
+  // Get unique group names dynamically from all matches
+  const uniqueGroupNames = Array.from(
+    new Set(
+      matches
+        .map((match: any) => match.group_name)
+        .filter((name: any) => name)
+    )
+  ).sort();
+
+  // Apply date filter
+  if (filterDate === 'today') {
+    filteredMatches = filteredMatches.filter((match: any) => match.date === todayString);
+  }
+
+  // Apply group name filter
+  if (filterGroupName) {
+    filteredMatches = filteredMatches.filter((match: any) => 
+      match.group_name === filterGroupName
+    );
+  }
 
   // Group matches by group_name
   const groupedMatches = filteredMatches.reduce((acc: any, match: any) => {
@@ -73,9 +97,56 @@ export const GroupCards = ({ matches }: GroupCardsProps) => {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-3xl font-bold">Tournament Groups</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-3xl font-bold">Tournament Groups</h2>
+      </div>
+
+      {/* Filter buttons */}
+      <div className="flex flex-wrap gap-3 items-center">
+        <div className="flex gap-2 items-center">
+          <span className="text-sm font-medium text-muted-foreground">Date:</span>
+          <Button
+            onClick={() => setFilterDate(filterDate === 'today' ? null : 'today')}
+            variant={filterDate === 'today' ? 'default' : 'outline'}
+            size="sm"
+            className="h-9"
+          >
+            Today
+          </Button>
+        </div>
+
+        <div className="flex gap-2 items-center flex-wrap">
+          <span className="text-sm font-medium text-muted-foreground">Group:</span>
+          {uniqueGroupNames.map((groupName) => (
+            <Button
+              key={groupName}
+              onClick={() => setFilterGroupName(filterGroupName === groupName ? null : groupName)}
+              variant={filterGroupName === groupName ? 'default' : 'outline'}
+              size="sm"
+              className="h-9"
+            >
+              {groupName}
+            </Button>
+          ))}
+        </div>
+
+        {(filterDate || filterGroupName) && (
+          <Button
+            onClick={() => {
+              setFilterDate(null);
+              setFilterGroupName(null);
+            }}
+            variant="ghost"
+            size="sm"
+            className="h-9"
+          >
+            <X className="w-4 h-4 mr-1" /> Clear
+          </Button>
+        )}
+      </div>
+
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {Object.entries(groupedMatches).map(([groupName, groupMatches]: [string, any]) => (
+        {Object.entries(groupedMatches).sort(([a], [b]) => a.localeCompare(b)).map(([groupName, groupMatches]: [string, any]) => (
           <div
             key={groupName}
             onClick={() => navigate(`/group/${groupName}`)}
@@ -110,13 +181,28 @@ export const GroupCards = ({ matches }: GroupCardsProps) => {
 
                   return (
                     <div key={match.id} className={`p-3 bg-white/5 hover:bg-white/15 rounded-lg space-y-2 transition-all duration-200 cursor-default border border-white/10 ${borderColor} hover:shadow-lg`}>
-                      <div className="flex justify-between items-center text-sm">
-                        <span className="font-semibold text-white/90 hover:text-cyan-300 transition-colors">{match.team1_name}</span>
-                        {/* <span className="text-xs text-white/50">VS</span> */}
-                        <span className="bg-gradient-to-r from-rose-500 to-pink-500 text-white font-bold text-sm sm:text-base md:text-lg px-3 sm:px-4 py-1 sm:py-1.5 rounded-lg shadow-lg hover:shadow-xl hover:from-rose-600 hover:to-pink-600 transition-all">
+                      <div className="flex justify-between items-center text-sm gap-2">
+                        <div className="flex-1 text-center">
+                          <span className="font-semibold text-white/90 hover:text-cyan-300 transition-colors block">{match.team1_name}</span>
+                          <span className="text-lg font-bold text-cyan-300">{match.team1_score ?? 0}</span>
+                          {match.status === 'completed' && (
+                            <span className={`text-xs font-semibold block ${match.team1_score > match.team2_score ? 'text-green-400' : 'text-red-400'}`}>
+                              {match.team1_score > match.team2_score ? 'WON' : 'LOST'}
+                            </span>
+                          )}
+                        </div>
+                        <span className="bg-gradient-to-r from-rose-500 to-pink-500 text-white font-bold text-xs px-2 py-1 rounded-lg shadow-lg hover:shadow-xl hover:from-rose-600 hover:to-pink-600 transition-all">
                           VS
                         </span>
-                        <span className="font-semibold text-white/90 hover:text-cyan-300 transition-colors">{match.team2_name}</span>
+                        <div className="flex-1 text-center">
+                          <span className="font-semibold text-white/90 hover:text-cyan-300 transition-colors block">{match.team2_name}</span>
+                          <span className="text-lg font-bold text-cyan-300">{match.team2_score ?? 0}</span>
+                          {match.status === 'completed' && (
+                            <span className={`text-xs font-semibold block ${match.team2_score > match.team1_score ? 'text-green-400' : 'text-red-400'}`}>
+                              {match.team2_score > match.team1_score ? 'WON' : 'LOST'}
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <div className="flex justify-between items-center text-xs text-white/60 mb-2">
                         <span>{match.date}</span>
