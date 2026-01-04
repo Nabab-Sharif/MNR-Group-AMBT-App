@@ -11,6 +11,22 @@ export const SlideManagement = () => {
   const [slides, setSlides] = useState<any[]>([]);
   const [editingSlide, setEditingSlide] = useState<any>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [autoPlayEnabled, setAutoPlayEnabled] = useState(() => {
+    const saved = localStorage.getItem('slideshow-autoplay-enabled');
+    return saved !== null ? JSON.parse(saved) : false;
+  });
+  const [autoPlayInterval, setAutoPlayInterval] = useState(() => {
+    const saved = localStorage.getItem('slideshow-autoplay-interval');
+    return saved !== null ? parseInt(saved, 10) : 5;
+  });
+
+  const saveAutoPlaySettings = (enabled: boolean, interval: number) => {
+    localStorage.setItem('slideshow-autoplay-enabled', JSON.stringify(enabled));
+    localStorage.setItem('slideshow-autoplay-interval', JSON.stringify(interval));
+    setAutoPlayEnabled(enabled);
+    setAutoPlayInterval(interval);
+    toast.success("Auto-play settings saved!");
+  };
 
   const fetchSlides = async () => {
     const { data } = await supabase
@@ -88,6 +104,52 @@ export const SlideManagement = () => {
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Slide Management</h2>
       </div>
+
+      {/* Auto-play Settings */}
+      <Card className="p-6 border-2 border-primary/30 bg-card">
+        <div className="space-y-4">
+          <h3 className="text-lg font-bold">🎬 Auto-Play Settings</h3>
+          
+          <div className="flex items-center gap-4">
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={autoPlayEnabled}
+                onChange={(e) => saveAutoPlaySettings(e.target.checked, autoPlayInterval)}
+                className="w-5 h-5 rounded"
+              />
+              <span className="font-semibold">Enable Auto-Play</span>
+            </label>
+          </div>
+
+          {autoPlayEnabled && (
+            <div className="space-y-3 pl-8 border-l-2 border-primary/30">
+              <div className="flex items-center gap-4">
+                <label className="text-sm font-semibold min-w-fit">Interval (seconds):</label>
+                <input
+                  type="number"
+                  min="1"
+                  max="60"
+                  value={autoPlayInterval}
+                  onChange={(e) => {
+                    const value = Math.max(1, parseInt(e.target.value, 10) || 5);
+                    setAutoPlayInterval(value);
+                  }}
+                  className="w-20 px-3 py-2 border border-border rounded bg-background text-foreground"
+                />
+                <Button
+                  onClick={() => saveAutoPlaySettings(autoPlayEnabled, autoPlayInterval)}
+                  className="ml-2"
+                  size="sm"
+                >
+                  Save
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">⏱️ Slide will auto-advance every {autoPlayInterval} second(s). Auto-play pauses on hover.</p>
+            </div>
+          )}
+        </div>
+      </Card>
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {slides.map((slide) => (

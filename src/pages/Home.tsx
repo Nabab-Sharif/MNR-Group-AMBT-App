@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,28 @@ const Home = () => {
   const [showWelcome, setShowWelcome] = useState(false);
   const [showLiveScoreboard, setShowLiveScoreboard] = useState(true);
   const [playerDialog, setPlayerDialog] = useState<any>(null);
+  const fullscreenTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    // Auto-close fullscreen scoreboard after 10 seconds
+    if (fullscreenMatch) {
+      // Clear any existing timeout
+      if (fullscreenTimeoutRef.current) {
+        clearTimeout(fullscreenTimeoutRef.current);
+      }
+      
+      // Set new timeout for 10 seconds
+      fullscreenTimeoutRef.current = setTimeout(() => {
+        setFullscreenMatch(null);
+      }, 10000);
+    }
+
+    return () => {
+      if (fullscreenTimeoutRef.current) {
+        clearTimeout(fullscreenTimeoutRef.current);
+      }
+    };
+  }, [fullscreenMatch]);
 
   useEffect(() => {
     // Fetch all matches
@@ -184,7 +206,10 @@ const Home = () => {
                 <LiveScoreboard
                   key={m.id}
                   match={m}
-                  onWin={(match) => setWinningMatch(match)}
+                  onWin={(match) => {
+                    setWinningMatch(match);
+                    setFullscreenMatch(match);
+                  }}
                   onShowWelcome={() => {
                     setWelcomeMatch(m);
                     setShowWelcome(true);

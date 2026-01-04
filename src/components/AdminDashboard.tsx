@@ -15,6 +15,7 @@ import { SlideManagement } from "@/components/SlideManagement";
 import { FullscreenScoreboard } from "@/components/FullscreenScoreboard";
 import { NavLink } from "@/components/NavLink";
 import { DataManagement } from "@/components/DataManagement";
+import { ThemeSelector } from "@/components/ThemeSelector";
 
 interface AdminDashboardProps {
   session: Session;
@@ -272,6 +273,7 @@ export const AdminDashboard = ({ session }: AdminDashboardProps) => {
               </div>
             </div>
             <div className="flex items-center gap-4">
+              <ThemeSelector />
               <Button onClick={handleFullscreenToggle} variant="outline">
                 Fullscreen
               </Button>

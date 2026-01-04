@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { User, Trophy, ChevronLeft, ChevronRight } from "lucide-react";
 import { formatTimeToTwelveHour } from "@/lib/utils";
 import logo from "@/assets/logo.jpg";
+import { useTheme } from "@/contexts/ThemeContext";
 
 interface Match {
   id: string;
@@ -37,15 +38,40 @@ interface Match {
 }
 
 export const EnhancedMatchSlideshow = () => {
+  const { currentTheme } = useTheme();
+  const isWhiteTheme = currentTheme === 'white';
+  
   const [slides, setSlides] = useState<Match[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [slideFilter, setSlideFilter] = useState<string>('winners-A');
+  const [slideFilter, setSlideFilter] = useState<string>('today');
   const [winnerDate, setWinnerDate] = useState<string | null>(null);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [todayDataExists, setTodayDataExists] = useState(false);
   const [todayUpcomingData, setTodayUpcomingData] = useState<Match[]>([]);
   const [availableGroups, setAvailableGroups] = useState<string[]>([]);
+  const [autoPlayEnabled, setAutoPlayEnabled] = useState(() => {
+    const saved = localStorage.getItem('slideshow-autoplay-enabled');
+    return saved !== null ? JSON.parse(saved) : false;
+  });
+  const [autoPlayInterval, setAutoPlayInterval] = useState(() => {
+    const saved = localStorage.getItem('slideshow-autoplay-interval');
+    return saved !== null ? parseInt(saved, 10) : 5;
+  });
+  const [isHovering, setIsHovering] = useState(false);
+
+  // Monitor localStorage changes for auto-play settings
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const enabled = localStorage.getItem('slideshow-autoplay-enabled');
+      const interval = localStorage.getItem('slideshow-autoplay-interval');
+      if (enabled !== null) setAutoPlayEnabled(JSON.parse(enabled));
+      if (interval !== null) setAutoPlayInterval(parseInt(interval, 10));
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -101,6 +127,17 @@ export const EnhancedMatchSlideshow = () => {
     const interval = setInterval(checkTodayData, 5000); // Check every 5 seconds
     return () => clearInterval(interval);
   }, [slideFilter]);
+
+  // Auto-play effect
+  useEffect(() => {
+    if (!autoPlayEnabled || isHovering || slides.length === 0) return;
+
+    const autoPlayTimer = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % slides.length);
+    }, autoPlayInterval * 1000);
+
+    return () => clearInterval(autoPlayTimer);
+  }, [autoPlayEnabled, autoPlayInterval, slides.length, isHovering]);
 
   useEffect(() => {
     const fetchSlides = async () => {
@@ -408,16 +445,16 @@ export const EnhancedMatchSlideshow = () => {
       return (
         <div className="text-center space-y-2">
           <div className="flex justify-center">
-            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full overflow-hidden border-2 border-primary/50 flex items-center justify-center bg-muted">
+            <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-full overflow-hidden border-2 flex items-center justify-center ${isWhiteTheme ? 'border-blue-400/50 bg-blue-50' : 'border-primary/50 bg-muted'}`}>
               {playerPhoto ? (
                 <img src={playerPhoto} alt={playerName} className="w-full h-full object-cover" />
               ) : (
-                <User className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground/70" />
+                <User className={`h-6 w-6 sm:h-8 sm:w-8 ${isWhiteTheme ? 'text-blue-400/70' : 'text-muted-foreground/70'}`} />
               )}
             </div>
           </div>
-          <div className="text-white text-xs sm:text-sm font-bold">{playerName}</div>
-          <div className="text-yellow-400 text-2xl sm:text-3xl font-bold">{total}</div>
+          <div className={`text-xs sm:text-sm font-bold ${isWhiteTheme ? 'text-foreground' : 'text-white'}`}>{playerName}</div>
+          <div className={`text-2xl sm:text-3xl font-bold ${isWhiteTheme ? 'text-orange-600' : 'text-yellow-400'}`}>{total}</div>
         </div>
       );
     }
@@ -428,23 +465,23 @@ export const EnhancedMatchSlideshow = () => {
     return (
       <div className="text-center space-y-2">
         <div className="flex justify-center">
-          <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full overflow-hidden border-2 border-accent/50 flex items-center justify-center bg-muted shadow-lg shadow-accent/30">
+          <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-full overflow-hidden border-2 flex items-center justify-center shadow-lg ${isWhiteTheme ? 'border-orange-400/50 bg-orange-50 shadow-orange-400/30' : 'border-accent/50 bg-muted shadow-accent/30'}`}>
             {playerPhoto ? (
               <img src={playerPhoto} alt={playerName} className="w-full h-full object-cover" />
             ) : (
-              <User className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground/70" />
+              <User className={`h-6 w-6 sm:h-8 sm:w-8 ${isWhiteTheme ? 'text-orange-400/70' : 'text-muted-foreground/70'}`} />
             )}
           </div>
         </div>
-        <div className="text-white text-xs sm:text-sm font-bold">{playerName}</div>
+        <div className={`text-xs sm:text-sm font-bold ${isWhiteTheme ? 'text-foreground' : 'text-white'}`}>{playerName}</div>
         <div className="flex gap-0.5 justify-center flex-wrap">
           {row1.map((score, index) => (
             <div
               key={index}
               className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full text-[8px] sm:text-xs font-bold flex items-center justify-center border ${
                 score === 1
-                  ? 'bg-gradient-to-br from-emerald-400 to-teal-500 border-emerald-500 text-white'
-                  : 'bg-white/20 border-white/30 text-white/50'
+                  ? isWhiteTheme ? 'bg-gradient-to-br from-green-400 to-teal-400 border-green-500 text-green-900' : 'bg-gradient-to-br from-emerald-400 to-teal-500 border-emerald-500 text-white'
+                  : isWhiteTheme ? 'bg-gray-200 border-gray-300 text-gray-400' : 'bg-white/20 border-white/30 text-white/50'
               }`}
             >
               {score}
@@ -457,15 +494,15 @@ export const EnhancedMatchSlideshow = () => {
               key={index + 8}
               className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full text-[8px] sm:text-xs font-bold flex items-center justify-center border ${
                 score === 1
-                  ? 'bg-gradient-to-br from-emerald-400 to-teal-500 border-emerald-500 text-white'
-                  : 'bg-white/20 border-white/30 text-white/50'
+                  ? isWhiteTheme ? 'bg-gradient-to-br from-green-400 to-teal-400 border-green-500 text-green-900' : 'bg-gradient-to-br from-emerald-400 to-teal-500 border-emerald-500 text-white'
+                  : isWhiteTheme ? 'bg-gray-200 border-gray-300 text-gray-400' : 'bg-white/20 border-white/30 text-white/50'
               }`}
             >
               {score}
             </div>
           ))}
         </div>
-        <div className="text-yellow-400 text-lg sm:text-2xl font-bold mt-1">{total}</div>
+        <div className={`text-lg sm:text-2xl font-bold mt-1 ${isWhiteTheme ? 'text-orange-600' : 'text-yellow-400'}`}>{total}</div>
       </div>
     );
   };
@@ -476,17 +513,31 @@ export const EnhancedMatchSlideshow = () => {
       
       {/* Dark Theme Slide - Like Reference Image */}
       <div 
-        className="relative overflow-hidden bg-card rounded-2xl shadow-2xl w-full cursor-grab active:cursor-grabbing"
+        className={`relative overflow-hidden rounded-2xl shadow-2xl w-full cursor-grab active:cursor-grabbing transition-transform duration-300 hover:shadow-3xl hover:scale-[1.01] ${
+          isWhiteTheme ? 'bg-white border-2 border-foreground/20' : 'bg-card'
+        }`}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
+        onMouseEnter={() => setIsHovering(true)}
+        onMouseLeave={() => setIsHovering(false)}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-3 sm:px-4 md:px-8 py-2 sm:py-3 md:py-4 border-b border-white/10">
+        <div className={`flex items-center justify-between px-3 sm:px-4 md:px-8 py-2 sm:py-3 md:py-4 ${
+          isWhiteTheme 
+            ? 'border-b border-foreground/10 bg-foreground/5' 
+            : 'border-b border-white/10'
+        }`}>
           <div className="flex items-center gap-2 sm:gap-3">
-            <img src={logo} alt="Logo" className="w-7 h-7 sm:w-9 sm:h-9 md:w-12 md:h-12 rounded-full border-2 border-white/30" />
-            <span className="text-white font-bold text-xs sm:text-sm md:text-lg truncate">Anis Memorial Badminton Tournament</span>
+            <img src={logo} alt="Logo" className={`w-7 h-7 sm:w-9 sm:h-9 md:w-12 md:h-12 rounded-full border-2 ${
+              isWhiteTheme ? 'border-foreground/30' : 'border-white/30'
+            }`} />
+            <span className={`font-bold text-xs sm:text-sm md:text-lg truncate ${
+              isWhiteTheme ? 'text-foreground' : 'text-white'
+            }`}>Anis Memorial Badminton Tournament</span>
           </div>
-          <div className="flex items-center gap-2 text-white/70 text-xs sm:text-sm">
+          <div className={`flex items-center gap-2 text-xs sm:text-sm ${
+            isWhiteTheme ? 'text-foreground/60' : 'text-white/70'
+          }`}>
             <span className="hidden sm:inline">Welcome</span>
             {currentSlide.status === 'live' && (
               <span className="bg-red-600 text-white px-2 py-0.5 rounded text-xs animate-pulse">LIVE</span>
@@ -499,13 +550,25 @@ export const EnhancedMatchSlideshow = () => {
           {/* Left Side - Match Info & Scoreboard */}
           <div className="space-y-3 sm:space-y-4 md:space-y-6 flex flex-col justify-center">
             {/* Team Names with Score - Scoreboard Style */}
-            <div className="space-y-2 sm:space-y-3 bg-card/50 rounded-xl p-4 sm:p-6 border border-primary/20">
+            <div className={`space-y-2 sm:space-y-3 rounded-xl p-4 sm:p-6 border ${
+              isWhiteTheme
+                ? 'bg-foreground/5 border-foreground/20'
+                : 'bg-card/50 border-primary/20'
+            }`}>
               <div className="flex items-center justify-between gap-2 sm:gap-3">
                 <div className="flex-1">
-                  <div className="text-white text-lg sm:text-2xl md:text-3xl font-black truncate">{currentSlide.team1_name}</div>
-                  <div className="text-white/50 text-xs sm:text-sm mt-1">Team 1</div>
+                  <div className={`text-lg sm:text-2xl md:text-3xl font-black truncate ${
+                    isWhiteTheme ? 'text-foreground' : 'text-white'
+                  }`}>{currentSlide.team1_name}</div>
+                  <div className={`text-xs sm:text-sm mt-1 ${
+                    isWhiteTheme ? 'text-foreground/50' : 'text-white/50'
+                  }`}>Team 1</div>
                 </div>
-                <div className="text-yellow-400 text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black px-2 sm:px-4 py-1 sm:py-2 bg-black/50 rounded-lg">
+                <div className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black px-2 sm:px-4 py-1 sm:py-2 rounded-lg ${
+                  isWhiteTheme 
+                    ? 'text-orange-600 bg-orange-100' 
+                    : 'text-yellow-400 bg-black/50'
+                }`}>
                   {currentSlide.team1_score || 0}
                 </div>
               </div>
@@ -514,12 +577,12 @@ export const EnhancedMatchSlideshow = () => {
               {(slideFilter === 'winners' || slideFilter === 'today-winners-a' || slideFilter === 'today-winners-b') && (
                 <div className="space-y-1">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-white/50">Performance</span>
-                    <span className="text-cyan-400 font-bold">{Math.round(((currentSlide.team1_score || 0) / 30) * 100)}%</span>
+                    <span className={isWhiteTheme ? 'text-foreground/50' : 'text-white/50'}>Performance</span>
+                    <span className={`font-bold ${isWhiteTheme ? 'text-blue-600' : 'text-cyan-400'}`}>{Math.round(((currentSlide.team1_score || 0) / 30) * 100)}%</span>
                   </div>
-                  <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden border border-white/20">
+                  <div className={`w-full h-2 rounded-full overflow-hidden border ${isWhiteTheme ? 'bg-foreground/10 border-foreground/20' : 'bg-white/10 border-white/20'}`}>
                     <div 
-                      className="h-full bg-primary transition-all duration-500"
+                      className={`h-full transition-all duration-500 ${isWhiteTheme ? 'bg-blue-600' : 'bg-primary'}`}
                       style={{ width: `${Math.min(((currentSlide.team1_score || 0) / 30) * 100, 100)}%` }}
                     />
                   </div>
@@ -527,15 +590,15 @@ export const EnhancedMatchSlideshow = () => {
               )}
 
               <div className="text-center py-2 sm:py-3">
-                <span className="text-white/60 text-sm sm:text-base font-bold px-3 py-1 bg-white/10 rounded-full">VS</span>
+                <span className={`text-sm sm:text-base font-bold px-3 py-1 rounded-full ${isWhiteTheme ? 'text-foreground/60 bg-foreground/10' : 'text-white/60 bg-white/10'}`}>VS</span>
               </div>
 
               <div className="flex items-center justify-between gap-2 sm:gap-3">
                 <div className="flex-1">
-                  <div className="text-white text-lg sm:text-2xl md:text-3xl font-black truncate">{currentSlide.team2_name}</div>
-                  <div className="text-white/50 text-xs sm:text-sm mt-1">Team 2</div>
+                  <div className={`text-lg sm:text-2xl md:text-3xl font-black truncate ${isWhiteTheme ? 'text-foreground' : 'text-white'}`}>{currentSlide.team2_name}</div>
+                  <div className={`text-xs sm:text-sm mt-1 ${isWhiteTheme ? 'text-foreground/50' : 'text-white/50'}`}>Team 2</div>
                 </div>
-                <div className="text-yellow-400 text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black px-2 sm:px-4 py-1 sm:py-2 bg-black/50 rounded-lg">
+                <div className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black px-2 sm:px-4 py-1 sm:py-2 rounded-lg ${isWhiteTheme ? 'text-pink-600 bg-pink-100' : 'text-yellow-400 bg-black/50'}`}>
                   {currentSlide.team2_score || 0}
                 </div>
               </div>
@@ -544,12 +607,12 @@ export const EnhancedMatchSlideshow = () => {
               {(slideFilter === 'winners' || slideFilter === 'today-winners-a' || slideFilter === 'today-winners-b') && (
                 <div className="space-y-1">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-white/50">Performance</span>
-                    <span className="text-rose-400 font-bold">{Math.round(((currentSlide.team2_score || 0) / 30) * 100)}%</span>
+                    <span className={isWhiteTheme ? 'text-foreground/50' : 'text-white/50'}>Performance</span>
+                    <span className={`font-bold ${isWhiteTheme ? 'text-red-600' : 'text-rose-400'}`}>{Math.round(((currentSlide.team2_score || 0) / 30) * 100)}%</span>
                   </div>
-                  <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden border border-white/20">
+                  <div className={`w-full h-2 rounded-full overflow-hidden border ${isWhiteTheme ? 'bg-foreground/10 border-foreground/20' : 'bg-white/10 border-white/20'}`}>
                     <div 
-                      className="h-full bg-destructive transition-all duration-500"
+                      className={`h-full transition-all duration-500 ${isWhiteTheme ? 'bg-red-600' : 'bg-destructive'}`}
                       style={{ width: `${Math.min(((currentSlide.team2_score || 0) / 30) * 100, 100)}%` }}
                     />
                   </div>
@@ -559,12 +622,12 @@ export const EnhancedMatchSlideshow = () => {
 
             {/* Winner Banner - Only show on winners slide */}
             {currentSlide.winner && (slideFilter === 'winners' || slideFilter === 'today-winners-a' || slideFilter === 'today-winners-b') && (
-              <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-primary via-primary to-primary p-0.5 shadow-2xl">
-                <div className="bg-card rounded-lg px-4 sm:px-6 py-4 sm:py-5 text-center relative">
+              <div className={`relative overflow-hidden rounded-xl p-0.5 shadow-2xl ${isWhiteTheme ? 'bg-gradient-to-r from-amber-500 to-orange-500' : 'bg-gradient-to-r from-primary via-primary to-primary'}`}>
+                <div className={`rounded-lg px-4 sm:px-6 py-4 sm:py-5 text-center relative ${isWhiteTheme ? 'bg-white' : 'bg-card'}`}>
                   {/* Animated background particles */}
                   <div className="absolute inset-0 overflow-hidden rounded-lg">
-                    <div className="absolute -top-1/2 -right-1/2 w-96 h-96 bg-yellow-400/10 rounded-full blur-3xl animate-pulse"></div>
-                    <div className="absolute -bottom-1/2 -left-1/2 w-96 h-96 bg-orange-400/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+                    <div className="absolute -top-1/2 -right-1/2 w-96 h-96 rounded-full blur-3xl animate-pulse" style={{ background: isWhiteTheme ? 'rgba(251, 146, 60, 0.1)' : 'rgba(234, 179, 8, 0.1)' }}></div>
+                    <div className="absolute -bottom-1/2 -left-1/2 w-96 h-96 rounded-full blur-3xl animate-pulse" style={{ background: isWhiteTheme ? 'rgba(249, 115, 22, 0.1)' : 'rgba(234, 179, 8, 0.1)', animationDelay: '1s' }}></div>
                   </div>
                   
                   <div className="relative z-10 space-y-2">
@@ -573,10 +636,10 @@ export const EnhancedMatchSlideshow = () => {
                       <span className="text-2xl animate-bounce" style={{ animationDelay: '0.1s' }}>✨</span>
                       <span className="text-2xl animate-bounce" style={{ animationDelay: '0.2s' }}>🎉</span>
                     </div>
-                    <div className="text-accent font-black text-2xl sm:text-4xl">
+                    <div className={`font-black text-2xl sm:text-4xl ${isWhiteTheme ? 'text-amber-600' : 'text-accent'}`}>
                       {currentSlide.winner}
                     </div>
-                    <div className="text-amber-300 font-bold text-xs sm:text-sm tracking-widest uppercase">
+                    <div className={`font-bold text-xs sm:text-sm tracking-widest uppercase ${isWhiteTheme ? 'text-orange-600' : 'text-amber-300'}`}>
                       ⚡ Win • {currentSlide.date} ⚡
                     </div>
                   </div>
@@ -588,35 +651,35 @@ export const EnhancedMatchSlideshow = () => {
 
             {/* Match Details */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
-              <div className="bg-white/5 rounded-lg sm:rounded-xl p-2 sm:p-3 border border-white/10">
-                <div className="text-white/50 text-xs">📅 DATE</div>
-                <div className="text-white font-bold text-xs sm:text-sm">{currentSlide.date}</div>
+              <div className={`rounded-lg sm:rounded-xl p-2 sm:p-3 border ${isWhiteTheme ? 'bg-foreground/5 border-foreground/10' : 'bg-white/5 border-white/10'}`}>
+                <div className={`text-xs ${isWhiteTheme ? 'text-foreground/50' : 'text-white/50'}`}>📅 DATE</div>
+                <div className={`font-bold text-xs sm:text-sm ${isWhiteTheme ? 'text-foreground' : 'text-white'}`}>{currentSlide.date}</div>
               </div>
-              <div className="bg-white/5 rounded-lg sm:rounded-xl p-2 sm:p-3 border border-white/10">
-                <div className="text-white/50 text-xs">⏰ TIME</div>
-                <div className="text-white font-bold text-xs sm:text-sm">{formatTimeToTwelveHour(currentSlide.match_time)}</div>
+              <div className={`rounded-lg sm:rounded-xl p-2 sm:p-3 border ${isWhiteTheme ? 'bg-foreground/5 border-foreground/10' : 'bg-white/5 border-white/10'}`}>
+                <div className={`text-xs ${isWhiteTheme ? 'text-foreground/50' : 'text-white/50'}`}>⏰ TIME</div>
+                <div className={`font-bold text-xs sm:text-sm ${isWhiteTheme ? 'text-foreground' : 'text-white'}`}>{formatTimeToTwelveHour(currentSlide.match_time)}</div>
               </div>
-              <div className="bg-white/5 rounded-lg sm:rounded-xl p-2 sm:p-3 border border-white/10">
-                <div className="text-white/50 text-xs">📍 VENUE</div>
-                <div className="text-white font-bold text-xs sm:text-sm">{currentSlide.venue}</div>
+              <div className={`rounded-lg sm:rounded-xl p-2 sm:p-3 border ${isWhiteTheme ? 'bg-foreground/5 border-foreground/10' : 'bg-white/5 border-white/10'}`}>
+                <div className={`text-xs ${isWhiteTheme ? 'text-foreground/50' : 'text-white/50'}`}>📍 VENUE</div>
+                <div className={`font-bold text-xs sm:text-sm ${isWhiteTheme ? 'text-foreground' : 'text-white'}`}>{currentSlide.venue}</div>
               </div>
-              <div className="bg-white/5 rounded-lg sm:rounded-xl p-2 sm:p-3 border border-white/10">
-                <div className="text-white/50 text-xs">🏆 GROUP</div>
-                <div className="text-white font-bold text-xs sm:text-sm">{currentSlide.group_name}</div>
+              <div className={`rounded-lg sm:rounded-xl p-2 sm:p-3 border ${isWhiteTheme ? 'bg-foreground/5 border-foreground/10' : 'bg-white/5 border-white/10'}`}>
+                <div className={`text-xs ${isWhiteTheme ? 'text-foreground/50' : 'text-white/50'}`}>🏆 GROUP</div>
+                <div className={`font-bold text-xs sm:text-sm ${isWhiteTheme ? 'text-foreground' : 'text-white'}`}>{currentSlide.group_name}</div>
               </div>
             </div>
           </div>
 
           {/* Right Side - 4 Player Photos Grid */}
           {(slideFilter === 'winners' || slideFilter === 'today-winners-a' || slideFilter === 'today-winners-b') ? (
-            <div className="relative rounded-xl p-4 sm:p-6 border border-primary/20 bg-card/50 overflow-hidden">
+            <div className={`relative rounded-xl p-4 sm:p-6 border overflow-hidden ${isWhiteTheme ? 'bg-foreground/5 border-foreground/20' : 'bg-card/50 border-primary/20'}`}>
               {/* Decorative gradient background */}
-              <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 via-transparent to-orange-500/5 rounded-xl pointer-events-none"></div>
+              <div className="absolute inset-0 rounded-xl pointer-events-none" style={{ background: isWhiteTheme ? 'linear-gradient(135deg, rgba(251, 146, 60, 0.05), transparent, rgba(249, 115, 22, 0.05))' : 'linear-gradient(135deg, rgba(234, 179, 8, 0.05), transparent, rgba(234, 179, 8, 0.05))' }}></div>
               
               <div className="relative z-10 grid grid-cols-2 gap-4 sm:gap-5 md:gap-6 h-full place-content-center">
                 {/* Team 1 Players */}
                 <div className="col-span-2 text-center mb-2">
-                  <div className="text-sm font-bold text-cyan-400 bg-cyan-600/20 rounded-full px-3 py-1 inline-block border border-cyan-400/30">
+                  <div className={`text-sm font-bold rounded-full px-3 py-1 inline-block border ${isWhiteTheme ? 'text-blue-700 bg-blue-100 border-blue-300' : 'text-cyan-400 bg-cyan-600/20 border-cyan-400/30'}`}>
                     {currentSlide.team1_name}
                   </div>
                 </div>
@@ -635,11 +698,11 @@ export const EnhancedMatchSlideshow = () => {
                 )}
                 
                 {/* Divider */}
-                <div className="col-span-2 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent my-2"></div>
+                <div className={`col-span-2 h-px bg-gradient-to-r ${isWhiteTheme ? 'from-transparent via-foreground/20 to-transparent' : 'from-transparent via-white/20 to-transparent'} my-2`}></div>
                 
                 {/* Team 2 Players */}
                 <div className="col-span-2 text-center mb-2">
-                  <div className="text-sm font-bold text-rose-400 bg-rose-600/20 rounded-full px-3 py-1 inline-block border border-rose-400/30">
+                  <div className={`text-sm font-bold rounded-full px-3 py-1 inline-block border ${isWhiteTheme ? 'text-red-700 bg-red-100 border-red-300' : 'text-rose-400 bg-rose-600/20 border-rose-400/30'}`}>
                     {currentSlide.team2_name}
                   </div>
                 </div>
@@ -685,12 +748,12 @@ export const EnhancedMatchSlideshow = () => {
         </div>
 
         {/* Navigation & Indicators */}
-        <div className="flex items-center justify-center gap-3 sm:gap-4 md:gap-6 py-3 sm:py-4 md:py-6 border-t border-white/10 flex-wrap">
+        <div className={`flex items-center justify-center gap-3 sm:gap-4 md:gap-6 py-3 sm:py-4 md:py-6 border-t flex-wrap ${isWhiteTheme ? 'border-foreground/10' : 'border-white/10'}`}>
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setCurrentIndex((prev) => (prev - 1 + slides.length) % slides.length)}
-            className="text-white hover:bg-white/10 h-8 w-8 sm:h-10 sm:w-10"
+            className={`h-8 w-8 sm:h-10 sm:w-10 ${isWhiteTheme ? 'text-foreground hover:bg-foreground/10' : 'text-white hover:bg-white/10'}`}
           >
             <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
           </Button>
@@ -702,8 +765,8 @@ export const EnhancedMatchSlideshow = () => {
                 onClick={() => setCurrentIndex(idx)}
                 className={`rounded-full transition-all ${
                   idx === currentIndex 
-                    ? 'w-6 sm:w-8 h-2 sm:h-2.5 bg-cyan-500' 
-                    : 'w-2 h-2 sm:h-2.5 bg-white/30 hover:bg-white/50'
+                    ? `w-6 sm:w-8 h-2 sm:h-2.5 ${isWhiteTheme ? 'bg-orange-600' : 'bg-cyan-500'}` 
+                    : `w-2 h-2 sm:h-2.5 ${isWhiteTheme ? 'bg-gray-400 hover:bg-gray-600' : 'bg-white/30 hover:bg-white/50'}`
                 }`}
               />
             ))}
@@ -713,7 +776,7 @@ export const EnhancedMatchSlideshow = () => {
             variant="ghost"
             size="icon"
             onClick={() => setCurrentIndex((prev) => (prev + 1) % slides.length)}
-            className="text-white hover:bg-white/10 h-8 w-8 sm:h-10 sm:w-10"
+            className={`h-8 w-8 sm:h-10 sm:w-10 ${isWhiteTheme ? 'text-foreground hover:bg-foreground/10' : 'text-white hover:bg-white/10'}`}
           >
             <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
           </Button>

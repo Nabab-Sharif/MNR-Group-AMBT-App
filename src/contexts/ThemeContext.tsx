@@ -162,7 +162,7 @@ const THEMES: Record<ThemeName, ThemeColors> = {
     input: "0 0% 92%",
     ring: "220 90% 50%",
     muted: "0 0% 90%",
-    "muted-foreground": "0 0% 45%",
+    "muted-foreground": "0 0% 35%",
   },
 };
 
