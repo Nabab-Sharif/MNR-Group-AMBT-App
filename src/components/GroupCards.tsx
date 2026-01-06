@@ -167,15 +167,12 @@ export const GroupCards = ({ matches }: GroupCardsProps) => {
                 <Badge variant="secondary" className="bg-cyan-600/30 border border-cyan-400/50 text-cyan-300 group-hover:bg-cyan-600/50 group-hover:border-cyan-400/80 transition-all duration-300">Total Group Sets: {groupMatches.length} </Badge>
               </div>
               <div className="space-y-3">
-                {groupMatches.slice(0, 6).map((match: any, index: number) => {
+                {groupMatches.slice(0, 3).map((match: any, index: number) => {
                   // Define different colored borders for each match
                   const borderColors = [
                     'hover:border-cyan-400/80 hover:shadow-cyan-500/30',
                     'hover:border-blue-400/80 hover:shadow-blue-500/30',
-                    'hover:border-purple-400/80 hover:shadow-purple-500/30',
-                    'hover:border-pink-400/80 hover:shadow-pink-500/30',
-                    'hover:border-green-400/80 hover:shadow-green-500/30',
-                    'hover:border-yellow-400/80 hover:shadow-yellow-500/30'
+                    'hover:border-purple-400/80 hover:shadow-purple-500/30'
                   ];
                   const borderColor = borderColors[index % borderColors.length];
 

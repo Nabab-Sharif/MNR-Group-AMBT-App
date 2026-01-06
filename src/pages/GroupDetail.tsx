@@ -121,6 +121,38 @@ const GroupDetail = () => {
     return sequence;
   };
 
+  // Group/reorder matches within a single date so that matches involving the same team appear consecutively
+  const groupMatchesByTeam = (dateMatches: any[]) => {
+    const added = new Set<string>();
+    const teamOrder: string[] = [];
+
+    // Determine an order of teams from appearance in the day's matches
+    dateMatches.forEach((m) => {
+      const t1 = m.team1_name || '';
+      const t2 = m.team2_name || '';
+      if (t1 && !teamOrder.includes(t1)) teamOrder.push(t1);
+      if (t2 && !teamOrder.includes(t2)) teamOrder.push(t2);
+    });
+
+    const result: any[] = [];
+    teamOrder.forEach((team) => {
+      dateMatches.forEach((m) => {
+        if (added.has(m.id)) return;
+        if (m.team1_name === team || m.team2_name === team) {
+          result.push(m);
+          added.add(m.id);
+        }
+      });
+    });
+
+    // Append any remaining matches not captured (defensive)
+    dateMatches.forEach((m) => {
+      if (!added.has(m.id)) result.push(m);
+    });
+
+    return result;
+  };
+
   useEffect(() => {
     const fetchGroupMatches = async () => {
       try {
@@ -382,8 +414,8 @@ const GroupDetail = () => {
                   {/* Expanded match details */}
                   {expandedDate === date && (
                     <div className="ml-4 pl-4 border-l-2 border-blue-400/50 space-y-3">
-                      {/* Display all matches from this date without duplicate grouping */}
-                      {dateMatches.map((match) => {
+                      {/* Group matches by team so same-team matches appear consecutively */}
+                      {groupMatchesByTeam(dateMatches).map((match) => {
                                     const team1Seq = getTeamMatchSequence(match.team1_name)[match.id] || '-';
                                     const team2Seq = getTeamMatchSequence(match.team2_name)[match.id] || '-';
                                     

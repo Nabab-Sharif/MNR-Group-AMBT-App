@@ -207,6 +207,86 @@ All colors MUST be HSL.
     }
 }
 
+/* WIN badge 3D animation (enhanced highlight) */
+.win-badge {
+  position: relative;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  will-change: transform, box-shadow;
+  box-shadow: 0 10px 30px rgba(16, 185, 129, 0.18);
+  transition: transform 300ms cubic-bezier(.2,.9,.2,1), box-shadow 300ms ease, filter 300ms ease;
+  animation: win-3d 1.6s ease-in-out infinite;
+  display: inline-block;
+  background: linear-gradient(90deg, rgba(52,211,153,1), rgba(187,247,208,1));
+  color: #064e3b; /* dark green text */
+  border: 1px solid rgba(16,185,129,0.18);
+}
+
+.win-badge::before {
+  content: '';
+  position: absolute;
+  left: -8px;
+  right: -8px;
+  top: -6px;
+  bottom: -6px;
+  border-radius: 9999px;
+  background: radial-gradient(circle at 50% 20%, rgba(34,197,94,0.18), transparent 35%);
+  filter: blur(8px);
+  z-index: -1;
+  opacity: 0.9;
+  animation: win-pulse 1.6s ease-in-out infinite;
+}
+
+.win-badge::after {
+  content: '✨';
+  position: absolute;
+  top: -8px;
+  right: -10px;
+  font-size: 12px;
+  opacity: 0.95;
+  transform: rotate(-15deg) translateZ(6px);
+  animation: win-sparkle 1.6s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes win-pulse {
+  0% { transform: scale(1); opacity: 0.7; }
+  50% { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.7; }
+}
+
+@keyframes win-sparkle {
+  0% { transform: rotate(-15deg) translateY(-2px); opacity: 0.6; }
+  50% { transform: rotate(-15deg) translateY(-8px); opacity: 1; }
+  100% { transform: rotate(-15deg) translateY(-2px); opacity: 0.6; }
+}
+
+@keyframes win-3d {
+  0% {
+    transform: translateZ(0) rotateX(0) rotateY(0) scale(1);
+    box-shadow: 0 6px 18px rgba(16, 185, 129, 0.12);
+  }
+  30% {
+    transform: translateZ(12px) rotateX(-12deg) rotateY(8deg) scale(1.08);
+    box-shadow: 0 20px 40px rgba(16, 185, 129, 0.22);
+  }
+  60% {
+    transform: translateZ(6px) rotateX(6deg) rotateY(-6deg) scale(1.03);
+    box-shadow: 0 12px 28px rgba(16, 185, 129, 0.18);
+  }
+  100% {
+    transform: translateZ(0) rotateX(0) rotateY(0) scale(1);
+    box-shadow: 0 6px 18px rgba(16, 185, 129, 0.12);
+  }
+}
+
+/* Slight hover pop */
+.win-badge:hover {
+  transform: translateZ(18px) rotateX(-16deg) rotateY(12deg) scale(1.12);
+  box-shadow: 0 30px 64px rgba(16, 185, 129, 0.32);
+  filter: saturate(1.05) brightness(1.02);
+}
+
 @keyframes shimmer {
     0% {
         background-position: -200% center;
@@ -458,6 +538,74 @@ All colors MUST be HSL.
     opacity: 0;
 }
 
+/* Decorative blobs and confetti for the slideshow */
+.blob {
+  position: absolute;
+  filter: blur(56px);
+  opacity: 0.24;
+  transform: translate3d(0,0,0);
+  border-radius: 9999px;
+  mix-blend-mode: screen;
+  animation: blob-move 8s ease-in-out infinite;
+}
+
+@keyframes blob-move {
+  0% { transform: translate(0,0) scale(1); }
+  50% { transform: translate(24px,-18px) scale(1.08); }
+  100% { transform: translate(0,0) scale(1); }
+}
+
+.confetti {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.confetti span {
+  position: absolute;
+  width: 8px;
+  height: 12px;
+  border-radius: 2px;
+  opacity: 0.95;
+  animation: confetti-drop 1100ms linear infinite;
+}
+
+@keyframes confetti-drop {
+  from { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+  to { transform: translateY(80vh) rotate(360deg); opacity: 0.9; }
+}
+
+.sparkle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  opacity: 0.9;
+  filter: blur(2px);
+  animation: sparkle 1.2s linear infinite;
+}
+
+@keyframes sparkle {
+  0% { transform: scale(0.6); opacity: 0.4; }
+  50% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(0.6); opacity: 0.4; }
+}
+
+.slide-card-glass {
+  backdrop-filter: blur(6px) saturate(120%);
+  -webkit-backdrop-filter: blur(6px) saturate(120%);
+}
+
+.slide-badge {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 9999px;
+  font-weight: 700;
+  font-size: 12px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+}
+
 @keyframes scale-in {
     from {
         opacity: 0;
@@ -570,6 +718,73 @@ All colors MUST be HSL.
     animation: text-fire-glow 2s ease-in-out infinite;
 }
 
+
+/* Today's Winners (footer-top) */
+.today-winners {
+  background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+.today-group {
+  border: 1px solid rgba(255,255,255,0.04);
+}
+
+.group-name-highlight {
+  display: inline-block;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: linear-gradient(90deg, rgba(59,130,246,0.12), rgba(34,197,94,0.06));
+  box-shadow: 0 10px 30px rgba(2,6,23,0.22);
+  font-weight: 700;
+  color: var(--foreground);
+  border-left: 6px solid rgba(255,255,255,0.03);
+}
+
+.winner-subheader {
+  font-size: 0.93rem;
+  color: var(--muted-foreground);
+  background: transparent;
+  border-radius: 6px;
+  padding-left: 4px;
+}
+
+.chunk-separator {
+  padding-top: 0.6rem;
+  margin-top: 0.75rem;
+  border-top: 1px dashed rgba(255,255,255,0.04);
+}
+
+.winner-group + .winner-group {
+  margin-top: 8px;
+}
+
+
+.today-match-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+}
+
+.today-match-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(2,6,23,0.3);
+}
+
+.win-badge {
+  background: linear-gradient(90deg, rgba(255,230,128,1), rgba(255,210,64,1));
+  color: #4a2e00;
+  padding: 4px 8px;
+  border-radius: 9999px;
+  font-weight: 700;
+  box-shadow: 0 8px 20px rgba(255,200,80,0.15);
+}
+
+@media (max-width: 640px) {
+  .today-group { padding: 0.75rem; }
+  .today-match-card { padding: 0.6rem; }
+}
 
 /* 3D Rotation animations for player cards */
 

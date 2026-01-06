@@ -24,9 +24,9 @@ const filteredMatches = matches.filter((match: any) => {
 ```
 
 #### 2. **Match Display Count**
-- Changed from displaying 3 matches to **4-6 matches** per group card
-- Used `.slice(0, 6)` to show up to 6 matches
-- Updated "more matches" indicator from "+{length - 3}" to "+{length - 6}"
+- Changed to displaying **up to 3 matches** per group card
+- Uses `.slice(0, 3)` to show up to 3 matches
+- "More matches" indicator shows how many additional matches exist (e.g., "+{length - 3}")
 
 #### 3. **Colored Border Hover Effects**
 - Each match card now displays with a different colored border on hover

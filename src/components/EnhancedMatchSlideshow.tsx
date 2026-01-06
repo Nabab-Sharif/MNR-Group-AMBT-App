@@ -43,7 +43,7 @@ export const EnhancedMatchSlideshow = () => {
   
   const [slides, setSlides] = useState<Match[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [slideFilter, setSlideFilter] = useState<string>('today');
+  const [slideFilter, setSlideFilter] = useState<string>('winners-A');
   const [winnerDate, setWinnerDate] = useState<string | null>(null);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
@@ -115,9 +115,17 @@ export const EnhancedMatchSlideshow = () => {
       setTodayDataExists(hasAnyToday);
       setTodayUpcomingData(upcomingData || []);
       
-      // Auto-switch: if today data no longer exists and filter is 'today' or 'today-*', switch to 'winners-A'
+      // Auto-switch behavior:
+      // - If there are no matches for today and the current filter is a today filter, switch to general 'winners'.
+      // - If all today's matches are completed (no upcoming/live), switch to show today's winners specifically.
       if (!hasAnyToday && (slideFilter === 'today' || slideFilter.startsWith('today-'))) {
-        setSlideFilter('winners-A');
+        setSlideFilter('winners');
+        setWinnerDate(null);
+        setCurrentIndex(0);
+      } else if (hasCompleted && !hasUpcoming && (slideFilter === 'today' || slideFilter.startsWith('today-'))) {
+        // All today's matches completed: show winners for today
+        setSlideFilter('winners');
+        setWinnerDate(today);
         setCurrentIndex(0);
       }
     };
@@ -171,103 +179,30 @@ export const EnhancedMatchSlideshow = () => {
         const groupName = slideFilter.replace('today-', '');
         query = query.eq("status", "upcoming").eq("date", today).eq("group_name", groupName);
       } else if (slideFilter === 'winners') {
-        // Show winners for the most recent match date (by latest updated_at), all groups, single date only
-        const { data: allWinners } = await supabase
-          .from("matches")
-          .select("date, updated_at")
+        // Show only today's winners (no multi-day lookback)
+        query = query
           .eq("status", "completed")
           .not("winner", "is", null)
+          .eq("date", today)
           .order("updated_at", { ascending: false });
-
-        if (allWinners && allWinners.length > 0) {
-          // Find the most recent date by grouping unique dates and picking the one with the latest updated_at
-          const dateToLatestUpdate: Record<string, string> = {};
-          for (const match of allWinners) {
-            if (!dateToLatestUpdate[match.date] || match.updated_at > dateToLatestUpdate[match.date]) {
-              dateToLatestUpdate[match.date] = match.updated_at;
-            }
-          }
-          const uniqueDates = Object.keys(dateToLatestUpdate).sort((a, b) => {
-            const timeA = new Date(dateToLatestUpdate[a]).getTime();
-            const timeB = new Date(dateToLatestUpdate[b]).getTime();
-            return timeB - timeA;
-          });
-
-          if (uniqueDates.length > 0) {
-            const latestDate = uniqueDates[0];
-            setWinnerDate(latestDate);
-            query = query
-              .eq("status", "completed")
-              .not("winner", "is", null)
-              .eq("date", latestDate)
-              .order("updated_at", { ascending: false });
-          } else {
-            setSlides([]);
-            return;
-          }
-        } else {
-          setSlides([]);
-          return;
-        }
       } else if (slideFilter.startsWith('winners-')) {
         // Handle dynamic 'winners-[GroupName]' filters like 'winners-B>A'
         const groupName = slideFilter.replace('winners-', '');
-        const daysToShow = 7;
-        const datesToInclude = [];
-        for (let i = 0; i < daysToShow; i++) {
-          const date = new Date(Date.now() - (i * 86400000)).toISOString().split('T')[0];
-          datesToInclude.push(date);
-        }
+        // Only today's winners for the selected group
         query = query
           .eq("status", "completed")
           .eq("group_name", groupName)
           .not("winner", "is", null)
-          .in("date", datesToInclude)
+          .eq("date", today)
           .order("updated_at", { ascending: false });
       } else if (slideFilter === 'today-winners-a') {
         // Legacy support for A Group winners (deprecated)
-        if (winnerDate) {
-          query = query.eq("status", "completed").eq("group_name", "A").eq("date", winnerDate).not("winner", "is", null);
-        } else {
-            const { data: latestData } = await supabase
-            .from("matches")
-            .select("date")
-            .eq("status", "completed")
-            .eq("group_name", "A")
-            .not("winner", "is", null)
-            .order("updated_at", { ascending: false })
-            .limit(1);
-          
-          if (latestData && latestData.length > 0) {
-            setWinnerDate(latestData[0].date);
-            query = query.eq("status", "completed").eq("group_name", "A").eq("date", latestData[0].date).not("winner", "is", null);
-          } else {
-            setSlides([]);
-            return;
-          }
-        }
+        // Only today's A-group winners
+        query = query.eq("status", "completed").eq("group_name", "A").eq("date", today).not("winner", "is", null);
       } else if (slideFilter === 'today-winners-b') {
         // Legacy support for B Group winners (deprecated)
-        if (winnerDate) {
-          query = query.eq("status", "completed").eq("group_name", "B").eq("date", winnerDate).not("winner", "is", null);
-        } else {
-            const { data: latestData } = await supabase
-            .from("matches")
-            .select("date")
-            .eq("status", "completed")
-            .eq("group_name", "B")
-            .not("winner", "is", null)
-            .order("updated_at", { ascending: false })
-            .limit(1);
-          
-          if (latestData && latestData.length > 0) {
-            setWinnerDate(latestData[0].date);
-            query = query.eq("status", "completed").eq("group_name", "B").eq("date", latestData[0].date).not("winner", "is", null);
-          } else {
-            setSlides([]);
-            return;
-          }
-        }
+        // Only today's B-group winners
+        query = query.eq("status", "completed").eq("group_name", "B").eq("date", today).not("winner", "is", null);
       }
 
       const { data } = await query;
@@ -282,6 +217,38 @@ export const EnhancedMatchSlideshow = () => {
             const bTime = b.updated_at ? new Date(b.updated_at).getTime() : new Date(b.date).getTime();
             return bTime - aTime;
           });
+
+          // Group slides by the winning team so all matches for a given team appear together
+          const groups: Record<string, Match[]> = {};
+          for (const s of slidesData) {
+            if (!s.winner) continue;
+            if (!groups[s.winner]) groups[s.winner] = [];
+            groups[s.winner].push(s);
+          }
+
+          // Sort matches within each group by updated_at descending
+          for (const k of Object.keys(groups)) {
+            groups[k].sort((a, b) => {
+              const aT = a.updated_at ? new Date(a.updated_at).getTime() : new Date(a.date).getTime();
+              const bT = b.updated_at ? new Date(b.updated_at).getTime() : new Date(b.date).getTime();
+              return bT - aT;
+            });
+          }
+
+          // Order groups by the most recent match in each group (so most-recent-winning teams come first)
+          const winnerOrder = Object.keys(groups).sort((a, b) => {
+            const aT = groups[a][0].updated_at ? new Date(groups[a][0].updated_at).getTime() : new Date(groups[a][0].date).getTime();
+            const bT = groups[b][0].updated_at ? new Date(groups[b][0].updated_at).getTime() : new Date(groups[b][0].date).getTime();
+            return bT - aT;
+          });
+
+          // Flatten groups back into slidesData preserving the group sequences
+          const groupedSlides: Match[] = [];
+          for (const w of winnerOrder) {
+            groupedSlides.push(...groups[w]);
+          }
+
+          if (groupedSlides.length > 0) slidesData = groupedSlides;
         }
 
         setSlides(slidesData);
@@ -302,7 +269,42 @@ export const EnhancedMatchSlideshow = () => {
           schema: 'public',
           table: 'matches'
         },
-        () => fetchSlides()
+        async (payload: any) => {
+          try {
+            const today = new Date().toISOString().split('T')[0];
+
+            // Re-evaluate today's matches to decide which filter to show
+            const { data: todayMatches } = await supabase
+              .from('matches')
+              .select('id,status')
+              .eq('date', today);
+
+            if (todayMatches && todayMatches.length > 0) {
+              const hasNonCompleted = todayMatches.some((m: any) => m.status !== 'completed');
+              const hasCompleted = todayMatches.some((m: any) => m.status === 'completed');
+
+              if (hasNonCompleted) {
+                // If any match today is still upcoming/live, show today's upcoming slides
+                if (slideFilter !== 'today') {
+                  setSlideFilter('today');
+                  setWinnerDate(null);
+                  const el = document.getElementById('enhanced-slideshow');
+                  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+              } else if (hasCompleted) {
+                // All today's matches are completed -> switch to today's winners
+                setSlideFilter('winners');
+                setWinnerDate(today);
+                const el = document.getElementById('enhanced-slideshow');
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
+            }
+          } catch (err) {
+            // ignore errors; still refresh slides below
+          }
+
+          fetchSlides();
+        }
       )
       .subscribe();
 
@@ -416,6 +418,7 @@ export const EnhancedMatchSlideshow = () => {
   }
 
   const currentSlide = slides[currentIndex];
+  const currentWinCount = currentSlide?.winner ? slides.filter(s => s.winner === currentSlide.winner).length : 0;
 
   const PlayerCard = ({ photo, name, gradient }: { photo: string | null; name: string; gradient: string }) => (
     <div className="rounded-2xl aspect-square flex flex-col items-center justify-center shadow-xl hover:scale-105 transition-transform overflow-hidden relative">
@@ -511,39 +514,20 @@ export const EnhancedMatchSlideshow = () => {
     <div id="enhanced-slideshow" className="w-full">
       {filterButtons}
       
-      {/* Dark Theme Slide - Like Reference Image */}
+      {/* Dark Theme Slide - Enhanced Visual */}
       <div 
-        className={`relative overflow-hidden rounded-2xl shadow-2xl w-full cursor-grab active:cursor-grabbing transition-transform duration-300 hover:shadow-3xl hover:scale-[1.01] ${
-          isWhiteTheme ? 'bg-white border-2 border-foreground/20' : 'bg-card'
+        key={currentSlide?.id ?? 'slide'}
+        className={`relative overflow-hidden rounded-3xl shadow-2xl w-full cursor-grab active:cursor-grabbing transition-transform duration-300 hover:shadow-3xl hover:scale-[1.01] slide-card-glass animate-fade-in ${
+          isWhiteTheme ? 'bg-white/60 border border-foreground/10' : 'bg-gradient-to-br from-slate-900 via-primary/60 to-rose-900'
         }`}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => setIsHovering(false)}
       >
-        {/* Header */}
-        <div className={`flex items-center justify-between px-3 sm:px-4 md:px-8 py-2 sm:py-3 md:py-4 ${
-          isWhiteTheme 
-            ? 'border-b border-foreground/10 bg-foreground/5' 
-            : 'border-b border-white/10'
-        }`}>
-          <div className="flex items-center gap-2 sm:gap-3">
-            <img src={logo} alt="Logo" className={`w-7 h-7 sm:w-9 sm:h-9 md:w-12 md:h-12 rounded-full border-2 ${
-              isWhiteTheme ? 'border-foreground/30' : 'border-white/30'
-            }`} />
-            <span className={`font-bold text-xs sm:text-sm md:text-lg truncate ${
-              isWhiteTheme ? 'text-foreground' : 'text-white'
-            }`}>Anis Memorial Badminton Tournament</span>
-          </div>
-          <div className={`flex items-center gap-2 text-xs sm:text-sm ${
-            isWhiteTheme ? 'text-foreground/60' : 'text-white/70'
-          }`}>
-            <span className="hidden sm:inline">Welcome</span>
-            {currentSlide.status === 'live' && (
-              <span className="bg-red-600 text-white px-2 py-0.5 rounded text-xs animate-pulse">LIVE</span>
-            )}
-          </div>
-        </div>
+        {/* Decorative Blobs */}
+        <div className="blob" style={{ right: '-6rem', top: '-6rem', width: '28rem', height: '28rem', background: 'radial-gradient(circle at 25% 30%, rgba(99,102,241,0.40), transparent 40%)' }} />
+        <div className="blob" style={{ left: '-6rem', bottom: '-6rem', width: '22rem', height: '22rem', background: 'radial-gradient(circle at 70% 70%, rgba(236,72,153,0.30), transparent 40%)', animationDelay: '2s' }} />
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 md:gap-6 p-3 sm:p-4 md:p-8 min-h-[400px] sm:min-h-[500px] md:min-h-[600px] lg:min-h-[700px]">
@@ -559,7 +543,12 @@ export const EnhancedMatchSlideshow = () => {
                 <div className="flex-1">
                   <div className={`text-lg sm:text-2xl md:text-3xl font-black truncate ${
                     isWhiteTheme ? 'text-foreground' : 'text-white'
-                  }`}>{currentSlide.team1_name}</div>
+                  }`}>
+                    {currentSlide.team1_name}
+                    {currentSlide.winner === currentSlide.team1_name && (
+                      <span className={`ml-3 inline-block text-xs font-semibold px-2 py-0.5 rounded-full ${isWhiteTheme ? 'bg-emerald-100 text-emerald-800' : 'bg-emerald-500 text-white'}`}>WIN</span>
+                    )}
+                  </div>
                   <div className={`text-xs sm:text-sm mt-1 ${
                     isWhiteTheme ? 'text-foreground/50' : 'text-white/50'
                   }`}>Team 1</div>
@@ -595,7 +584,12 @@ export const EnhancedMatchSlideshow = () => {
 
               <div className="flex items-center justify-between gap-2 sm:gap-3">
                 <div className="flex-1">
-                  <div className={`text-lg sm:text-2xl md:text-3xl font-black truncate ${isWhiteTheme ? 'text-foreground' : 'text-white'}`}>{currentSlide.team2_name}</div>
+                  <div className={`text-lg sm:text-2xl md:text-3xl font-black truncate ${isWhiteTheme ? 'text-foreground' : 'text-white'}`}>
+                    {currentSlide.team2_name}
+                    {currentSlide.winner === currentSlide.team2_name && (
+                      <span className={`ml-3 inline-block text-xs font-semibold px-2 py-0.5 rounded-full ${isWhiteTheme ? 'bg-emerald-100 text-emerald-800' : 'bg-emerald-500 text-white'}`}>WIN</span>
+                    )}
+                  </div>
                   <div className={`text-xs sm:text-sm mt-1 ${isWhiteTheme ? 'text-foreground/50' : 'text-white/50'}`}>Team 2</div>
                 </div>
                 <div className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black px-2 sm:px-4 py-1 sm:py-2 rounded-lg ${isWhiteTheme ? 'text-pink-600 bg-pink-100' : 'text-yellow-400 bg-black/50'}`}>
@@ -630,17 +624,33 @@ export const EnhancedMatchSlideshow = () => {
                     <div className="absolute -bottom-1/2 -left-1/2 w-96 h-96 rounded-full blur-3xl animate-pulse" style={{ background: isWhiteTheme ? 'rgba(249, 115, 22, 0.1)' : 'rgba(234, 179, 8, 0.1)', animationDelay: '1s' }}></div>
                   </div>
                   
-                  <div className="relative z-10 space-y-2">
-                    <div className="flex justify-center gap-1 mb-2">
-                      <span className="text-2xl animate-bounce">🏆</span>
-                      <span className="text-2xl animate-bounce" style={{ animationDelay: '0.1s' }}>✨</span>
-                      <span className="text-2xl animate-bounce" style={{ animationDelay: '0.2s' }}>🎉</span>
+                  <div className="relative z-10 space-y-3">
+                    <div className="flex justify-center items-center gap-3 mb-2 relative">
+                      <div className="flex items-center gap-1">
+                        <span className="text-3xl animate-bounce">🏆</span>
+                        <span className="text-2xl animate-bounce" style={{ animationDelay: '0.1s' }}>✨</span>
+                        <span className="text-2xl animate-bounce" style={{ animationDelay: '0.2s' }}>🎉</span>
+                      </div>
+
+                      {currentWinCount > 1 && (
+                        <div className={`slide-badge ${isWhiteTheme ? 'bg-orange-100 text-orange-800 border-orange-200' : 'bg-gradient-to-r from-amber-400 to-orange-500 text-white'}`}>
+                          {currentWinCount} wins today
+                        </div>
+                      )}
                     </div>
-                    <div className={`font-black text-2xl sm:text-4xl ${isWhiteTheme ? 'text-amber-600' : 'text-accent'}`}>
+
+                    <div className={`font-black text-2xl sm:text-4xl bg-clip-text text-transparent ${isWhiteTheme ? 'bg-gradient-to-r from-amber-400 to-orange-400' : 'bg-gradient-to-r from-amber-300 to-pink-500'}`}>
                       {currentSlide.winner}
                     </div>
                     <div className={`font-bold text-xs sm:text-sm tracking-widest uppercase ${isWhiteTheme ? 'text-orange-600' : 'text-amber-300'}`}>
                       ⚡ Win • {currentSlide.date} ⚡
+                    </div>
+
+                    {/* Confetti */}
+                    <div className="confetti" aria-hidden>
+                      {['#F87171','#FB923C','#FDE68A','#34D399','#60A5FA','#A78BFA','#FB7185','#F59E0B'].map((c, i) => (
+                        <span key={i} style={{ left: `${6 + i * 11}%`, background: c, top: `${-8 + (i % 3) * 6}%` }} />
+                      ))}
                     </div>
                   </div>
                 </div>
@@ -670,81 +680,70 @@ export const EnhancedMatchSlideshow = () => {
             </div>
           </div>
 
-          {/* Right Side - 4 Player Photos Grid */}
-          {(slideFilter === 'winners' || slideFilter === 'today-winners-a' || slideFilter === 'today-winners-b') ? (
-            <div className={`relative rounded-xl p-4 sm:p-6 border overflow-hidden ${isWhiteTheme ? 'bg-foreground/5 border-foreground/20' : 'bg-card/50 border-primary/20'}`}>
-              {/* Decorative gradient background */}
-              <div className="absolute inset-0 rounded-xl pointer-events-none" style={{ background: isWhiteTheme ? 'linear-gradient(135deg, rgba(251, 146, 60, 0.05), transparent, rgba(249, 115, 22, 0.05))' : 'linear-gradient(135deg, rgba(234, 179, 8, 0.05), transparent, rgba(234, 179, 8, 0.05))' }}></div>
-              
-              <div className="relative z-10 grid grid-cols-2 gap-4 sm:gap-5 md:gap-6 h-full place-content-center">
-                {/* Team 1 Players */}
-                <div className="col-span-2 text-center mb-2">
-                  <div className={`text-sm font-bold rounded-full px-3 py-1 inline-block border ${isWhiteTheme ? 'text-blue-700 bg-blue-100 border-blue-300' : 'text-cyan-400 bg-cyan-600/20 border-cyan-400/30'}`}>
-                    {currentSlide.team1_name}
-                  </div>
+          {/* Right Side - Player Scores & Photos (always visible) */}
+          <div className={`relative rounded-xl p-4 sm:p-6 border overflow-hidden ${isWhiteTheme ? 'bg-foreground/5 border-foreground/20' : 'bg-card/60 border-primary/20'}`}>
+            {/* Decorative gradient background */}
+            <div className="absolute inset-0 rounded-xl pointer-events-none" style={{ background: isWhiteTheme ? 'linear-gradient(135deg, rgba(59,130,246,0.03), transparent)' : 'linear-gradient(135deg, rgba(2,6,23,0.05), transparent)' }} />
+            
+            <div className="relative z-10 grid grid-cols-2 gap-4 sm:gap-5 md:gap-6 h-full place-content-center">
+              {/* Team 1 Players */}
+              <div className="col-span-2 text-center mb-2">
+                <div className={`text-sm font-bold rounded-full px-3 py-1 inline-block border ${isWhiteTheme ? 'text-blue-700 bg-blue-100 border-blue-300' : 'text-cyan-400 bg-cyan-600/20 border-cyan-400/30'}`}>
+                  {currentSlide.team1_name}
+                  {currentSlide.winner === currentSlide.team1_name && (
+                    <span className="ml-2 inline-block win-badge text-[12px] sm:text-sm font-semibold px-3 py-1.5 rounded-full bg-emerald-500 text-white">WIN</span>
+                  )}
                 </div>
-                
-                {renderPlayerScore(
-                  currentSlide.team1_player1_scores,
-                  currentSlide.team1_player1_name,
-                  currentSlide.team1_player1_photo,
-                  currentSlide.team1_player1_scores?.reduce((a, b) => a + b, 0) || 0
-                )}
-                {renderPlayerScore(
-                  currentSlide.team1_player2_scores,
-                  currentSlide.team1_player2_name,
-                  currentSlide.team1_player2_photo,
-                  currentSlide.team1_player2_scores?.reduce((a, b) => a + b, 0) || 0
-                )}
-                
-                {/* Divider */}
-                <div className={`col-span-2 h-px bg-gradient-to-r ${isWhiteTheme ? 'from-transparent via-foreground/20 to-transparent' : 'from-transparent via-white/20 to-transparent'} my-2`}></div>
-                
-                {/* Team 2 Players */}
-                <div className="col-span-2 text-center mb-2">
-                  <div className={`text-sm font-bold rounded-full px-3 py-1 inline-block border ${isWhiteTheme ? 'text-red-700 bg-red-100 border-red-300' : 'text-rose-400 bg-rose-600/20 border-rose-400/30'}`}>
-                    {currentSlide.team2_name}
-                  </div>
-                </div>
-                
-                {renderPlayerScore(
-                  currentSlide.team2_player1_scores,
-                  currentSlide.team2_player1_name,
-                  currentSlide.team2_player1_photo,
-                  currentSlide.team2_player1_scores?.reduce((a, b) => a + b, 0) || 0
-                )}
-                {renderPlayerScore(
-                  currentSlide.team2_player2_scores,
-                  currentSlide.team2_player2_name,
-                  currentSlide.team2_player2_photo,
-                  currentSlide.team2_player2_scores?.reduce((a, b) => a + b, 0) || 0
-                )}
               </div>
+              
+              {renderPlayerScore(
+                currentSlide.team1_player1_scores,
+                currentSlide.team1_player1_name,
+                currentSlide.team1_player1_photo,
+                currentSlide.team1_player1_scores?.reduce((a, b) => a + b, 0) || 0
+              )}
+              {renderPlayerScore(
+                currentSlide.team1_player2_scores,
+                currentSlide.team1_player2_name,
+                currentSlide.team1_player2_photo,
+                currentSlide.team1_player2_scores?.reduce((a, b) => a + b, 0) || 0
+              )}
+              
+              {/* Divider */}
+              <div className={`col-span-2 h-px bg-gradient-to-r ${isWhiteTheme ? 'from-transparent via-foreground/20 to-transparent' : 'from-transparent via-white/20 to-transparent'} my-2`}></div>
+              
+              {/* Team 2 Players */}
+              <div className="col-span-2 text-center mb-2">
+                <div className={`text-sm font-bold rounded-full px-3 py-1 inline-block border ${isWhiteTheme ? 'text-red-700 bg-red-100 border-red-300' : 'text-rose-400 bg-rose-600/20 border-rose-400/30'}`}>
+                  {currentSlide.team2_name}
+                  {currentSlide.winner === currentSlide.team2_name && (
+                    <span className="ml-2 inline-block win-badge text-[12px] sm:text-sm font-semibold px-3 py-1.5 rounded-full bg-emerald-500 text-white">WIN</span>
+                  )}
+                </div>
+              </div>
+              
+              {renderPlayerScore(
+                currentSlide.team2_player1_scores,
+                currentSlide.team2_player1_name,
+                currentSlide.team2_player1_photo,
+                currentSlide.team2_player1_scores?.reduce((a, b) => a + b, 0) || 0
+              )}
+              {renderPlayerScore(
+                currentSlide.team2_player2_scores,
+                currentSlide.team2_player2_name,
+                currentSlide.team2_player2_photo,
+                currentSlide.team2_player2_scores?.reduce((a, b) => a + b, 0) || 0
+              )}
             </div>
-          ) : (
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-2 gap-2 sm:gap-3 md:gap-4 h-full">
-              <PlayerCard
-                photo={currentSlide.team1_player1_photo}
-                name={currentSlide.team1_player1_name}
-                gradient="bg-gradient-to-br from-purple-600 to-pink-600"
-              />
-              <PlayerCard
-                photo={currentSlide.team1_player2_photo}
-                name={currentSlide.team1_player2_name}
-                gradient="bg-gradient-to-br from-pink-500 to-orange-500"
-              />
-              <PlayerCard
-                photo={currentSlide.team2_player1_photo}
-                name={currentSlide.team2_player1_name}
-                gradient="bg-gradient-to-br from-cyan-500 to-blue-600"
-              />
-              <PlayerCard
-                photo={currentSlide.team2_player2_photo}
-                name={currentSlide.team2_player2_name}
-                gradient="bg-gradient-to-br from-orange-500 to-red-600"
-              />
+
+            {/* Player photo row for extra visual */}
+            <div className="mt-4 grid grid-cols-4 gap-3">
+              <PlayerCard photo={currentSlide.team1_player1_photo} name={currentSlide.team1_player1_name} gradient="bg-gradient-to-br from-purple-600 to-pink-600" />
+              <PlayerCard photo={currentSlide.team1_player2_photo} name={currentSlide.team1_player2_name} gradient="bg-gradient-to-br from-pink-500 to-orange-500" />
+              <PlayerCard photo={currentSlide.team2_player1_photo} name={currentSlide.team2_player1_name} gradient="bg-gradient-to-br from-cyan-500 to-blue-600" />
+              <PlayerCard photo={currentSlide.team2_player2_photo} name={currentSlide.team2_player2_name} gradient="bg-gradient-to-br from-orange-500 to-red-600" />
             </div>
-          )}
+          </div>
         </div>
 
         {/* Navigation & Indicators */}

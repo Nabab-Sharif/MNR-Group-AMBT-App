@@ -11,6 +11,7 @@ import { EnhancedMatchSlideshow } from "@/components/EnhancedMatchSlideshow";
 import { GroupCards } from "@/components/GroupCards";
 import { FullscreenScoreboard } from "@/components/FullscreenScoreboard";
 import { Footer } from "@/components/Footer";
+import TodayWinners from "@/components/TodayWinners";
 import { ThemeSelector } from "@/components/ThemeSelector";
 
 const Home = () => {
@@ -314,6 +315,9 @@ const Home = () => {
           </div>
         </div>
       )}
+
+      {/* Today's winners (above footer) */}
+      <TodayWinners matches={allMatches} />
 
       {/* Footer */}
       <Footer />
