@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Camera, X } from "lucide-react";
+import { Camera, X, Clock } from "lucide-react";
 import { matchSchema, validatePhotoFile } from "@/lib/validation";
 import { CameraCapture } from "./CameraCapture";
 
@@ -28,6 +28,10 @@ export const CreateMatchDialog = ({ open, onOpenChange, onSuccess }: CreateMatch
   const [currentField, setCurrentField] = useState<string>("");
   const [previews, setPreviews] = useState<Record<string, string>>({});
   const [allMatches, setAllMatches] = useState<any[]>([]);
+  const [venueSuggestions, setVenueSuggestions] = useState<string[]>([]);
+  const [showVenueSuggestions, setShowVenueSuggestions] = useState(false);
+  const [groupSuggestions, setGroupSuggestions] = useState<string[]>([]);
+  const [showGroupSuggestions, setShowGroupSuggestions] = useState(false);
   const [team1LeaderSuggestions, setTeam1LeaderSuggestions] = useState<LeaderSuggestion[]>([]);
   const [team2LeaderSuggestions, setTeam2LeaderSuggestions] = useState<LeaderSuggestion[]>([]);
   const [showTeam1Suggestions, setShowTeam1Suggestions] = useState(false);
@@ -67,7 +71,7 @@ export const CreateMatchDialog = ({ open, onOpenChange, onSuccess }: CreateMatch
     try {
       const { data, error } = await supabase
         .from('matches')
-        .select('team1_name, team1_leader, team1_player1_name, team1_player1_department, team1_player1_unit, team1_player2_name, team1_player2_department, team1_player2_unit, team2_name, team2_leader, team2_player1_name, team2_player1_department, team2_player1_unit, team2_player2_name, team2_player2_department, team2_player2_unit')
+        .select('team1_name, team1_leader, team1_player1_name, team1_player1_department, team1_player1_unit, team1_player2_name, team1_player2_department, team1_player2_unit, team2_name, team2_leader, team2_player1_name, team2_player1_department, team2_player1_unit, team2_player2_name, team2_player2_department, team2_player2_unit, venue, group_name')
         .order('created_at', { ascending: false })
         .limit(100);
       
@@ -78,10 +82,47 @@ export const CreateMatchDialog = ({ open, onOpenChange, onSuccess }: CreateMatch
       
       if (data) {
         setAllMatches(data);
+        // derive venue and group suggestions
+        const venues = Array.from(new Set(data.map((m: any) => m.venue).filter(Boolean))).slice(0, 50);
+        const groups = Array.from(new Set(data.map((m: any) => m.group_name).filter(Boolean))).slice(0, 50);
+        setVenueSuggestions(venues);
+        setGroupSuggestions(groups);
       }
     } catch (err) {
       console.error('Failed to load leader suggestions:', err);
     }
+  };
+
+  const getVenueSuggestions = (searchTerm: string) => {
+    if (!searchTerm.trim()) return venueSuggestions;
+    return venueSuggestions.filter(v => v.toLowerCase().includes(searchTerm.toLowerCase())).slice(0, 6);
+  };
+
+  const getGroupSuggestions = (searchTerm: string) => {
+    if (!searchTerm.trim()) return groupSuggestions;
+    return groupSuggestions.filter(g => g.toLowerCase().includes(searchTerm.toLowerCase())).slice(0, 6);
+  };
+
+  const handleVenueChange = (value: string) => {
+    setFormData(prev => ({ ...prev, venue: value }));
+    const suggestions = getVenueSuggestions(value);
+    setShowVenueSuggestions(value.length > 0 && suggestions.length > 0);
+  };
+
+  const selectVenueSuggestion = (v: string) => {
+    setFormData(prev => ({ ...prev, venue: v }));
+    setShowVenueSuggestions(false);
+  };
+
+  const handleGroupChange = (value: string) => {
+    setFormData(prev => ({ ...prev, groupName: value }));
+    const suggestions = getGroupSuggestions(value);
+    setShowGroupSuggestions(value.length > 0 && suggestions.length > 0);
+  };
+
+  const selectGroupSuggestion = (g: string) => {
+    setFormData(prev => ({ ...prev, groupName: g }));
+    setShowGroupSuggestions(false);
   };
 
   // Get team data by team name
@@ -260,10 +301,15 @@ export const CreateMatchDialog = ({ open, onOpenChange, onSuccess }: CreateMatch
     }
   };
 
-  // Load leader suggestions when dialog opens
+  // Load leader/venue/group suggestions and default day when dialog opens
   useEffect(() => {
     if (open) {
       loadLeaderSuggestions();
+      // default date to today and day to the weekday if not filled
+      const today = new Date().toISOString().split('T')[0];
+      const dateStr = formData.date || today;
+      const dayName = new Date(dateStr).toLocaleDateString(undefined, { weekday: 'long' });
+      setFormData(prev => ({ ...prev, date: prev.date || today, day: prev.day || dayName, matchTime: prev.matchTime || '18:00' }));
     }
   }, [open]);
 
@@ -502,6 +548,7 @@ export const CreateMatchDialog = ({ open, onOpenChange, onSuccess }: CreateMatch
 
   return (
     <>
+      <style>{`input[type="date"]::-webkit-calendar-picker-indicator{display:none!important;} input[type="time"]::-webkit-calendar-picker-indicator{display:none!important;} input[type="date"]::-webkit-inner-spin-button{display:none!important;} input[type="time"]::-webkit-inner-spin-button{display:none!important;}`}</style>
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
           <DialogHeader>
@@ -514,9 +561,34 @@ export const CreateMatchDialog = ({ open, onOpenChange, onSuccess }: CreateMatch
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2"><Label>Date *</Label><Input type="date" value={formData.date} onChange={(e) => setFormData(prev => ({ ...prev, date: e.target.value }))} required /></div>
                 <div className="space-y-2"><Label>Day *</Label><Input value={formData.day} onChange={(e) => setFormData(prev => ({ ...prev, day: e.target.value }))} required /></div>
-                <div className="space-y-2"><Label>Venue *</Label><Input value={formData.venue} onChange={(e) => setFormData(prev => ({ ...prev, venue: e.target.value }))} required /></div>
-                <div className="space-y-2"><Label>Time</Label><Input type="time" value={formData.matchTime} onChange={(e) => setFormData(prev => ({ ...prev, matchTime: e.target.value }))} /></div>
-                <div className="space-y-2"><Label>Group *</Label><Input value={formData.groupName} onChange={(e) => setFormData(prev => ({ ...prev, groupName: e.target.value }))} required /></div>
+                <div className="space-y-2 relative">
+                  <Label>Venue *</Label>
+                  <Input value={formData.venue} onChange={(e) => handleVenueChange(e.target.value)} onFocus={() => setShowVenueSuggestions(true)} required />
+                  {showVenueSuggestions && venueSuggestions.length > 0 && (
+                    <div className="absolute z-50 w-full mt-1 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-md shadow-lg max-h-40 overflow-auto">
+                      {getVenueSuggestions(formData.venue).map((v, idx) => (
+                        <button key={idx} type="button" onClick={() => selectVenueSuggestion(v)} className="w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-slate-700 border-b last:border-b-0 flex items-center gap-3">
+                          <span className="w-3 h-3 rounded-full bg-sky-400 dark:bg-sky-600 flex-shrink-0" />
+                          <span className="text-black">{v}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-2"><Label>Time</Label><div className="relative"><Clock aria-hidden className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" /><Input className="pl-10" type="time" value={formData.matchTime} onChange={(e) => setFormData(prev => ({ ...prev, matchTime: e.target.value }))} /></div></div>
+                <div className="space-y-2 relative"><Label>Group *</Label>
+                  <Input value={formData.groupName} onChange={(e) => handleGroupChange(e.target.value)} onFocus={() => setShowGroupSuggestions(true)} required />
+                  {showGroupSuggestions && groupSuggestions.length > 0 && (
+                    <div className="absolute z-50 w-full mt-1 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-md shadow-lg">
+                      {getGroupSuggestions(formData.groupName).map((g, idx) => (
+                        <button key={idx} type="button" onClick={() => selectGroupSuggestion(g)} className="w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-slate-700 border-b last:border-b-0 flex items-center gap-3">
+                          <span className="w-3 h-3 rounded-full bg-amber-400 dark:bg-amber-600 flex-shrink-0" />
+                          <span className="text-black">{g}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -542,10 +614,13 @@ export const CreateMatchDialog = ({ open, onOpenChange, onSuccess }: CreateMatch
                           key={idx}
                           type="button"
                           onClick={() => selectLeaderSuggestion(suggestion, false)}
-                          className="w-full text-left px-3 py-2 hover:bg-blue-100 dark:hover:bg-slate-700 border-b last:border-b-0 dark:text-white"
+                          className="w-full text-left px-3 py-2 hover:bg-blue-100 dark:hover:bg-slate-700 border-b last:border-b-0 text-black flex items-start gap-2"
                         >
-                          <div className="font-medium">{suggestion.name}</div>
-                          {suggestion.department && <div className="text-xs text-gray-600 dark:text-gray-400">{suggestion.department} {suggestion.unit ? `• ${suggestion.unit}` : ''}</div>}
+                          <span className="w-3 h-3 rounded-full mt-1.5 bg-emerald-400 dark:bg-emerald-600 flex-shrink-0" />
+                          <div>
+                            <div className="font-medium">{suggestion.name}</div>
+                            {suggestion.department && <div className="text-xs text-black">{suggestion.department} {suggestion.unit ? `• ${suggestion.unit}` : ''}</div>}
+                          </div>
                         </button>
                       ))}
                     </div>
@@ -640,10 +715,13 @@ export const CreateMatchDialog = ({ open, onOpenChange, onSuccess }: CreateMatch
                           key={idx}
                           type="button"
                           onClick={() => selectLeaderSuggestion(suggestion, true)}
-                          className="w-full text-left px-3 py-2 hover:bg-blue-100 dark:hover:bg-slate-700 border-b last:border-b-0 dark:text-white"
+                          className="w-full text-left px-3 py-2 hover:bg-blue-100 dark:hover:bg-slate-700 border-b last:border-b-0 text-black flex items-start gap-2"
                         >
-                          <div className="font-medium">{suggestion.name}</div>
-                          {suggestion.department && <div className="text-xs text-gray-600 dark:text-gray-400">{suggestion.department} {suggestion.unit ? `• ${suggestion.unit}` : ''}</div>}
+                          <span className="w-3 h-3 rounded-full mt-1.5 bg-emerald-400 dark:bg-emerald-600 flex-shrink-0" />
+                          <div>
+                            <div className="font-medium">{suggestion.name}</div>
+                            {suggestion.department && <div className="text-xs text-black">{suggestion.department} {suggestion.unit ? `• ${suggestion.unit}` : ''}</div>}
+                          </div>
                         </button>
                       ))}
                     </div>

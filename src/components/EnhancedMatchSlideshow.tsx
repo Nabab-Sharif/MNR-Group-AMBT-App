@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { User, Trophy, ChevronLeft, ChevronRight } from "lucide-react";
 import { formatTimeToTwelveHour } from "@/lib/utils";
+import { LiveScoreboard } from "./LiveScoreboard";
 import logo from "@/assets/logo.jpg";
 import { useTheme } from "@/contexts/ThemeContext";
 
@@ -59,6 +60,10 @@ export const EnhancedMatchSlideshow = () => {
     return saved !== null ? parseInt(saved, 10) : 5;
   });
   const [isHovering, setIsHovering] = useState(false);
+  const [dualLiveEnabled, setDualLiveEnabled] = useState(() => {
+    const saved = localStorage.getItem('slideshow-dual-live-enabled');
+    return saved !== null ? JSON.parse(saved) : false;
+  });
   
   // Use ref to track slideFilter in subscription callback without re-creating subscription
   const slideFilterRef = useRef<string>('winners-A');
@@ -75,6 +80,9 @@ export const EnhancedMatchSlideshow = () => {
       if (enabled !== null) setAutoPlayEnabled(JSON.parse(enabled));
       if (interval !== null) setAutoPlayInterval(parseInt(interval, 10));
     };
+
+    const dual = localStorage.getItem('slideshow-dual-live-enabled');
+    if (dual !== null) setDualLiveEnabled(JSON.parse(dual));
 
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
@@ -100,12 +108,13 @@ export const EnhancedMatchSlideshow = () => {
   useEffect(() => {
     const checkTodayData = async () => {
       const today = new Date().toISOString().split('T')[0];
+      const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
       
-      // Get today's upcoming matches
+      // Get today's upcoming OR live matches
       const { data: upcomingData } = await supabase
         .from("matches")
         .select("*")
-        .eq("status", "upcoming")
+        .in("status", ["upcoming", "live"])
         .eq("date", today);
       
       // Get today's completed matches
@@ -136,9 +145,9 @@ export const EnhancedMatchSlideshow = () => {
         setWinnerDate(today);
         setCurrentIndex(0);
       } else if (!hasAnyToday && (slideFilter === 'today' || slideFilter.startsWith('today-'))) {
-        // No matches today - switch to general winners
+        // No matches today - switch to general winners showing yesterday's winners
         setSlideFilter('winners');
-        setWinnerDate(null);
+        setWinnerDate(yesterday);
         setCurrentIndex(0);
       }
     };
@@ -185,15 +194,29 @@ export const EnhancedMatchSlideshow = () => {
 
       // Handle today filters
       if (slideFilter === 'today') {
-        // Show all today's upcoming matches
-        query = query.eq("status", "upcoming").eq("date", today);
+        // Show all today's upcoming or live matches
+        query = query.in("status", ["upcoming", "live"]).eq("date", today);
       } else if (slideFilter.startsWith('today-') && !slideFilter.includes('winners')) {
         // Handle dynamic 'today-[GroupName]' filters like 'today-B>A'
         const groupName = slideFilter.replace('today-', '');
-        query = query.eq("status", "upcoming").eq("date", today).eq("group_name", groupName);
+        query = query.in("status", ["upcoming", "live"]).eq("date", today).eq("group_name", groupName);
       } else if (slideFilter === 'winners') {
-        // Show winners for the specific date (winnerDate) or today
-        const dateToShow = winnerDate || today;
+        // Show winners for the specific date (`winnerDate`) or determine the best date:
+        // - If `winnerDate` is explicitly set use it
+        // - Otherwise, prefer today if there are completed matches today, else show yesterday
+        const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+        let dateToShow = winnerDate || null;
+        if (!dateToShow) {
+          const { data: completedToday } = await supabase
+            .from('matches')
+            .select('id')
+            .eq('status', 'completed')
+            .eq('date', today)
+            .limit(1);
+
+          dateToShow = completedToday && completedToday.length > 0 ? today : yesterday;
+        }
+
         query = query
           .eq("status", "completed")
           .not("winner", "is", null)
@@ -203,7 +226,17 @@ export const EnhancedMatchSlideshow = () => {
         // Handle dynamic 'winners-[GroupName]' filters like 'winners-B>A'
         const groupName = slideFilter.replace('winners-', '');
         // Show winners for the selected group (specific date or today)
-        const dateToShow = winnerDate || today;
+        const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+        let dateToShow = winnerDate || null;
+        if (!dateToShow) {
+          const { data: completedToday } = await supabase
+            .from('matches')
+            .select('id')
+            .eq('status', 'completed')
+            .eq('date', today)
+            .limit(1);
+          dateToShow = completedToday && completedToday.length > 0 ? today : yesterday;
+        }
         query = query
           .eq("status", "completed")
           .eq("group_name", groupName)
@@ -273,7 +306,33 @@ export const EnhancedMatchSlideshow = () => {
       }
     };
 
+    // When Dual Live is enabled and viewing today's slides, ensure we fetch up to 2 live/upcoming matches
+    const ensureTwoLiveMatches = async () => {
+      try {
+        if (dualLiveEnabled && (slideFilter === 'today' || slideFilter.startsWith('today-'))) {
+          // If we already have two, nothing to do
+          if (todayUpcomingData.length >= 2) return;
+
+          const today = new Date().toISOString().split('T')[0];
+          const { data: extra } = await supabase
+            .from('matches')
+            .select('*')
+            .in('status', ['upcoming', 'live'])
+            .eq('date', today)
+            .order('match_number', { ascending: true })
+            .limit(2);
+
+          if (extra && extra.length > 0) {
+            setTodayUpcomingData(extra as Match[]);
+          }
+        }
+      } catch (err) {
+        // ignore
+      }
+    };
+
     fetchSlides();
+    ensureTwoLiveMatches();
 
     const channel = supabase
       .channel('enhanced-slideshow')
@@ -287,6 +346,19 @@ export const EnhancedMatchSlideshow = () => {
         async (payload: any) => {
           try {
             const today = new Date().toISOString().split('T')[0];
+            const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+
+            // If the realtime payload indicates an inserted/updated completed match for today,
+            // force showing today's winners (this replaces previous-day winners)
+            const evt = payload?.eventType || payload?.event || payload?.type;
+            const newRec = payload?.new || payload?.record || payload?.payload?.new || payload?.payload || payload;
+            if ((evt === 'INSERT' || evt === 'UPDATE' || payload?.action === 'INSERT' || payload?.action === 'UPDATE')
+                && newRec && newRec.status === 'completed' && newRec.date === today) {
+              setSlideFilter('winners');
+              setWinnerDate(today);
+              setCurrentIndex(0);
+              // fetchSlides will run below and replace previous slides
+            }
 
             // Re-evaluate today's matches to decide which filter to show
             const { data: todayMatches } = await supabase
@@ -307,6 +379,13 @@ export const EnhancedMatchSlideshow = () => {
                 // All today's matches are completed -> switch to today's winners
                 setSlideFilter('winners');
                 setWinnerDate(today);
+                setCurrentIndex(0);
+              }
+            } else {
+              // No matches today -> show yesterday's winners by default
+              if (slideFilterRef.current === 'today' || slideFilterRef.current.startsWith('today-')) {
+                setSlideFilter('winners');
+                setWinnerDate(yesterday);
                 setCurrentIndex(0);
               }
             }
@@ -396,8 +475,51 @@ export const EnhancedMatchSlideshow = () => {
           </Button>
         ))}
       </div>
+      {/* Dual Live Toggle */}
+      <div className="flex items-center ml-2">
+        <label className="text-xs font-semibold text-muted-foreground mr-2">LIVE MODE:</label>
+        <Button
+          variant={dualLiveEnabled ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => {
+            setDualLiveEnabled(prev => {
+              const next = !prev;
+              localStorage.setItem('slideshow-dual-live-enabled', JSON.stringify(next));
+              return next;
+            });
+          }}
+        >
+          {dualLiveEnabled ? 'Dual Live' : 'Single Live'}
+        </Button>
+      </div>
     </div>
   );
+
+  // When showing today's live matches and dual-live is enabled, render two live scoreboards
+  if (slideFilter === 'today' && dualLiveEnabled) {
+    const liveMatches = todayUpcomingData.slice(0, 2);
+
+    // Debug: ensure we attempted to fetch enough matches
+    console.debug('[EnhancedMatchSlideshow] Dual Live enabled, todayUpcomingData count:', todayUpcomingData.length, 'liveMatches count:', liveMatches.length, 'slideFilter:', slideFilter, 'dualLiveEnabled:', dualLiveEnabled);
+
+    return (
+      <div id="enhanced-slideshow" className="w-full">
+        {filterButtons}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {liveMatches.length === 0 && (
+            <div className="col-span-1 text-center py-10">No live matches available</div>
+          )}
+          {liveMatches.map((m) => (
+            <div key={m.id} className="w-full min-h-[320px] sm:min-h-[420px]">
+              <div className="w-full h-full">
+                <LiveScoreboard match={m} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   if (slides.length === 0) {
     const getFilterLabel = () => {
@@ -536,14 +658,23 @@ export const EnhancedMatchSlideshow = () => {
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => setIsHovering(false)}
       >
+        {/* Live indicator (gola) for today's/upcoming matches */}
+        { (slideFilter === 'today' || slideFilter.startsWith('today-')) && currentSlide?.status && currentSlide.status !== 'completed' && (
+          <div className="absolute top-4 left-4 z-30 flex items-center gap-2">
+            <span className="w-3 h-3 rounded-full bg-red-500 animate-pulse" />
+            <div className={`text-xs font-bold px-2 py-0.5 rounded-full ${isWhiteTheme ? 'bg-red-100 text-red-700' : 'bg-red-600 text-white'}`}>
+              LIVE
+            </div>
+          </div>
+        )}
         {/* Decorative Blobs */}
         <div className="blob" style={{ right: '-6rem', top: '-6rem', width: '28rem', height: '28rem', background: 'radial-gradient(circle at 25% 30%, rgba(99,102,241,0.40), transparent 40%)' }} />
         <div className="blob" style={{ left: '-6rem', bottom: '-6rem', width: '22rem', height: '22rem', background: 'radial-gradient(circle at 70% 70%, rgba(236,72,153,0.30), transparent 40%)', animationDelay: '2s' }} />
 
         {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 md:gap-6 p-3 sm:p-4 md:p-8 min-h-[400px] sm:min-h-[500px] md:min-h-[600px] lg:min-h-[700px]">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6 p-3 sm:p-4 md:p-8 min-h-[400px] sm:min-h-[500px] md:min-h-[600px] lg:min-h-[700px]">
           {/* Left Side - Match Info & Scoreboard */}
-          <div className="space-y-3 sm:space-y-4 md:space-y-6 flex flex-col justify-center">
+          <div className="space-y-3 sm:space-y-4 md:space-y-6 flex flex-col justify-center lg:col-span-2">
             {/* Team Names with Score - Scoreboard Style */}
             <div className={`space-y-2 sm:space-y-3 rounded-xl p-4 sm:p-6 border ${
               isWhiteTheme
@@ -692,7 +823,7 @@ export const EnhancedMatchSlideshow = () => {
           </div>
 
           {/* Right Side - Player Scores & Photos (always visible) */}
-          <div className={`relative rounded-xl p-4 sm:p-6 border overflow-hidden ${isWhiteTheme ? 'bg-foreground/5 border-foreground/20' : 'bg-card/60 border-primary/20'}`}>
+          <div className={`relative rounded-xl p-4 sm:p-6 border overflow-hidden ${isWhiteTheme ? 'bg-foreground/5 border-foreground/20' : 'bg-card/60 border-primary/20'} lg:col-span-1`}>
             {/* Decorative gradient background */}
             <div className="absolute inset-0 rounded-xl pointer-events-none" style={{ background: isWhiteTheme ? 'linear-gradient(135deg, rgba(59,130,246,0.03), transparent)' : 'linear-gradient(135deg, rgba(2,6,23,0.05), transparent)' }} />
             

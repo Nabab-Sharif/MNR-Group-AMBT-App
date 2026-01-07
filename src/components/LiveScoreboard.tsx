@@ -29,7 +29,18 @@ export const LiveScoreboard = ({ match, isAdmin = false, onFullscreen, onWin, on
   const [winner, setWinner] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [downloadedAt15, setDownloadedAt15] = useState(false);
+  const [flashTeam1, setFlashTeam1] = useState(false);
+  const [flashTeam2, setFlashTeam2] = useState(false);
   const scoreboardRef = useRef<HTMLDivElement>(null);
+
+  const flashTimeouts = useRef<{ [k: string]: number | null }>({ t1: null, t2: null });
+
+  useEffect(() => {
+    return () => {
+      if (flashTimeouts.current.t1) window.clearTimeout(flashTimeouts.current.t1 as any);
+      if (flashTimeouts.current.t2) window.clearTimeout(flashTimeouts.current.t2 as any);
+    };
+  }, []);
   
   const team1Player1Total = team1Player1Scores.reduce((a, b) => a + b, 0);
   const team1Player2Total = team1Player2Scores.reduce((a, b) => a + b, 0);
@@ -138,24 +149,44 @@ export const LiveScoreboard = ({ match, isAdmin = false, onFullscreen, onWin, on
       newScores[index] = newScores[index] === 0 ? 1 : 0;
       updatedTeam1Player1 = newScores;
       setTeam1Player1Scores(newScores);
+      if (isScoreAdded) {
+        setFlashTeam1(true);
+        if (flashTimeouts.current.t1) window.clearTimeout(flashTimeouts.current.t1 as any);
+        flashTimeouts.current.t1 = window.setTimeout(() => setFlashTeam1(false), 800);
+      }
     } else if (team === 1 && player === 2) {
       newScores = [...team1Player2Scores];
       isScoreAdded = newScores[index] === 0;
       newScores[index] = newScores[index] === 0 ? 1 : 0;
       updatedTeam1Player2 = newScores;
       setTeam1Player2Scores(newScores);
+      if (isScoreAdded) {
+        setFlashTeam1(true);
+        if (flashTimeouts.current.t1) window.clearTimeout(flashTimeouts.current.t1 as any);
+        flashTimeouts.current.t1 = window.setTimeout(() => setFlashTeam1(false), 800);
+      }
     } else if (team === 2 && player === 1) {
       newScores = [...team2Player1Scores];
       isScoreAdded = newScores[index] === 0;
       newScores[index] = newScores[index] === 0 ? 1 : 0;
       updatedTeam2Player1 = newScores;
       setTeam2Player1Scores(newScores);
+      if (isScoreAdded) {
+        setFlashTeam2(true);
+        if (flashTimeouts.current.t2) window.clearTimeout(flashTimeouts.current.t2 as any);
+        flashTimeouts.current.t2 = window.setTimeout(() => setFlashTeam2(false), 800);
+      }
     } else {
       newScores = [...team2Player2Scores];
       isScoreAdded = newScores[index] === 0;
       newScores[index] = newScores[index] === 0 ? 1 : 0;
       updatedTeam2Player2 = newScores;
       setTeam2Player2Scores(newScores);
+      if (isScoreAdded) {
+        setFlashTeam2(true);
+        if (flashTimeouts.current.t2) window.clearTimeout(flashTimeouts.current.t2 as any);
+        flashTimeouts.current.t2 = window.setTimeout(() => setFlashTeam2(false), 800);
+      }
     }
     
     const team1NewTotal = updatedTeam1Player1.reduce((a, b) => a + b, 0) + updatedTeam1Player2.reduce((a, b) => a + b, 0);
@@ -508,7 +539,7 @@ export const LiveScoreboard = ({ match, isAdmin = false, onFullscreen, onWin, on
         <div className="p-2 sm:p-3 md:p-4" data-scoreboard>
           <div className="flex flex-col lg:flex-row gap-2 sm:gap-3 md:gap-4">
             {/* Team 1 Section */}
-            <div className="flex-1 bg-gradient-to-br from-indigo-500 via-indigo-600 to-blue-600 rounded-xl sm:rounded-2xl p-2 sm:p-3 md:p-4 shadow-xl">
+            <div className={`flex-1 bg-gradient-to-br from-indigo-500 via-indigo-600 to-blue-600 rounded-xl sm:rounded-2xl p-2 sm:p-3 md:p-4 shadow-xl ${flashTeam1 ? 'ring-4 ring-cyan-300/60 shadow-[0_0_40px_rgba(34,211,238,0.20)] scale-[1.01]' : ''}`}>
               {/* Team Header */}
               <div className="bg-indigo-400/30 rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 mb-2 sm:mb-3 text-center border border-indigo-300/40">
                 <h3 className="text-white font-bold text-sm sm:text-base md:text-lg">{match.team1_name}</h3>
@@ -555,7 +586,7 @@ export const LiveScoreboard = ({ match, isAdmin = false, onFullscreen, onWin, on
               </div>
               
               {/* Total Bar */}
-              <div className="bg-gradient-to-br from-cyan-500 to-blue-600 text-white font-bold text-2xl sm:text-3xl md:text-5xl lg:text-5xl px-2 sm:px-3 py-1.5 sm:py-2 mt-2 sm:mt-3 text-center shadow-lg">
+              <div className={`bg-gradient-to-br from-cyan-500 to-blue-600 text-white font-bold text-2xl sm:text-3xl md:text-5xl lg:text-5xl px-2 sm:px-3 py-1.5 sm:py-2 mt-2 sm:mt-3 text-center shadow-lg ${flashTeam1 ? 'scale-105 transition-transform duration-300' : ''}`}>
                 <div className="text-white/90 text-[10px] sm:text-xs font-medium">Total</div>
                 <div className="text-white font-bold text-lg sm:text-xl">{team1Total}</div>
               </div>
@@ -572,16 +603,16 @@ export const LiveScoreboard = ({ match, isAdmin = false, onFullscreen, onWin, on
             {/* Center VS Section */}
             <div className="flex lg:flex-col items-center justify-center gap-2 sm:gap-3 py-2 lg:py-0 lg:px-2">
               <div className="flex items-center gap-3 sm:gap-4">
-                <div className="bg-gradient-to-br from-cyan-500 to-blue-600 text-white font-bold text-2xl sm:text-3xl md:text-4xl lg:text-5xl px-4 sm:px-6 py-2 sm:py-3 rounded-lg shadow-lg">{team1Total}</div>
+                <div className={`bg-gradient-to-br from-cyan-500 to-blue-600 text-white font-bold text-2xl sm:text-3xl md:text-4xl lg:text-5xl px-4 sm:px-6 py-2 sm:py-3 rounded-lg shadow-lg ${flashTeam1 ? 'scale-110 transition-transform duration-300' : ''}`}>{team1Total}</div>
                 <div className="bg-gradient-to-r from-rose-500 to-pink-500 text-white font-bold text-sm sm:text-base md:text-lg px-3 sm:px-4 py-1 sm:py-1.5 rounded-lg shadow-lg">
                   VS
                 </div>
-                <div className="bg-gradient-to-br from-purple-500 to-violet-600 text-white font-bold text-2xl sm:text-3xl md:text-4xl lg:text-5xl px-4 sm:px-6 py-2 sm:py-3 rounded-lg shadow-lg">{team2Total}</div>
+                <div className={`bg-gradient-to-br from-purple-500 to-violet-600 text-white font-bold text-2xl sm:text-3xl md:text-4xl lg:text-5xl px-4 sm:px-6 py-2 sm:py-3 rounded-lg shadow-lg ${flashTeam2 ? 'scale-110 transition-transform duration-300' : ''}`}>{team2Total}</div>
               </div>
             </div>
 
             {/* Team 2 Section */}
-            <div className="flex-1 bg-gradient-to-br from-purple-500 to-violet-600 rounded-xl sm:rounded-2xl p-2 sm:p-3 md:p-4 shadow-xl">
+            <div className={`flex-1 bg-gradient-to-br from-purple-500 to-violet-600 rounded-xl sm:rounded-2xl p-2 sm:p-3 md:p-4 shadow-xl ${flashTeam2 ? 'ring-4 ring-rose-300/60 shadow-[0_0_40px_rgba(236,72,153,0.20)] scale-[1.01]' : ''}`}>
               {/* Team Header */}
               <div className="bg-purple-400/40 rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 mb-2 sm:mb-3 text-center border border-purple-300/30">
                 <h3 className="text-white font-bold text-sm sm:text-base md:text-lg">{match.team2_name}</h3>
@@ -624,7 +655,7 @@ export const LiveScoreboard = ({ match, isAdmin = false, onFullscreen, onWin, on
               </div>
               
               {/* Total Bar */}
-              <div className="bg-gradient-to-r from-fuchsia-500 to-violet-600 rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 mt-2 sm:mt-3 text-center shadow-lg">
+              <div className={`bg-gradient-to-r from-fuchsia-500 to-violet-600 rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 mt-2 sm:mt-3 text-center shadow-lg ${flashTeam2 ? 'scale-105 transition-transform duration-300' : ''}`}>
                 <div className="text-white/90 text-[10px] sm:text-xs font-medium">Total</div>
                 <div className="text-white font-bold text-lg sm:text-xl">{team2Total}</div>
               </div>
