@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { User, Trophy, ChevronLeft, ChevronRight } from "lucide-react";
@@ -59,6 +59,13 @@ export const EnhancedMatchSlideshow = () => {
     return saved !== null ? parseInt(saved, 10) : 5;
   });
   const [isHovering, setIsHovering] = useState(false);
+  
+  // Use ref to track slideFilter in subscription callback without re-creating subscription
+  const slideFilterRef = useRef<string>('winners-A');
+  
+  useEffect(() => {
+    slideFilterRef.current = slideFilter;
+  }, [slideFilter]);
 
   // Monitor localStorage changes for auto-play settings
   useEffect(() => {
@@ -116,16 +123,22 @@ export const EnhancedMatchSlideshow = () => {
       setTodayUpcomingData(upcomingData || []);
       
       // Auto-switch behavior:
-      // - If there are no matches for today and the current filter is a today filter, switch to general 'winners'.
-      // - If all today's matches are completed (no upcoming/live), switch to show today's winners specifically.
-      if (!hasAnyToday && (slideFilter === 'today' || slideFilter.startsWith('today-'))) {
-        setSlideFilter('winners');
-        setWinnerDate(null);
-        setCurrentIndex(0);
-      } else if (hasCompleted && !hasUpcoming && (slideFilter === 'today' || slideFilter.startsWith('today-'))) {
-        // All today's matches completed: show winners for today
+      if (hasUpcoming) {
+        // Today has upcoming/live matches - always show today's matches
+        if (slideFilter !== 'today' && !slideFilter.startsWith('today-')) {
+          setSlideFilter('today');
+          setWinnerDate(null);
+          setCurrentIndex(0);
+        }
+      } else if (hasCompleted && !hasUpcoming) {
+        // All today's matches are completed - show today's winners
         setSlideFilter('winners');
         setWinnerDate(today);
+        setCurrentIndex(0);
+      } else if (!hasAnyToday && (slideFilter === 'today' || slideFilter.startsWith('today-'))) {
+        // No matches today - switch to general winners
+        setSlideFilter('winners');
+        setWinnerDate(null);
         setCurrentIndex(0);
       }
     };
@@ -179,21 +192,23 @@ export const EnhancedMatchSlideshow = () => {
         const groupName = slideFilter.replace('today-', '');
         query = query.eq("status", "upcoming").eq("date", today).eq("group_name", groupName);
       } else if (slideFilter === 'winners') {
-        // Show only today's winners (no multi-day lookback)
+        // Show winners for the specific date (winnerDate) or today
+        const dateToShow = winnerDate || today;
         query = query
           .eq("status", "completed")
           .not("winner", "is", null)
-          .eq("date", today)
+          .eq("date", dateToShow)
           .order("updated_at", { ascending: false });
       } else if (slideFilter.startsWith('winners-')) {
         // Handle dynamic 'winners-[GroupName]' filters like 'winners-B>A'
         const groupName = slideFilter.replace('winners-', '');
-        // Only today's winners for the selected group
+        // Show winners for the selected group (specific date or today)
+        const dateToShow = winnerDate || today;
         query = query
           .eq("status", "completed")
           .eq("group_name", groupName)
           .not("winner", "is", null)
-          .eq("date", today)
+          .eq("date", dateToShow)
           .order("updated_at", { ascending: false });
       } else if (slideFilter === 'today-winners-a') {
         // Legacy support for A Group winners (deprecated)
@@ -285,18 +300,14 @@ export const EnhancedMatchSlideshow = () => {
 
               if (hasNonCompleted) {
                 // If any match today is still upcoming/live, show today's upcoming slides
-                if (slideFilter !== 'today') {
-                  setSlideFilter('today');
-                  setWinnerDate(null);
-                  const el = document.getElementById('enhanced-slideshow');
-                  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-              } else if (hasCompleted) {
+                setSlideFilter('today');
+                setWinnerDate(null);
+                setCurrentIndex(0);
+              } else if (hasCompleted && !hasNonCompleted) {
                 // All today's matches are completed -> switch to today's winners
                 setSlideFilter('winners');
                 setWinnerDate(today);
-                const el = document.getElementById('enhanced-slideshow');
-                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                setCurrentIndex(0);
               }
             }
           } catch (err) {

@@ -13,6 +13,7 @@ import { FullscreenScoreboard } from "@/components/FullscreenScoreboard";
 import { Footer } from "@/components/Footer";
 import TodayWinners from "@/components/TodayWinners";
 import { ThemeSelector } from "@/components/ThemeSelector";
+import { announceLiveMatchStart } from "@/lib/voiceAnnouncement";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -27,6 +28,7 @@ const Home = () => {
   const [showLiveScoreboard, setShowLiveScoreboard] = useState(true);
   const [playerDialog, setPlayerDialog] = useState<any>(null);
   const fullscreenTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const prevLiveIdsRef = useRef<Record<string, boolean>>({});
 
   useEffect(() => {
     // Auto-close fullscreen scoreboard after 10 seconds
@@ -94,6 +96,28 @@ const Home = () => {
       supabase.removeChannel(channel);
     };
   }, []);
+
+  // Announce when a new live match starts on the home page
+  useEffect(() => {
+    // Build a map of current live ids
+    const currentIds: Record<string, boolean> = {};
+    liveMatches.forEach(m => { if (m && m.id) currentIds[m.id] = true; });
+
+    // Find any id that is new compared to previous
+    const prevIds = prevLiveIdsRef.current || {};
+    const newLive = liveMatches.find(m => m && m.id && !prevIds[m.id]);
+    if (newLive) {
+      // Announce the newly started live match
+      try {
+        announceLiveMatchStart(newLive);
+      } catch (err) {
+        console.error('Voice announcement failed:', err);
+      }
+    }
+
+    // Update prev ids
+    prevLiveIdsRef.current = currentIds;
+  }, [liveMatches]);
 
   // NOTE: live modal will show all live scoreboards; no auto-advance.
 
