@@ -17,16 +17,93 @@ export const MatchSlideshow = () => {
   const [slides, setSlides] = useState<Slide[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [fullscreenSlide, setFullscreenSlide] = useState<Slide | null>(null);
+  const [allWinnersMode, setAllWinnersMode] = useState(true);
 
   useEffect(() => {
     const fetchSlides = async () => {
-      const { data } = await supabase
-        .from("home_slides")
-        .select("*")
-        .order("order_index", { ascending: true });
-      
-      if (data) {
-        setSlides(data as Slide[]);
+      try {
+        if (allWinnersMode) {
+          // Fetch recent completed matches (all winners mode)
+          const { data: winners } = await supabase
+            .from('matches')
+            .select('*')
+            .eq('status', 'completed')
+            .not('winner', 'is', null)
+            .order('updated_at', { ascending: false })
+            .limit(200);
+
+          if (winners && winners.length > 0) {
+              const filtered = (winners as any[]).filter((m: any) => {
+                const d = m.date || (m.updated_at ? m.updated_at.split('T')[0] : '');
+                if (!d) return false;
+                const day = parseInt(d.split('-')[2] || '', 10);
+                return day === 6 || day === 7;
+              });
+
+              const winnerSlides: Slide[] = (filtered as any[]).map((m) => ({
+              id: `match-${m.id}`,
+              title: `${m.winner} — Winner`,
+              description: `${m.team1_name} ${m.team1_score ?? 0} - ${m.team2_score ?? 0} ${m.team2_name} (${m.group_name || ''})`,
+              image_url: m.image_url || "",
+              order_index: 0,
+              created_at: m.updated_at || m.date || new Date().toISOString(),
+            }));
+            setSlides(winnerSlides);
+            setCurrentIndex(0);
+            return;
+          } else {
+            setSlides([]);
+            return;
+          }
+        }
+
+        const { data } = await supabase
+          .from("home_slides")
+          .select("*")
+          .order("order_index", { ascending: true });
+
+        if (data) {
+          // Try to fetch today's completed winner match and inject it as slide #2
+          try {
+            const today = new Date().toISOString().split('T')[0];
+            const { data: todaysCompleted } = await supabase
+              .from('matches')
+              .select('*')
+              .eq('status', 'completed')
+              .eq('date', today)
+              .not('winner', 'is', null)
+              .order('updated_at', { ascending: false })
+              .limit(1);
+
+            if (todaysCompleted && todaysCompleted.length > 0) {
+              const m: any = todaysCompleted[0];
+              const winnerSlide: Slide = {
+                id: `winner-${m.id}`,
+                title: `${m.winner} — Winner`,
+                description: `${m.team1_name} ${m.team1_score ?? 0} - ${m.team2_score ?? 0} ${m.team2_name} (${m.group_name || ''})`,
+                image_url: m.image_url || "",
+                order_index: 1,
+                created_at: m.updated_at || m.date || new Date().toISOString(),
+              };
+
+              const baseSlides = data as Slide[];
+              const newSlides = [
+                ...(baseSlides.slice(0, 1) || []),
+                winnerSlide,
+                ...(baseSlides.slice(1) || []),
+              ];
+              setSlides(newSlides);
+              return;
+            }
+          } catch (err) {
+            console.error('Failed to fetch today\'s winner slide:', err);
+          }
+
+          setSlides(data as Slide[]);
+        }
+      } catch (err) {
+        console.error('fetchSlides error:', err);
+        setSlides([]);
       }
     };
 
@@ -96,6 +173,17 @@ export const MatchSlideshow = () => {
                 <Maximize2 className="h-4 w-4 mr-2" />
                 Full View
               </Button>
+              <Button
+                onClick={() => {
+                  setAllWinnersMode((v) => !v);
+                }}
+                variant={allWinnersMode ? 'default' : 'outline'}
+                size="sm"
+                className="mt-4 ml-2"
+              >
+                🏆 All Winners
+              </Button>
+              
             </div>
 
             {/* 3D Slide Indicators */}
