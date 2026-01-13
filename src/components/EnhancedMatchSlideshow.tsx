@@ -90,13 +90,16 @@ export const EnhancedMatchSlideshow = () => {
 
   useEffect(() => {
     const handler = (e: Event) => {
-      const detail = (e as CustomEvent).detail as { filter?: string; group?: string } | undefined;
+      const detail = (e as CustomEvent).detail as { filter?: string; group?: string; scroll?: boolean } | undefined;
       if (!detail) return;
       if (detail.filter) {
         setSlideFilter(detail.filter);
         setCurrentIndex(0);
-        const el = document.getElementById('enhanced-slideshow');
-        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Only scroll if explicitly requested
+        if (detail.scroll) {
+          const el = document.getElementById('enhanced-slideshow');
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
       }
     };
 
@@ -130,6 +133,10 @@ export const EnhancedMatchSlideshow = () => {
       
       setTodayDataExists(hasAnyToday);
       setTodayUpcomingData(upcomingData || []);
+      
+      // Don't auto-switch if a custom group filter is active
+      const isCustomGroupFilter = slideFilter.startsWith('winners-') && !slideFilter.includes('winners-all') && slideFilter !== 'winners';
+      if (isCustomGroupFilter) return;
       
       // Auto-switch behavior:
       if (hasUpcoming) {
