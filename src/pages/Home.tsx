@@ -9,6 +9,7 @@ import { WinCelebration } from "@/components/WinCelebration";
 import { WelcomeMessage } from "@/components/WelcomeMessage";
 import { EnhancedMatchSlideshow } from "@/components/EnhancedMatchSlideshow";
 import { GroupCards } from "@/components/GroupCards";
+import { LiveModeSelector } from "@/components/LiveModeSelector";
 import { FullscreenScoreboard } from "@/components/FullscreenScoreboard";
 import { Footer } from "@/components/Footer";
 import TodayWinners from "@/components/TodayWinners";
@@ -27,6 +28,10 @@ const Home = () => {
   const [showWelcome, setShowWelcome] = useState(false);
   const [showLiveScoreboard, setShowLiveScoreboard] = useState(true);
   const [playerDialog, setPlayerDialog] = useState<any>(null);
+  const [liveMatchesDoubleView, setLiveMatchesDoubleView] = useState(() => {
+    const saved = localStorage.getItem('live-matches-double-view');
+    return saved !== null ? JSON.parse(saved) : false;
+  });
   const fullscreenTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const prevLiveIdsRef = useRef<Record<string, boolean>>({});
 
@@ -224,9 +229,22 @@ const Home = () => {
                   <p className="text-sm text-muted-foreground">All active live scoreboards</p>
                 </div>
               </div>
+              {liveMatches.length >= 2 && (
+                <Button
+                  variant={liveMatchesDoubleView ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => {
+                    setLiveMatchesDoubleView(!liveMatchesDoubleView);
+                    localStorage.setItem('live-matches-double-view', JSON.stringify(!liveMatchesDoubleView));
+                  }}
+                  className={liveMatchesDoubleView ? 'bg-purple-600 hover:bg-purple-700' : ''}
+                >
+                  {liveMatchesDoubleView ? '2 Column' : '1 Column'}
+                </Button>
+              )}
             </div>
 
-            <div className="grid grid-cols-1 gap-4 w-full">
+            <div className={`grid ${liveMatchesDoubleView && liveMatches.length >= 2 ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'} gap-4 w-full`}>
               {liveMatches.map((m) => (
                 <LiveScoreboard
                   key={m.id}
@@ -246,6 +264,7 @@ const Home = () => {
             </div>
           </div>
         )}
+
 
         {/* Group Cards */}
         {allMatches.length > 0 && <GroupCards matches={allMatches} />}

@@ -567,23 +567,6 @@ export const EnhancedMatchSlideshow = () => {
           </Button>
         ))}
       </div>
-      {/* Dual Live Toggle */}
-      <div className="flex items-center ml-2">
-        <label className="text-xs font-semibold text-muted-foreground mr-2">LIVE MODE:</label>
-        <Button
-          variant={dualLiveEnabled ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => {
-            setDualLiveEnabled(prev => {
-              const next = !prev;
-              localStorage.setItem('slideshow-dual-live-enabled', JSON.stringify(next));
-              return next;
-            });
-          }}
-        >
-          {dualLiveEnabled ? 'Dual Live' : 'Single Live'}
-        </Button>
-      </div>
     </div>
   );
 
@@ -656,7 +639,7 @@ export const EnhancedMatchSlideshow = () => {
     return (
       <div className="text-center py-10 space-y-4">
         {filterButtons}
-        <h2 className="text-2xl font-bold mb-4">Welcome to Anish Memorial Tournament</h2>
+        <h2 className="text-2xl font-bold mb-4">Welcome to Anis Memorial Tournament</h2>
         <p className="text-muted-foreground">Organized by MNR Group</p>
         <p className="text-sm text-muted-foreground mt-4">
           No {getFilterLabel()} matches found
