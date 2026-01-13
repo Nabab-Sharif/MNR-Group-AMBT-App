@@ -28,7 +28,6 @@ export const LiveScoreboard = ({ match, isAdmin = false, onFullscreen, onWin, on
   const [team2Player2Scores, setTeam2Player2Scores] = useState<number[]>(Array(16).fill(0));
   const [winner, setWinner] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [downloadedAt15, setDownloadedAt15] = useState(false);
   const [flashTeam1, setFlashTeam1] = useState(false);
   const [flashTeam2, setFlashTeam2] = useState(false);
   const scoreboardRef = useRef<HTMLDivElement>(null);
@@ -123,15 +122,15 @@ export const LiveScoreboard = ({ match, isAdmin = false, onFullscreen, onWin, on
     };
   }, [match.id]);
 
-  // Auto-download when any team reaches 15 points
-  useEffect(() => {
-    if (!downloadedAt15 && (team1Total >= 15 || team2Total >= 15)) {
-      setDownloadedAt15(true);
-      setTimeout(() => {
-        handleDownload();
-      }, 500);
-    }
-  }, [team1Total, team2Total, downloadedAt15]);
+  // Auto-download disabled
+  // useEffect(() => {
+  //   if (!downloadedAt15 && (team1Total >= 15 || team2Total >= 15)) {
+  //     setDownloadedAt15(true);
+  //     setTimeout(() => {
+  //       handleDownload();
+  //     }, 500);
+  //   }
+  // }, [team1Total, team2Total, downloadedAt15]);
 
   const toggleScore = async (team: 1 | 2, player: 1 | 2, index: number) => {
     if (!isAdmin) return;

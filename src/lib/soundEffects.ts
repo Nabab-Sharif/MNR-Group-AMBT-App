@@ -1,13 +1,14 @@
 // Sound effects manager for score and win sounds
 export const playScoreSound = (teamName?: string, playerName?: string, totalScore?: number, teamNumber?: number, playerTotalScore?: number) => {
-  // Use best quality female voice with Bengali accent (en-IN) to announce score update
+  // Announce only: player name, team name, and team total score
   try {
     // Play light background music first
     playLightNotificationSound();
     
-    let message = 'Score Update';
-    if (playerName && teamName && totalScore !== undefined && playerTotalScore !== undefined) {
-      message = `${playerName}, 1 point. ${playerName} score ${playerTotalScore}. ${teamName}, total score ${totalScore}`;
+    let message = '';
+    // Announce: Player name, Team name, Team total score
+    if (playerName && teamName && totalScore !== undefined) {
+      message = `${playerName}. ${teamName}. Total ${totalScore}`;
     } else if (teamName && totalScore !== undefined) {
       message = `${teamName}, total score ${totalScore}`;
     } else if (playerName && teamName) {
@@ -16,67 +17,60 @@ export const playScoreSound = (teamName?: string, playerName?: string, totalScor
       message = `${teamName}`;
     }
     
-    const utterance = new SpeechSynthesisUtterance(message);
-    utterance.rate = 0.9; // Slightly slower for clarity with Bengali accent
-    utterance.pitch = 1.1; // Slightly higher pitch for female voice
-    utterance.volume = 0.95;
-    utterance.lang = 'en-IN'; // Bengali-accented English
-    
-    // Get available voices and prioritize diverse female voices (not just default system)
-    const voices = window.speechSynthesis.getVoices();
-    
-    let selectedVoice = null;
-    
-    // Priority 1: Look for named premium/quality voices (Google, Microsoft, Apple)
-    selectedVoice = voices.find(voice => 
-      (voice.name.includes('Google') || voice.name.includes('Microsoft') || voice.name.includes('Zira') || voice.name.includes('Aria')) &&
-      (voice.name.toLowerCase().includes('female') || voice.name.toLowerCase().includes('woman')) &&
-      (voice.lang === 'en-IN' || voice.lang === 'en_IN' || voice.lang === 'en-US' || voice.lang === 'en_US')
-    );
-    
-    // Priority 2: en-IN female voices
-    if (!selectedVoice) {
+    if (message) {
+      const utterance = new SpeechSynthesisUtterance(message);
+      utterance.rate = 0.85;
+      utterance.pitch = 1.0;
+      utterance.volume = 1.0;
+      utterance.lang = 'en-IN';
+      
+      const voices = window.speechSynthesis.getVoices();
+      let selectedVoice = null;
+      
       selectedVoice = voices.find(voice => 
-        (voice.lang === 'en-IN' || voice.lang === 'en_IN') && 
-        (voice.name.toLowerCase().includes('female') || voice.name.toLowerCase().includes('woman') || voice.name.toLowerCase().includes('isha') || voice.name.toLowerCase().includes('rishi'))
+        (voice.name.includes('Google') || voice.name.includes('Microsoft') || voice.name.includes('Zira') || voice.name.includes('Aria')) &&
+        (voice.name.toLowerCase().includes('female') || voice.name.toLowerCase().includes('woman')) &&
+        (voice.lang === 'en-IN' || voice.lang === 'en_IN' || voice.lang === 'en-US' || voice.lang === 'en_US')
       );
+      
+      if (!selectedVoice) {
+        selectedVoice = voices.find(voice => 
+          (voice.lang === 'en-IN' || voice.lang === 'en_IN') && 
+          (voice.name.toLowerCase().includes('female') || voice.name.toLowerCase().includes('woman') || voice.name.toLowerCase().includes('isha') || voice.name.toLowerCase().includes('rishi'))
+        );
+      }
+      
+      if (!selectedVoice) {
+        selectedVoice = voices.find(voice => 
+          voice.lang === 'en-IN' || voice.lang === 'en_IN'
+        );
+      }
+      
+      if (!selectedVoice) {
+        selectedVoice = voices.find(voice => 
+          (voice.lang === 'en-US' || voice.lang === 'en_US') && 
+          (voice.name.toLowerCase().includes('female') || voice.name.toLowerCase().includes('woman') || voice.name.toLowerCase().includes('moira') || voice.name.toLowerCase().includes('victoria'))
+        );
+      }
+      
+      if (!selectedVoice) {
+        selectedVoice = voices.find(voice => 
+          voice.name.toLowerCase().includes('female') || 
+          voice.name.toLowerCase().includes('woman')
+        );
+      }
+      
+      if (selectedVoice) {
+        utterance.voice = selectedVoice;
+      }
+      
+      setTimeout(() => {
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(utterance);
+      }, 100);
     }
-    
-    // Priority 3: Any en-IN voice
-    if (!selectedVoice) {
-      selectedVoice = voices.find(voice => 
-        voice.lang === 'en-IN' || voice.lang === 'en_IN'
-      );
-    }
-    
-    // Priority 4: en-US female voices
-    if (!selectedVoice) {
-      selectedVoice = voices.find(voice => 
-        (voice.lang === 'en-US' || voice.lang === 'en_US') && 
-        (voice.name.toLowerCase().includes('female') || voice.name.toLowerCase().includes('woman') || voice.name.toLowerCase().includes('moira') || voice.name.toLowerCase().includes('victoria'))
-      );
-    }
-    
-    // Priority 5: Last resort - any female voice in any language
-    if (!selectedVoice) {
-      selectedVoice = voices.find(voice => 
-        voice.name.toLowerCase().includes('female') || 
-        voice.name.toLowerCase().includes('woman')
-      );
-    }
-    
-    if (selectedVoice) {
-      utterance.voice = selectedVoice;
-    }
-    
-    // Delay voice by 100ms to let music play first
-    setTimeout(() => {
-      window.speechSynthesis.cancel(); // Cancel any ongoing speech
-      window.speechSynthesis.speak(utterance);
-    }, 100);
   } catch (err) {
     console.log('Speech synthesis not available, playing beep instead');
-    // Fallback to beep sound
     playBeepSound();
   }
 };
@@ -139,7 +133,7 @@ const playBeepSound = () => {
 };
 
 export const playWinSound = (winnerName?: string) => {
-  // Play beautiful winning fanfare with voice announcement
+  // Play winning fanfare (voice announcement disabled)
   try {
     // First, play an epic fanfare
     const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -171,13 +165,15 @@ export const playWinSound = (winnerName?: string) => {
       oscillator.stop(noteStartTime + note.duration);
     });
     
-    // Announce winner with voice
+    // Voice announcement disabled
+    // Uncomment below to re-enable voice announcements
+    /*
     if (winnerName) {
       setTimeout(() => {
         try {
           const message = `${winnerName} wins the match!`;
           const utterance = new SpeechSynthesisUtterance(message);
-          utterance.rate = 0.85; // Slightly slower for impact
+          utterance.rate = 0.85;
           utterance.pitch = 0.9;
           utterance.volume = 1.0;
           utterance.lang = 'en-IN';
@@ -207,8 +203,9 @@ export const playWinSound = (winnerName?: string) => {
         } catch (err) {
           console.log('Could not play win announcement');
         }
-      }, 1500); // Start voice after music finishes
+      }, 1500);
     }
+    */
   } catch (err) {
     console.log('Error playing win sound:', err);
   }
