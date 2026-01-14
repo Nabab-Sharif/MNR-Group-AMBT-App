@@ -518,7 +518,7 @@ export const EnhancedMatchSlideshow = () => {
     <div className="flex gap-2 justify-center mb-4 flex-wrap">
       {/* Today Filters */}
       <div className="flex gap-2 items-center flex-wrap">
-        <span className="text-xs font-semibold text-muted-foreground mr-2">TODAY:</span>
+        <span className="text-xs font-semibold text-muted-foreground mr-2">Today:</span>
         {todayDataExists && (
           <Button
             variant={slideFilter === 'today' ? 'default' : 'outline'}
@@ -546,7 +546,7 @@ export const EnhancedMatchSlideshow = () => {
 
       {/* Winners Filters */}
       <div className="flex gap-2 items-center flex-wrap">
-        <span className="text-xs font-semibold text-muted-foreground mr-2">WINNERS:</span>
+        <span className="text-xs font-semibold text-muted-foreground mr-2">Winners:</span>
         <Button
           key="winners-all"
           variant={slideFilter === 'winners-all' ? 'default' : 'outline'}
