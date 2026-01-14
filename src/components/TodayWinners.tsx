@@ -7,10 +7,14 @@ interface TodayWinnersProps {
 
 const TodayWinners = ({ matches = [] }: TodayWinnersProps) => {
   const today = new Date();
+  // Get yesterday's date (1 day back)
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  
   // Format as YYYY-MM-DD using local timezone instead of UTC
-  const year = today.getFullYear();
-  const month = String(today.getMonth() + 1).padStart(2, '0');
-  const day = String(today.getDate()).padStart(2, '0');
+  const year = yesterday.getFullYear();
+  const month = String(yesterday.getMonth() + 1).padStart(2, '0');
+  const day = String(yesterday.getDate()).padStart(2, '0');
   const todayString = `${year}-${month}-${day}`;
 
   const todaysWins = matches.filter(
@@ -64,8 +68,10 @@ const TodayWinners = ({ matches = [] }: TodayWinnersProps) => {
     <div className="today-winners border-t border-border pt-6 pb-6">
       <div className="px-6">
         <div className="flex items-center justify-between mb-4 cursor-pointer hover:opacity-70 transition-opacity" onClick={() => handleGroupClick('all-winners')}>
-          <h2 className="text-3xl font-bold">Today's Winners</h2>
-          <div className="text-sm text-muted-foreground">{todaysWins.length} completed match{todaysWins.length > 1 ? 'es' : ''}</div>
+          <div>
+            <h2 className="text-3xl font-bold">Today's Winners</h2>
+          </div>
+          <div className="text-sm text-muted-foreground">{todaysWins.length} completed set{todaysWins.length > 1 ? 'es' : ''}</div>
         </div>
 
         <div className="space-y-4">
