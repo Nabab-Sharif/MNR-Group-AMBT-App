@@ -91,7 +91,13 @@ const Home = () => {
           table: 'matches'
         },
         (payload) => {
-          // Re-fetch matches on any change. Do NOT auto-show win celebration here.
+          // Check if match is completed and show win celebration
+          const newRec = payload.new as any;
+          if (newRec && newRec.status === 'completed' && newRec.winner) {
+            setWinningMatch(newRec);
+            setFullscreenMatch(newRec);
+          }
+          // Re-fetch matches on any change
           fetchMatches();
         }
       )

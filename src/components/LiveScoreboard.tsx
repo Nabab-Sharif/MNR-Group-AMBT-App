@@ -122,16 +122,6 @@ export const LiveScoreboard = ({ match, isAdmin = false, onFullscreen, onWin, on
     };
   }, [match.id]);
 
-  // Auto-download disabled
-  // useEffect(() => {
-  //   if (!downloadedAt15 && (team1Total >= 15 || team2Total >= 15)) {
-  //     setDownloadedAt15(true);
-  //     setTimeout(() => {
-  //       handleDownload();
-  //     }, 500);
-  //   }
-  // }, [team1Total, team2Total, downloadedAt15]);
-
   const toggleScore = async (team: 1 | 2, player: 1 | 2, index: number) => {
     if (!isAdmin) return;
     

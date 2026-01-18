@@ -51,6 +51,9 @@ export const EnhancedMatchSlideshow = () => {
   const [todayDataExists, setTodayDataExists] = useState(false);
   const [todayUpcomingData, setTodayUpcomingData] = useState<Match[]>([]);
   const [availableGroups, setAvailableGroups] = useState<string[]>([]);
+  const [todayWinnerGroups, setTodayWinnerGroups] = useState<string[]>([]);
+  const [todayAllGroups, setTodayAllGroups] = useState<string[]>([]);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [autoPlayEnabled, setAutoPlayEnabled] = useState(() => {
     const saved = localStorage.getItem('slideshow-autoplay-enabled');
     return saved !== null ? JSON.parse(saved) : false;
@@ -86,6 +89,61 @@ export const EnhancedMatchSlideshow = () => {
 
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  // Fetch today's winner groups
+  useEffect(() => {
+    const fetchTodayWinnerGroups = async () => {
+      try {
+        const today = new Date().toISOString().split('T')[0];
+        const { data } = await supabase
+          .from('matches')
+          .select('group_name')
+          .eq('date', today)
+          .eq('status', 'completed')
+          .not('winner', 'is', null);
+        
+        if (data) {
+          const uniqueGroups = Array.from(
+            new Set(data.map((m: any) => m.group_name).filter(Boolean))
+          ).sort() as string[];
+          setTodayWinnerGroups(uniqueGroups);
+        }
+      } catch (err) {
+        console.error('Error fetching today winner groups:', err);
+      }
+    };
+    
+    fetchTodayWinnerGroups();
+    const interval = setInterval(fetchTodayWinnerGroups, 3000); // Check every 3 seconds
+    return () => clearInterval(interval);
+  }, []);
+
+  // Fetch today's all groups (for Today filter)
+  useEffect(() => {
+    const fetchTodayAllGroups = async () => {
+      try {
+        const today = new Date().toISOString().split('T')[0];
+        const { data } = await supabase
+          .from('matches')
+          .select('group_name')
+          .eq('date', today)
+          .in('status', ['upcoming', 'live', 'completed']);
+        
+        if (data) {
+          const uniqueGroups = Array.from(
+            new Set(data.map((m: any) => m.group_name).filter(Boolean))
+          ).sort() as string[];
+          setTodayAllGroups(uniqueGroups);
+        }
+      } catch (err) {
+        console.error('Error fetching today all groups:', err);
+      }
+    };
+    
+    fetchTodayAllGroups();
+    const interval = setInterval(fetchTodayAllGroups, 3000); // Check every 3 seconds
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
@@ -134,25 +192,18 @@ export const EnhancedMatchSlideshow = () => {
       setTodayDataExists(hasAnyToday);
       setTodayUpcomingData(upcomingData || []);
       
+      // Auto-switch behavior on initial load and during operation:
       // Don't auto-switch if a custom group filter is active
-      const isCustomGroupFilter = slideFilter.startsWith('winners-') && !slideFilter.includes('winners-all') && slideFilter !== 'winners';
+      const isCustomGroupFilter = slideFilter.startsWith('winners-') && slideFilter !== 'winners-all' && slideFilter !== 'winners';
       if (isCustomGroupFilter) return;
       
       // Auto-switch behavior:
       if (hasUpcoming) {
-        // Today has upcoming/live matches - switch to live-only if live mode enabled, otherwise show today's matches
-        if (hasUpcoming && dualLiveEnabled) {
-          if (slideFilter !== 'live-only') {
-            setSlideFilter('live-only');
-            setWinnerDate(null);
-            setCurrentIndex(0);
-          }
-        } else {
-          if (slideFilter !== 'today' && !slideFilter.startsWith('today-')) {
-            setSlideFilter('today');
-            setWinnerDate(null);
-            setCurrentIndex(0);
-          }
+        // Today has upcoming/live matches - show today's matches
+        if (slideFilter !== 'today' && !slideFilter.startsWith('today-')) {
+          setSlideFilter('today');
+          setWinnerDate(null);
+          setCurrentIndex(0);
         }
       } else if (hasCompleted && !hasUpcoming) {
         // All today's matches are completed - show today's winners
@@ -207,28 +258,19 @@ export const EnhancedMatchSlideshow = () => {
         .select("*")
         .order("match_number", { ascending: true });
 
-      // Live-only filter
-      if (slideFilter === 'live-only') {
-        query = supabase
-          .from('matches')
-          .select('*')
-          .eq('status', 'live')
-          .eq('date', today)
-          .order('match_number', { ascending: true });
-      }
-
       // Handle today filters
       if (slideFilter === 'today') {
-        // Show all today's upcoming or live matches
-        query = query.in("status", ["upcoming", "live"]).eq("date", today);
+        // Show all today's matches (upcoming, live, or completed)
+        query = query.in("status", ["upcoming", "live", "completed"]).eq("date", today);
       } else if (slideFilter.startsWith('today-') && !slideFilter.includes('winners')) {
         // Handle dynamic 'today-[GroupName]' filters like 'today-B>A'
         const groupName = slideFilter.replace('today-', '');
-        query = query.in("status", ["upcoming", "live"]).eq("date", today).eq("group_name", groupName);
+        query = query.in("status", ["upcoming", "live", "completed"]).eq("date", today).eq("group_name", groupName);
       } else if (slideFilter === 'winners-all') {
-        // Show all recent winners across groups
+        // Show today's winners only
         query = query
           .eq('status', 'completed')
+          .eq('date', today)
           .not('winner', 'is', null)
           .order('updated_at', { ascending: false })
           .limit(200);
@@ -325,14 +367,7 @@ export const EnhancedMatchSlideshow = () => {
           }
           if (groupedByDate.length > 0) slidesData = groupedByDate;
 
-          // Restrict 'winners-all' to matches from day 6 or 7 only
-          slidesData = slidesData.filter((s) => {
-            const d = s.date || (s.updated_at ? s.updated_at.split('T')[0] : '');
-            if (!d) return false;
-            const dayStr = d.split('-')[2] || '';
-            const day = parseInt(dayStr, 10);
-            return day === 6 || day === 7;
-          });
+          // Show all today's winners (no day restriction)
         } else if (slideFilter.includes('winners')) {
           slidesData = slidesData.sort((a, b) => {
             const aTime = a.updated_at ? new Date(a.updated_at).getTime() : new Date(a.date).getTime();
@@ -428,19 +463,24 @@ export const EnhancedMatchSlideshow = () => {
             const newRec = payload?.new || payload?.record || payload?.payload?.new || payload?.payload || payload;
                 if ((evt === 'INSERT' || evt === 'UPDATE' || payload?.action === 'INSERT' || payload?.action === 'UPDATE')
                     && newRec) {
-                  // If a match becomes live and live mode is enabled, switch to live-only
-                  if (newRec.status === 'live' && dualLiveEnabled) {
-                    setSlideFilter('live-only');
-                    setWinnerDate(null);
-                    setCurrentIndex(0);
+                  // If a new upcoming/live match for today is added, switch to "All Today"
+                  if ((newRec.status === 'upcoming' || newRec.status === 'live') && newRec.date === today) {
+                    if (!slideFilterRef.current.startsWith('today')) {
+                      setSlideFilter('today');
+                      setWinnerDate(null);
+                      setCurrentIndex(0);
+                    }
                   }
 
-                  // If a completed match for today is inserted/updated, but user isn't on winners-all, consider switching to winners
+                  // If a completed match for today is inserted/updated, switch to "All Winners" if not already
                   if (newRec.status === 'completed' && newRec.date === today) {
                     if (slideFilterRef.current !== 'winners-all') {
-                      setSlideFilter('winners');
-                      setWinnerDate(today);
+                      setSlideFilter('winners-all');
+                      setWinnerDate(null);
                       setCurrentIndex(0);
+                    } else {
+                      // If on winners-all, just trigger refresh
+                      setRefreshTrigger((prev) => prev + 1);
                     }
                   }
                   // fetchSlides will run below and replace previous slides
@@ -458,14 +498,18 @@ export const EnhancedMatchSlideshow = () => {
 
               if (hasNonCompleted) {
                 // If any match today is still upcoming/live, show today's upcoming slides
-                setSlideFilter('today');
-                setWinnerDate(null);
-                setCurrentIndex(0);
+                if (slideFilterRef.current !== 'today' && !slideFilterRef.current.startsWith('today-')) {
+                  setSlideFilter('today');
+                  setWinnerDate(null);
+                  setCurrentIndex(0);
+                }
               } else if (hasCompleted && !hasNonCompleted) {
-                // All today's matches are completed -> switch to today's winners
-                setSlideFilter('winners');
-                setWinnerDate(today);
-                setCurrentIndex(0);
+                // All today's matches are completed -> switch to all winners
+                if (slideFilterRef.current !== 'winners-all') {
+                  setSlideFilter('winners-all');
+                  setWinnerDate(null);
+                  setCurrentIndex(0);
+                }
               }
             } else {
               // No matches today -> show yesterday's winners by default
@@ -487,7 +531,7 @@ export const EnhancedMatchSlideshow = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [slideFilter, winnerDate, dualLiveEnabled]);
+  }, [slideFilter, winnerDate, dualLiveEnabled, refreshTrigger]);
 
   // Touch handlers for swipe navigation
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -530,8 +574,8 @@ export const EnhancedMatchSlideshow = () => {
           </Button>
         )}
         
-        {/* Dynamic Today Group buttons */}
-        {availableGroups.map((groupName) => (
+        {/* Dynamic Today Group buttons - show only today's groups */}
+        {todayAllGroups.map((groupName) => (
           <Button
             key={`today-${groupName}`}
             variant={slideFilter === `today-${groupName}` ? 'default' : 'outline'}
@@ -561,8 +605,8 @@ export const EnhancedMatchSlideshow = () => {
 
         
 
-        {/* Dynamic Group Winners buttons */}
-        {availableGroups.map((groupName) => (
+        {/* Dynamic Group Winners buttons - show only today's winner groups */}
+        {todayWinnerGroups.map((groupName) => (
           <Button
             key={`winners-${groupName}`}
             variant={slideFilter === `winners-${groupName}` ? 'default' : 'outline'}
@@ -588,29 +632,6 @@ export const EnhancedMatchSlideshow = () => {
       <div id="enhanced-slideshow" className="w-full">
         {filterButtons}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {liveMatches.length === 0 && (
-            <div className="col-span-1 text-center py-10">No live matches available</div>
-          )}
-          {liveMatches.map((m) => (
-            <div key={m.id} className="w-full min-h-[320px] sm:min-h-[420px]">
-              <div className="w-full h-full">
-                <LiveScoreboard match={m} />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  // Live-only view: show up to two live matches (1 if one live match, 2 if two)
-  if (slideFilter === 'live-only') {
-    const liveMatches = (todayUpcomingData || []).filter((m) => m.status === 'live').slice(0, 2);
-
-    return (
-      <div id="enhanced-slideshow" className="w-full">
-        {filterButtons}
-        <div className={`grid grid-cols-1 ${liveMatches.length === 2 ? 'md:grid-cols-2' : ''} gap-4`}>
           {liveMatches.length === 0 && (
             <div className="col-span-1 text-center py-10">No live matches available</div>
           )}
@@ -763,15 +784,6 @@ export const EnhancedMatchSlideshow = () => {
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => setIsHovering(false)}
       >
-        {/* Live indicator (gola) for today's/upcoming matches */}
-        { (slideFilter.startsWith('today-') && slideFilter !== 'today') && currentSlide?.status && currentSlide.status !== 'completed' && (
-          <div className="absolute top-4 left-4 z-30 flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-red-500 animate-pulse" />
-            <div className={`text-xs font-bold px-2 py-0.5 rounded-full ${isWhiteTheme ? 'bg-red-100 text-red-700' : 'bg-red-600 text-white'}`}>
-              LIVE
-            </div>
-          </div>
-        )}
         {/* Decorative Blobs */}
         <div className="blob" style={{ right: '-6rem', top: '-6rem', width: '28rem', height: '28rem', background: 'radial-gradient(circle at 25% 30%, rgba(99,102,241,0.40), transparent 40%)' }} />
         <div className="blob" style={{ left: '-6rem', bottom: '-6rem', width: '22rem', height: '22rem', background: 'radial-gradient(circle at 70% 70%, rgba(236,72,153,0.30), transparent 40%)', animationDelay: '2s' }} />

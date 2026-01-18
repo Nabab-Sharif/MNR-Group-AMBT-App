@@ -6,9 +6,9 @@ export const playScoreSound = (teamName?: string, playerName?: string, totalScor
     playLightNotificationSound();
     
     let message = '';
-    // Announce: Player name, Team name, Team total score
+    // Announce: Player name, 1 point, Team name, Team total score
     if (playerName && teamName && totalScore !== undefined) {
-      message = `${playerName}. ${teamName}. Total ${totalScore}`;
+      message = `${playerName}, 1 point. ${teamName}, total ${totalScore}`;
     } else if (teamName && totalScore !== undefined) {
       message = `${teamName}, total score ${totalScore}`;
     } else if (playerName && teamName) {

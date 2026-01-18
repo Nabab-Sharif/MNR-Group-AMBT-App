@@ -21,41 +21,6 @@ export const WelcomeMessage = ({ match, onClose }: WelcomeMessageProps) => {
     });
   };
 
-  // Auto-download match preview screenshot on component mount
-  useEffect(() => {
-    setTimeout(() => {
-      downloadMatchScreenshot(match);
-    }, 1500); // Wait for animations to complete
-  }, [match]);
-
-  // Function to auto-download screenshot of the message
-  const downloadMatchScreenshot = async (matchData: any) => {
-    try {
-      // Dynamically import html2canvas
-      const html2canvas = (await import('html2canvas')).default;
-      
-      if (messageRef.current) {
-        const canvas = await html2canvas(messageRef.current, {
-          backgroundColor: '#0f172a',
-          scale: 2,
-          logging: false,
-          useCORS: true,
-          allowTaint: true,
-        });
-
-        const link = document.createElement('a');
-        link.href = canvas.toDataURL('image/png');
-        link.download = `match-welcome-${matchData.group_name}-${new Date().getTime()}.png`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      }
-    } catch (err) {
-      console.error('Screenshot download failed:', err);
-      // Fallback: still works even if html2canvas fails
-    }
-  };
-
   return (
     <div
       className="fixed inset-0 z-50 bg-gradient-to-br from-purple-950 via-slate-900 to-purple-950 flex items-center justify-center p-4 animate-fade-in"

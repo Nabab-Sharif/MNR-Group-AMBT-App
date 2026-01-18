@@ -499,6 +499,7 @@ export const AdminDashboard = ({ session }: AdminDashboardProps) => {
         <WelcomeMessage
           match={welcomeMatch}
           onClose={() => setWelcomeMatch(null)}
+          isAdmin={true}
         />
       )}
 
