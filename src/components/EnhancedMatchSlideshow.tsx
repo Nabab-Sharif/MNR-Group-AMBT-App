@@ -680,7 +680,7 @@ export const EnhancedMatchSlideshow = () => {
   const currentWinCount = currentSlide?.winner ? slides.filter(s => s.winner === currentSlide.winner).length : 0;
 
   const PlayerCard = ({ photo, name, gradient }: { photo: string | null; name: string; gradient: string }) => (
-    <div className="rounded-2xl aspect-square flex flex-col items-center justify-center shadow-xl hover:scale-105 transition-transform overflow-hidden relative">
+    <div className="rounded-2xl aspect-square flex flex-col items-center justify-center shadow-xl hover:scale-105 transition-transform overflow-hidden relative player-card-3d">
       {/* Circular photo fills entire card */}
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="w-3/4 h-3/4 rounded-full overflow-hidden flex items-center justify-center">
@@ -773,10 +773,10 @@ export const EnhancedMatchSlideshow = () => {
     <div id="enhanced-slideshow" className="w-full">
       {filterButtons}
       
-      {/* Dark Theme Slide - Enhanced Visual */}
+      {/* Dark Theme Slide - Enhanced Visual with Advanced 3D and Hover Effects */}
       <div 
         key={currentSlide?.id ?? 'slide'}
-        className={`relative overflow-hidden rounded-3xl shadow-2xl w-full cursor-grab active:cursor-grabbing transition-transform duration-300 hover:shadow-3xl hover:scale-[1.01] slide-card-glass animate-fade-in ${
+        className={`relative overflow-hidden rounded-3xl w-full cursor-grab active:cursor-grabbing slide-3d-depth slide-3d-card slide-3d-float slide-glow-3d slide-beveled-3d corner-highlight-3d prismatic-3d glow-ring-3d slide-hover-3d slide-color-shift slide-rainbow-glow slide-card-glass layer-slide-in-1 spotlight-hover ${
           isWhiteTheme ? 'bg-white/60 border border-foreground/10' : 'bg-gradient-to-br from-slate-900 via-primary/60 to-rose-900'
         }`}
         onTouchStart={handleTouchStart}
@@ -784,9 +784,9 @@ export const EnhancedMatchSlideshow = () => {
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => setIsHovering(false)}
       >
-        {/* Decorative Blobs */}
-        <div className="blob" style={{ right: '-6rem', top: '-6rem', width: '28rem', height: '28rem', background: 'radial-gradient(circle at 25% 30%, rgba(99,102,241,0.40), transparent 40%)' }} />
-        <div className="blob" style={{ left: '-6rem', bottom: '-6rem', width: '22rem', height: '22rem', background: 'radial-gradient(circle at 70% 70%, rgba(236,72,153,0.30), transparent 40%)', animationDelay: '2s' }} />
+        {/* Decorative Blobs with 3D Depth */}
+        <div className="blob blob-3d layer-slide-in-2" style={{ right: '-6rem', top: '-6rem', width: '28rem', height: '28rem', background: 'radial-gradient(circle at 25% 30%, rgba(99,102,241,0.40), transparent 40%)' }} />
+        <div className="blob blob-3d layer-slide-in-3" style={{ left: '-6rem', bottom: '-6rem', width: '22rem', height: '22rem', background: 'radial-gradient(circle at 70% 70%, rgba(236,72,153,0.30), transparent 40%)', animationDelay: '2s' }} />
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6 p-3 sm:p-4 md:p-8 min-h-[400px] sm:min-h-[500px] md:min-h-[600px] lg:min-h-[700px]">
@@ -812,7 +812,7 @@ export const EnhancedMatchSlideshow = () => {
                     isWhiteTheme ? 'text-foreground/50' : 'text-white/50'
                   }`}>Team 1</div>
                 </div>
-                <div className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black px-2 sm:px-4 py-1 sm:py-2 rounded-lg ${
+                <div className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black px-2 sm:px-4 py-1 sm:py-2 rounded-lg text-layer-3d score-3d-reveal metallic-3d ${
                   isWhiteTheme 
                     ? 'text-orange-600 bg-orange-100' 
                     : 'text-yellow-400 bg-black/50'
@@ -851,7 +851,7 @@ export const EnhancedMatchSlideshow = () => {
                   </div>
                   <div className={`text-xs sm:text-sm mt-1 ${isWhiteTheme ? 'text-foreground/50' : 'text-white/50'}`}>Team 2</div>
                 </div>
-                <div className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black px-2 sm:px-4 py-1 sm:py-2 rounded-lg ${isWhiteTheme ? 'text-pink-600 bg-pink-100' : 'text-yellow-400 bg-black/50'}`}>
+                <div className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black px-2 sm:px-4 py-1 sm:py-2 rounded-lg text-layer-3d score-3d-reveal metallic-3d ${isWhiteTheme ? 'text-pink-600 bg-pink-100' : 'text-yellow-400 bg-black/50'}`}>
                   {currentSlide.team2_score || 0}
                 </div>
               </div>
@@ -875,8 +875,8 @@ export const EnhancedMatchSlideshow = () => {
 
             {/* Winner Banner - Only show on winners slide */}
             {currentSlide.winner && (slideFilter === 'winners' || slideFilter === 'today-winners-a' || slideFilter === 'today-winners-b') && (
-              <div className={`relative overflow-hidden rounded-xl p-0.5 shadow-2xl ${isWhiteTheme ? 'bg-gradient-to-r from-amber-500 to-orange-500' : 'bg-gradient-to-r from-primary via-primary to-primary'}`}>
-                <div className={`rounded-lg px-4 sm:px-6 py-4 sm:py-5 text-center relative ${isWhiteTheme ? 'bg-white' : 'bg-card'}`}>
+              <div className={`relative overflow-hidden rounded-xl p-0.5 shadow-2xl layer-slide-in-4 ${isWhiteTheme ? 'bg-gradient-to-r from-amber-500 to-orange-500' : 'bg-gradient-to-r from-primary via-primary to-primary'}`}>
+                <div className={`rounded-lg px-4 sm:px-6 py-4 sm:py-5 text-center relative slide-beveled-3d metallic-3d ${isWhiteTheme ? 'bg-white' : 'bg-card'}`}>
                   {/* Animated background particles */}
                   <div className="absolute inset-0 overflow-hidden rounded-lg">
                     <div className="absolute -top-1/2 -right-1/2 w-96 h-96 rounded-full blur-3xl animate-pulse" style={{ background: isWhiteTheme ? 'rgba(251, 146, 60, 0.1)' : 'rgba(234, 179, 8, 0.1)' }}></div>
@@ -898,10 +898,10 @@ export const EnhancedMatchSlideshow = () => {
                       )}
                     </div>
 
-                    <div className={`font-black text-2xl sm:text-4xl bg-clip-text text-transparent ${isWhiteTheme ? 'bg-gradient-to-r from-amber-400 to-orange-400' : 'bg-gradient-to-r from-amber-300 to-pink-500'}`}>
+                    <div className={`font-black text-2xl sm:text-4xl bg-clip-text text-transparent text-3d-pop ${isWhiteTheme ? 'bg-gradient-to-r from-amber-400 to-orange-400' : 'bg-gradient-to-r from-amber-300 to-pink-500'}`}>
                       {currentSlide.winner}
                     </div>
-                    <div className={`font-bold text-xs sm:text-sm tracking-widest uppercase ${isWhiteTheme ? 'text-orange-600' : 'text-amber-300'}`}>
+                    <div className={`font-bold text-xs sm:text-sm tracking-widest uppercase text-3d-pop ${isWhiteTheme ? 'text-orange-600' : 'text-amber-300'}`} style={{ animationDelay: '0.3s' }}>
                       ⚡ Win • {currentSlide.date} ⚡
                     </div>
 
