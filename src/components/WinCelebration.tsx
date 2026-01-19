@@ -193,7 +193,7 @@ export const WinCelebration = ({ match, onClose }: WinCelebrationProps) => {
         <div className="grid grid-cols-2 gap-2 sm:gap-4 md:gap-8 lg:gap-12 w-full max-w-5xl mx-auto px-1 sm:px-2 md:px-4" style={{ perspective: '1000px' }}>
           {/* Player 1 - Left side with 3D tilt */}
           <div className="text-center transform transition-all hover:scale-105" style={{ transformStyle: 'preserve-3d', transformOrigin: 'center', animation: 'rotateYLeft 6s ease-in-out infinite' }}>
-            <div className="animate-player-fire-entrance" style={{ animationDelay: '0.3s' }}>
+            <div className="animate-player-fire-entrance">
               <div className="relative mx-auto w-fit">
                 {/* Fire glow rings */}
                 <div className="absolute inset-0 bg-gradient-to-r from-orange-600 to-red-600 rounded-full blur-2xl opacity-60 animate-flame-flare" style={{ width: 'calc(100% + 30px)', height: 'calc(100% + 30px)', margin: '-15px' }} />
@@ -208,13 +208,13 @@ export const WinCelebration = ({ match, onClose }: WinCelebrationProps) => {
                   )}
                 </div>
               </div>
-              <p className="font-bold text-white text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl mt-2 sm:mt-3 md:mt-4 lg:mt-5 animate-fade-in-up" style={{ animationDelay: '0.5s' }}>{winningTeam.player1}</p>
+              <p className="font-bold text-white text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl mt-2 sm:mt-3 md:mt-4 lg:mt-5 animate-fade-in-up">{winningTeam.player1}</p>
             </div>
           </div>
 
           {/* Player 2 - Right side with 3D tilt */}
           <div className="text-center transform transition-all hover:scale-105" style={{ transformStyle: 'preserve-3d', transformOrigin: 'center', animation: 'rotateYRight 6s ease-in-out infinite' }}>
-            <div className="animate-player-fire-entrance" style={{ animationDelay: '0.4s' }}>
+            <div className="animate-player-fire-entrance">
               <div className="relative mx-auto w-fit">
                 {/* Fire glow rings */}
                 <div className="absolute inset-0 bg-gradient-to-r from-orange-600 to-red-600 rounded-full blur-2xl opacity-60 animate-flame-flare" style={{ width: 'calc(100% + 30px)', height: 'calc(100% + 30px)', margin: '-15px', animationDelay: '0.2s' }} />
@@ -229,13 +229,13 @@ export const WinCelebration = ({ match, onClose }: WinCelebrationProps) => {
                   )}
                 </div>
               </div>
-              <p className="font-bold text-white text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl mt-2 sm:mt-3 md:mt-4 lg:mt-5 animate-fade-in-up" style={{ animationDelay: '0.55s' }}>{winningTeam.player2}</p>
+              <p className="font-bold text-white text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl mt-2 sm:mt-3 md:mt-4 lg:mt-5 animate-fade-in-up">{winningTeam.player2}</p>
             </div>
           </div>
         </div>
 
         {/* Team Name with fire glow styling */}
-        <div className="space-y-2 sm:space-y-3 animate-fade-in-up" style={{ animationDelay: '0.7s' }}>
+        <div className="space-y-2 sm:space-y-3 animate-fade-in-up">
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black text-white drop-shadow-lg animate-text-fire-glow">
             {winningTeam.name}
           </h2>
@@ -249,7 +249,7 @@ export const WinCelebration = ({ match, onClose }: WinCelebrationProps) => {
         </div>
 
         {/* Score Display with fire effects */}
-        <div className="animate-score-pop" style={{ animationDelay: '0.9s' }}>
+        <div className="animate-score-pop">
           <div className="inline-flex items-center gap-3 sm:gap-4 md:gap-6 lg:gap-8 bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-400 px-4 sm:px-8 md:px-12 lg:px-16 py-3 sm:py-4 md:py-5 lg:py-6 rounded-xl sm:rounded-2xl md:rounded-3xl shadow-2xl animate-fire-glow-pulse text-center" style={{ boxShadow: '0 0 30px rgba(255, 69, 0, 0.4), 0 0 60px rgba(255, 165, 0, 0.3)' }}>
             <span className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black text-yellow-900 animate-text-fire-glow">{winningTeam.score}</span>
             <span className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-yellow-900/60">-</span>
@@ -258,7 +258,7 @@ export const WinCelebration = ({ match, onClose }: WinCelebrationProps) => {
         </div>
 
         {/* Losing Team Info with enhanced styling */}
-        <div className="animate-fade-in-up" style={{ animationDelay: '1.0s' }}>
+        <div className="animate-fade-in-up">
           <div className="bg-gradient-to-r from-red-900/60 to-pink-900/60 px-4 sm:px-6 md:px-8 lg:px-10 py-2 sm:py-3 md:py-4 lg:py-5 rounded-lg sm:rounded-xl md:rounded-2xl border-2 border-red-500/70 shadow-lg" style={{ boxShadow: '0 0 20px rgba(220, 38, 38, 0.3)' }}>
             <p className="text-white/80 text-xs sm:text-sm md:text-base lg:text-lg font-semibold">Competing Team</p>
             <p className="text-white text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold mt-1">{losingTeam.name}</p>
@@ -267,7 +267,7 @@ export const WinCelebration = ({ match, onClose }: WinCelebrationProps) => {
         </div>
 
         {/* Victory Message with fire effect */}
-        <div className="animate-fade-in-up" style={{ animationDelay: '1.1s' }}>
+        <div className="animate-fade-in-up">
           <div className="inline-block bg-gradient-to-r from-emerald-500 to-teal-500 px-4 sm:px-6 md:px-8 lg:px-10 py-2 sm:py-3 md:py-4 lg:py-5 rounded-lg sm:rounded-xl md:rounded-2xl shadow-xl animate-fire-glow-pulse">
             <p className="text-base sm:text-lg md:text-2xl lg:text-3xl xl:text-4xl font-bold text-white flex items-center gap-1 sm:gap-2 animate-text-fire-glow justify-center">
               🎉 MATCH WINNER! 🎉

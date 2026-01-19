@@ -287,16 +287,19 @@ const Home = () => {
         />
       )}
 
-      {/* Win Celebration Overlay */}
+      {/* Win Celebration Overlay - Show immediately when winning match is set */}
       {winningMatch && (
         <WinCelebration
           match={winningMatch}
-          onClose={() => setWinningMatch(null)}
+          onClose={() => {
+            setWinningMatch(null);
+            setFullscreenMatch(null);
+          }}
         />
       )}
 
-      {/* Fullscreen Scoreboard */}
-      {fullscreenMatch && (
+      {/* Fullscreen Scoreboard - Only show if no win celebration */}
+      {fullscreenMatch && !winningMatch && (
         <FullscreenScoreboard
           match={fullscreenMatch}
           onClose={() => setFullscreenMatch(null)}
